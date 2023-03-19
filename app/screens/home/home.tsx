@@ -4,7 +4,33 @@ import { Image, View, Text, SafeAreaView, ScrollView, StyleSheet, FlatList } fro
 import colors from '../../colors';
 import styles from "../../style"
 import { AntDesign } from '@expo/vector-icons'; 
+import { Feather } from '@expo/vector-icons'; 
 
+const DayCard: FunctionComponent = (props: any) => {
+  return (
+    <View style={{
+      flexDirection: "row",
+      justifyContent: "space-between",
+      alignItems: "center",
+      borderColor: colors.white,
+      borderWidth: StyleSheet.hairlineWidth,
+      marginVertical: 7,
+      paddingVertical: 7,
+      paddingHorizontal: 14,
+      marginHorizontal: 14,
+      borderRadius: 7
+    }}>
+      <View>
+        <Text style={[styles.h3]}>Monday</Text>
+        <Text style={[styles.h3, {fontFamily:"Lato-Light"}]}>Legs</Text>
+      </View>
+      <View>
+        <Text style={[styles.h3, {fontFamily:"Lato-Light"}]}>3/19/23</Text>
+      </View>
+      <Feather name="info" size={24} color="white" />
+    </View>
+  );
+}
 const Logo: FunctionComponent = (props:any) => {
   return (
     <Image
@@ -17,12 +43,55 @@ const Logo: FunctionComponent = (props:any) => {
 const Title: FunctionComponent = (props: any) => {
   return (
     <View>
-      <Text style={styles.h5}>Hello Michael</Text>
-      <Text style={{color:colors.white, fontFamily:"Lato-Light"}}>Welcome back</Text>
+      <Text style={[styles.h3]}>Hello Michael</Text>
+      <Text style={[styles.p, {color:colors.white, fontFamily:"Lato-Light", paddingVertical: 7}]}>Welcome back</Text>
     </View>
   )
 }
 
+const Home: FunctionComponent = (props:any) => {
+  return (
+    <>
+      <Stack.Screen
+        options={{
+          headerBackVisible: false,
+          headerTitle: '',
+          headerStyle: { backgroundColor: colors.primary },
+          contentStyle: { backgroundColor: colors.primary, paddingVertical: 7 },
+          headerLeft: (props:any) => <Title {...props} />,
+          headerRight: (props: any) => <Logo {...props} />,
+        }}
+        
+      />
+      {//<View style={{ borderBottomColor: colors.secondary, borderBottomWidth: StyleSheet.hairlineWidth }} />
+      }
+      <View style={styles.container}>
+        <View>
+          <Text style={[ styles.h2, { paddingLeft: 14, paddingTop: 10 }]}>Workout History</Text>
+          <Text style={{ color:colors.white, paddingLeft: 14, paddingTop: 7, fontFamily: "Lato-Light" }}>Previous 7 Days</Text>
+        
+          <DayCard/>
+          <DayCard />
+          <DayCard />
+          <DayCard />
+          <DayCard />
+          <DayCard/>
+        </View>
+      </View>
+    </>
+  )
+}
+
+
+interface CardProps {
+  headerText: string,
+  image?: string,
+  bodyText: string
+}
+
+
+export default Home;
+/*
 
 const Card = (props:any) => {
   return (
@@ -40,36 +109,9 @@ const Card = (props:any) => {
       marginRight: 5,
       marginTop: 10
     }}>
-    
     </View>
   );
 }
-
-const Home: FunctionComponent = (props:any) => {
-  return (
-    <>
-      <Stack.Screen
-        options={{
-          headerBackVisible: false,
-          headerTitle: '',
-          headerStyle: { backgroundColor: colors.primary },
-          headerLeft: (props:any) => <Title {...props} />,
-          headerRight: (props: any) => <Logo {...props} />
-        }}
-      />
-      <Card>
-
-      </Card>
-
-      <View style={styles.container}>
-        <Text style={[styles.h5, { padding: 10 }]}>Workout History</Text>
-      </View>
-    </>
-
-  )
-}
-export default Home;
-/*
 <Stack.Screen
   options={{
 

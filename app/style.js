@@ -15,23 +15,27 @@ export default StyleSheet.create({
         justifyContent: "space-between",
         backgroundColor: colors.primary,
     },
-    h3: {
+    h1: {
         fontSize: 64,
         color: colors.white,
-        fontFamily: "Lato-Light",
-    },
-    h4: {
-        fontSize: 32,
-        lineHeight: 32,
-        color: 'white',
         fontFamily: "Lato-Regular",
-        fontWeight: "bold"
+
     },
-    h5: {
-        fontSize: 24,
-        lineHeight: 24,
-        color: 'white',
+    h2: {
+        fontSize: 28,
+        color: colors.white,
         fontFamily: "Lato-Regular",
-        fontWeight: "bold"
+
     },
+    h3: {
+        fontSize: 20,
+        color: colors.white,
+        fontFamily: "Lato-Regular",
+    },
+    p: {
+        fontSize: 14,
+        color: colors.white,
+        fontFamily: "Lato-Regular",
+    }
+    
 });
