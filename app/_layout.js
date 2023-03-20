@@ -1,19 +1,30 @@
-import { Stack } from "expo-router";
+import { Stack, Tabs,useRouter } from "expo-router";
 import colors from './colors';
-export default function Layout() {
-    return <Stack 
-        /*
-        screenOptions={{
-            headerStyle: {
-                backgroundColor: colors.primary,
-            },
-            headerTintColor: colors.white,
-            headerTitleStyle: {
-                fontFamily: "Lato-Regular",
-                fontSize: 24
-            },
-            headerShadowVisible: false,
-            
-        }}*/
-    />;
+import { Ionicons  } from '@expo/vector-icons'; 
+import { TouchableOpacity } from "react-native";
+
+const SettingsIcon = () => {
+    return (
+        <TouchableOpacity>
+            <Ionicons  name="settings-outline" size={28} color="white" />
+        </TouchableOpacity>
+    );
+}
+
+export default () => {
+    const router = useRouter();
+    return (
+        <Stack
+            screenOptions={{
+                headerBackVisible: false,
+                headerShadowVisible: false,
+                headerTitle: 'FitTrackr',
+                headerTintColor: colors.white,
+                headerStyle: { backgroundColor: colors.primary },
+                headerRight: () => <SettingsIcon/>
+            }}
+        >
+        </Stack>
+
+    );
 }
