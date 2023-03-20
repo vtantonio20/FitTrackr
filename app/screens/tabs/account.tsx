@@ -3,9 +3,14 @@ import { View, Text, } from 'react-native';
 
 const Account: FunctionComponent = () => {
   return (
-    <View>
-      <Text></Text>
-     </View>
+    <>
+      <View>
+        <Text></Text>
+      </View>
+
+    </>
+
+
   );
 }
 

@@ -1,42 +1,57 @@
 import { View, Pressable, StyleSheet } from 'react-native';
-import MaterialIcons from '@expo/vector-icons/MaterialIcons';
-import { FunctionComponent } from 'react';
-import { GestureResponderEvent } from "react-native";
-import colors from '../colors';
+import { FontAwesome5, MaterialIcons } from '@expo/vector-icons'; 
 
-interface Props {
-  focused: boolean,
+import { FunctionComponent } from 'react';
+import { Text } from "react-native";
+import colors from '../colors';
+import { TouchableHighlight } from 'react-native';
+
+const buttonHeight = 48
+interface Props {  
+  onPress: () => void,
   icon: React.ReactNode,
-  onPress: (event: GestureResponderEvent) => void
+  name: string,
+  focused: boolean,
+
 }
-const TabButton: FunctionComponent<Props> = (props:Props) => {
+/*
+<View style={{alignItems:'center'}}>
+<View style={styles.circleButtonContainer}>
+  <TouchableHighlight style={styles.circleButton}  onPress={props.onPress}>
+    {props.icon}
+  </TouchableHighlight>
+</View>
+<Text style={{color: props.focused ? colors.yellow : colors.white}}>{props.name}</Text>
+</View>
+*/
+const CircleButton: FunctionComponent<Props> = (props:Props) => {
   return (
-    <View style={props.focused ? styles.focused : styles.unfocused}>
-      <Pressable style={styles.circleButton} onPress={props.onPress}>
-        {props.icon}
-      </Pressable>
+    <View style={{alignItems:'center'}}>
+      <View style={styles.circleButtonContainer}>
+        <Pressable style={styles.circleButton}  onPress={props.onPress}>
+          {props.icon}
+        </Pressable>
+      </View>
+      <Text style={{color: props.focused ? colors.yellow : colors.white}}>{props.name}</Text>
     </View>
   )
 }
 const styles = StyleSheet.create({
-  unfocused: {
-
-  },
-  focused: {
-    backgroundColor: colors.white,
-  },
   circleButtonContainer: {
-    width: 24,
-    height: 24,
-    borderWidth: 4,
-    borderColor: "#ffd33d",
-    borderRadius: 42,
-    padding: 3,
+    width: buttonHeight,
+    height: buttonHeight,
+    padding: buttonHeight * 0.05,
   },
   circleButton: {
-
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    borderRadius: 42,
   },
+  text: {
+    color: colors.white
+  }
 });
 
 
-export default TabButton;
+export default CircleButton;

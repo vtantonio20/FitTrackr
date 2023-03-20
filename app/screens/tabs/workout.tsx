@@ -13,9 +13,9 @@ export default function Workout() {
     <>
       <StatusBar style="light" />
       <View style={styles.container}>
-        <CircleButton onPress={onAddSticker}></CircleButton>
       </View>
-    
+
+      
     </>
   );
 }

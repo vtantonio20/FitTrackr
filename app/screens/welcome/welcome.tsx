@@ -30,7 +30,7 @@ const Welcome: FunctionComponent = () => {
                     Start tracking your fitness{"\n"}journey today!</Text>
             </View>
 
-            <Link href="/screens/tabs/home" asChild>
+            <Link href="/screens/tabs/_navigator" asChild>
                 <TouchableOpacity style={{
                     backgroundColor: colors.primary,
                     borderRadius: 50,
