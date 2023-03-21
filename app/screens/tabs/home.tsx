@@ -12,7 +12,8 @@ import { Pressable } from 'react-native';
 interface Workout {
   workoutName: string,
   day: string,
-  date: Date
+  date: Date,
+  onPress: () => void
 }
 
 const DayCard: FunctionComponent<Workout> = (props: Workout) => {
@@ -34,7 +35,7 @@ const DayCard: FunctionComponent<Workout> = (props: Workout) => {
       <View style={{ width: '50%' }}>
         <Text style={[styles.h4, {}]}>{props.workoutName }</Text>
       </View>
-      <TouchableOpacity>
+      <TouchableOpacity  onPress={props.onPress}>
         <Feather name="info" size={24} color={colors.yellow} />
       </TouchableOpacity>
     </View>
@@ -42,8 +43,8 @@ const DayCard: FunctionComponent<Workout> = (props: Workout) => {
 }
 
 const Home: FunctionComponent = () => {
+  const router = useRouter();
   const [isModalVisible, setIsModalVisible] = useState(false);
-
   const changeDays = () => {
     if (!isModalVisible)
       setIsModalVisible(true)
@@ -56,29 +57,36 @@ const Home: FunctionComponent = () => {
           <View style={[styles.flexRow, {paddingVertical: 14}]}>
             <View>
               <Text style={[styles.h3]}>Recent Workouts</Text>
-              <Text style={[styles.p, styles.lighterFont, { paddingVertical: 1.5}]}>Previous 3 Days</Text>
+              <TouchableOpacity onPress={() => changeDays()} style={[styles.flexRowLeft, { paddingTop: 7}]}>
+                <Text style={[styles.h4, styles.lighterFont]}>Previous 3 Days</Text>
+                <Entypo name="chevron-down" size={20} color={colors.white} />
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.flexRow}>
-              <TouchableOpacity onPress={() => changeDays()} style={[styles.flexRow, { marginRight: 14}]}>
-                <Text style={styles.p}>Past 3 days</Text>
-                <Entypo name="chevron-down" size={24} color={colors.white} />
-              </TouchableOpacity>
-              <TouchableOpacity>
-                <AntDesign name="calendar" size={24} color={colors.white} />
-              </TouchableOpacity>
-            </View>
+
+            <TouchableOpacity>
+              <AntDesign name="calendar" size={24} color={colors.white} />
+            </TouchableOpacity>
           </View>
 
           <View style={[ {backgroundColor:colors.primary, borderRadius: 7 }]}>
             {data.map((workOut, index) => {
               return (index + 1 != data.length) ?
                 <View key={workOut.day}>
-                  <DayCard day={workOut.day} workoutName={workOut.workoutName} date={workOut.date} />
+                  <DayCard
+                    onPress={() => router.push('/screens/details/workoutDetails')}
+                    day={workOut.day}
+                    workoutName={workOut.workoutName}
+                    date={workOut.date} />
                   <View style={styles.divider} />
                 </View>
               :
-                <DayCard key={workOut.day} day={workOut.day} workoutName={workOut.workoutName} date={workOut.date} />
+                <DayCard
+                  onPress={() => router.push('/screens/details/workoutDetails')}
+                  key={workOut.day}
+                  day={workOut.day}
+                  workoutName={workOut.workoutName}
+                  date={workOut.date} />
             })}
           </View>
         </View>
@@ -90,26 +98,24 @@ const Home: FunctionComponent = () => {
             <View style={[styles.flexRow, { padding: 14 }]}>
               <Text style={styles.h3}>Set Workout Range</Text>
               <Feather name="x" size={36} color="white" onPress={() => setIsModalVisible(false)} />
-
             </View>
+
             <View style={{borderTopColor:colors.white, borderTopWidth:1}}>
               <View style={modal.selection}>
-                <Text style={[styles.p, styles.lighterFont]}>Past 3 days</Text>
+                <Text style={[styles.h4, styles.lighterFont]}>Past 3 days</Text>
               </View>
               <View style={modal.selection}>
-                <Text style={[styles.p, styles.lighterFont]}>Past 7 days</Text>
+                <Text style={[styles.h4, styles.lighterFont]}>Past 7 days</Text>
               </View>
               <View style={modal.selection}>
-                <Text style={[styles.p, styles.lighterFont]}>Past 14 days</Text>
+                <Text style={[styles.h4, styles.lighterFont]}>Past 14 days</Text>
               </View>
-
-    
-              </View>
+            </View>
+            
           </View>
         </Modal>
       :
-        <>
-        </>
+        <></>
       }
     </>
   )
@@ -118,7 +124,7 @@ const Home: FunctionComponent = () => {
 const onAddSticker = () => {
   // we will implement this later
 };
-let data: Workout[] = [
+let data = [
   { day: 'Monday', workoutName: 'Quads & Glutes', date: new Date() },
   { day: 'Wednesday', workoutName: 'Chest & Bi', date: new Date() },
   { day: 'Friday', workoutName: 'Back & Tri', date: new Date() }
@@ -144,11 +150,8 @@ const modal = StyleSheet.create({
     color: colors.white,
   },
   selection: {
-    paddingLeft: 14,
-    paddingVertical: 7,
-    borderBottomWidth: Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1,
-    borderColor: "white"
-  }
+    marginLeft: 14,
+    paddingVertical: 7,  }
 })
 /*
 
@@ -178,4 +181,6 @@ const Card = (props:any) => {
     headerBackVisible: false,
   }} 
 />
+
+
         */

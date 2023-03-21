@@ -14,10 +14,7 @@ export default StyleSheet.create({
         
     },
     container: {
-        flexDirection: "column",
         flexGrow:1,
-        justifyContent: "space-between",
-        alignItems: "center",
         backgroundColor: colors.black,
     },
     flexRow: {
@@ -25,38 +22,43 @@ export default StyleSheet.create({
         justifyContent: "space-between",
         alignItems: "center"
     },
+    flexRowLeft: {
+        flexDirection: "row",
+        alignItems: "center"
+
+    },
     h1: {
         fontSize: 64,
         color: colors.white,
-        fontFamily: "Inter-Regular",
+        fontFamily: "Lato-Regular",
 
     },
     h2: {
         fontSize: 28,
         color: colors.white,
-        fontFamily: "Inter-Regular",
+        fontFamily: "Lato-Regular",
 
     },
     h3: {
-        fontSize: 20,
+        fontSize: 24,
         color: colors.white,
-        fontFamily: "Inter-Regular",
+        fontFamily: "Lato-Regular",
     },
     h4: {
         fontSize: 18,
         color: colors.white,
-        fontFamily: "Inter-Regular",
+        fontFamily: "Lato-Regular",
     },
     p: {
         fontSize: 14,
         color: colors.white,
-        fontFamily: "Inter-Regular",
+        fontFamily: "Lato-Regular",
     },
     divider: {
         borderColor: colors.lighter,
         borderWidth: StyleSheet.hairlineWidth
     },
     lighterFont: {
-        fontFamily: Platform.OS === 'ios' ? "Inter-Light" : "Inter-Regular"
+        fontFamily: Platform.OS === 'ios' ? "Lato-Light" : "Lato-Regular"
     }
 });

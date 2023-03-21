@@ -38,7 +38,7 @@ const Navigator: FunctionComponent = () => {
           <TabButton
             onPress={() => setActiveTab('workout')}
             icon={<FontAwesome5 name="dumbbell" size={24} color={'workout' === activeTab ? colors.yellow : colors.white} />} 
-            name='Add Workout'
+            name='New Workout'
             focused={'workout' === activeTab}
           />
           <TabButton
@@ -58,7 +58,7 @@ const styles = StyleSheet.create({
   optionsContainer: {
     position: "absolute",
     width: "100%",
-    height:  100,
+    height:  85,
     bottom: 0,
   },
   optionsRow: {
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: colors.primary,
     height: "100%",
-    paddingBottom: Platform.OS === 'ios' ? 20 : 0
+    paddingBottom: Platform.OS === 'ios' ? 25 : 0
   },
 })
 
