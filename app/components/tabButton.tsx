@@ -6,7 +6,7 @@ import { Text } from "react-native";
 import colors from '../colors';
 import { TouchableHighlight } from 'react-native';
 
-const buttonHeight = 48
+const buttonHeight = 32
 interface Props {  
   onPress: () => void,
   icon: React.ReactNode,
@@ -14,33 +14,25 @@ interface Props {
   focused: boolean,
 
 }
-/*
-<View style={{alignItems:'center'}}>
-<View style={styles.circleButtonContainer}>
-  <TouchableHighlight style={styles.circleButton}  onPress={props.onPress}>
-    {props.icon}
-  </TouchableHighlight>
-</View>
-<Text style={{color: props.focused ? colors.yellow : colors.white}}>{props.name}</Text>
-</View>
-*/
+
 const CircleButton: FunctionComponent<Props> = (props:Props) => {
   return (
-    <View style={{alignItems:'center'}}>
+    <Pressable style={{width:70, height:50}} onPress={props.onPress}>
       <View style={styles.circleButtonContainer}>
-        <Pressable style={styles.circleButton}  onPress={props.onPress}>
+        <View style={styles.circleButton}>
           {props.icon}
-        </Pressable>
+        </View>
       </View>
-      <Text style={{color: props.focused ? colors.yellow : colors.white}}>{props.name}</Text>
-    </View>
+      <Text style={{alignSelf:"center", color: props.focused ? colors.yellow : colors.white}}>{props.name}</Text>
+    </Pressable>
   )
 }
 const styles = StyleSheet.create({
   circleButtonContainer: {
     width: buttonHeight,
     height: buttonHeight,
-    padding: buttonHeight * 0.05,
+    alignSelf: 'center',
+    
   },
   circleButton: {
     flex: 1,

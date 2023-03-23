@@ -1,3 +1,4 @@
+//TODO MOVE workoutDetails to HERE
 import { Stack } from 'expo-router';
 import React from 'react'
 import { Modal, View, Text, TouchableOpacity } from 'react-native';
@@ -11,15 +12,16 @@ const Title = () => {
   )
 }
 
-const WorkoutDetails = () => {
+const Details = () => {
   return (
     <>
     <Stack.Screen
       options={{
         headerBackVisible: true,
+        title: 'Detailed Workout'
       }}
     />
-      <View style={[styles.container]}>
+      <View style={[styles.modalContainer]}>
         <View style={[styles.flexRow, { paddingVertical: 14 }]}>
           <View>
             <Text style={[styles.h3]}>Recent Workouts</Text>
@@ -38,4 +40,4 @@ const WorkoutDetails = () => {
   )
 }
 
-export default WorkoutDetails;
+export default Details;

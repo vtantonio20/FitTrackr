@@ -1,10 +1,12 @@
 import { StyleSheet, Text, View } from "react-native";
 import Welcome from "./screens/welcome/welcome";
 import { useFonts } from "expo-font";
-import 'react-native-gesture-handler';
 import Loading from "./screens/loading/loading";
+import { StatusBar } from "expo-status-bar";
 
 export default function Page() { 
+  <StatusBar style="light" />
+
   const [fontsLoaded] = useFonts({
     "Lato-Bold": require("../assets/fonts/Lato/Lato-Bold.ttf"),
     "Lato-Regular": require("../assets/fonts/Lato/Lato-Regular.ttf"),
@@ -15,7 +17,6 @@ export default function Page() {
     "Inter-Regular": require("../assets/fonts/Inter/static/Inter-Regular.ttf"),
     "Inter-Light": require("../assets/fonts/Inter/static/Inter-Light.ttf"),
     "Inter-Bold": require("../assets/fonts/Inter/static/Inter-Bold.ttf"),
-
   });
 
   if (!fontsLoaded) {
