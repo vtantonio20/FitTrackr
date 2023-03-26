@@ -1,19 +1,18 @@
-import React, { FunctionComponent, useState } from 'react'
+import React, { FunctionComponent, useState, useContext } from 'react'
 import { View, StyleSheet, Platform, Settings } from 'react-native'
 import Account from './account'
 import Home from './home'
 import { AntDesign, Feather, Ionicons  , FontAwesome5, FontAwesome} from '@expo/vector-icons'; 
 import { Stack, useRouter } from 'expo-router';
-import TabButton from '../../components/tabButton'
 import colors from '../../colors'
 import { StatusBar } from 'expo-status-bar'
 import Calender from './calender'
 import Setting from './setting'
+import { TabButton } from '../../components/tabButton';
 
 
 const Navigator: FunctionComponent = () => {
   const [activeTab, setActiveTab] = useState('home');
-
   const renderTab = () => {
     if (activeTab === 'home')
       return <Home />
@@ -27,11 +26,7 @@ const Navigator: FunctionComponent = () => {
 
   return (
     <>
-      <Stack.Screen
-        options={{
-          title: 'FitTrackr',
-        }}
-      />
+      <Stack.Screen options={{ title: 'FitTrackr'}}/>
       <StatusBar style="light"/>
       {renderTab()}
       <View style={styles.optionsContainer}>

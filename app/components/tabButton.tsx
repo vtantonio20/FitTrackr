@@ -15,7 +15,7 @@ interface Props {
 
 }
 
-const CircleButton: FunctionComponent<Props> = (props:Props) => {
+export const TabButton: FunctionComponent<Props> = (props:Props) => {
   return (
     <Pressable style={{width:70, height:50}} onPress={props.onPress}>
       <View style={styles.circleButtonContainer}>
@@ -46,4 +46,3 @@ const styles = StyleSheet.create({
 });
 
 
-export default CircleButton;

@@ -1,13 +1,13 @@
 import React, { FunctionComponent } from 'react'
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native'
 import { Fontisto, FontAwesome5,AntDesign } from '@expo/vector-icons'; 
-import { Link, Stack } from "expo-router";
+import { Link, Stack, useRouter } from "expo-router";
 import styles from "../../style";
 import colors from "../../colors";
 
 
 const Welcome: FunctionComponent = () => {
-
+    const router = useRouter;
     return (
         <View style={styles.welcomeBackground}>
             <Stack.Screen options={{ headerShown: false }}/>

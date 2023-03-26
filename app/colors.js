@@ -25,4 +25,5 @@ darkMode ?
         white: '#000',
         back: '#000'
     }
+    
 export default colors;

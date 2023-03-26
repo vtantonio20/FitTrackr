@@ -1,28 +1,43 @@
-import { StyleSheet, Text, View } from "react-native";
-import Welcome from "./screens/welcome/welcome";
+import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import Navigator from "./screens/tabs/_navigator";
 import { useFonts } from "expo-font";
 import Loading from "./screens/loading/loading";
 import { StatusBar } from "expo-status-bar";
+import { useState } from "react";
+import { Stack } from "expo-router";
+import colors from "./colors";
+import { FontAwesome5, AntDesign } from '@expo/vector-icons'; 
+import { fonts } from "./utilities";
+import Welcome from "./screens/welcome/welcome";
 
+const WorkoutIcon = () => {
+  return (
+      <TouchableOpacity>
+          <View style={{ paddingHorizontal: 10 }}>
+              <FontAwesome5 name="dumbbell" size={22} color={colors.yellow} />
+              <AntDesign name="plus" size={11} color={colors.yellow}
+                  style={{
+                      position: "absolute",
+                      top: 0,
+                      right: 0
+                  }}
+              />
+          </View>
+      </TouchableOpacity>
+  );
+}
 export default function Page() { 
+
   <StatusBar style="light" />
 
-  const [fontsLoaded] = useFonts({
-    "Lato-Bold": require("../assets/fonts/Lato/Lato-Bold.ttf"),
-    "Lato-Regular": require("../assets/fonts/Lato/Lato-Regular.ttf"),
-    "Lato-Light": require("../assets/fonts/Lato/Lato-Light.ttf"),
-    "Nunito-Regular": require("../assets/fonts/Nunito/Nunito-Regular.ttf"),
-    "Nunito-Light": require("../assets/fonts/Nunito/Nunito-Light.ttf"),
-    "Nunito-Bold": require("../assets/fonts/Nunito/Nunito-Bold.ttf"),
-    "Inter-Regular": require("../assets/fonts/Inter/static/Inter-Regular.ttf"),
-    "Inter-Light": require("../assets/fonts/Inter/static/Inter-Light.ttf"),
-    "Inter-Bold": require("../assets/fonts/Inter/static/Inter-Bold.ttf"),
-  });
+  const [fontsLoaded] = useFonts(fonts);
 
   if (!fontsLoaded) {
     return  <Loading/>
   }
   return (
-    <Welcome/>
-  );
+    <>
+      <Welcome />
+    </>
+  ) 
 }

@@ -63,6 +63,11 @@ export default StyleSheet.create({
         fontFamily: "Lato-Regular",
         
     },
+    h3a: {
+        fontSize: 20,
+        color: colors.white,
+        fontFamily: "Lato-Regular",
+    },
     h4: {
         fontSize: 18,
         color: colors.white,

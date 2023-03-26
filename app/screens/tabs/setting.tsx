@@ -1,9 +1,9 @@
 import React, {FunctionComponent} from 'react'
 import { View, StyleSheet, Platform } from 'react-native'
-const Setting: FunctionComponent = () => {
+import { Svg, Path } from 'react-native-svg'
+const Setting: FunctionComponent = (props) => {
   return (
     <View>
-      
     </View>
   )
 }

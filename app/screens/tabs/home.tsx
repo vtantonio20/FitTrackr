@@ -1,129 +1,15 @@
-import React, { FunctionComponent, useState } from 'react'
+import React, { FunctionComponent, useContext, useState, useMemo } from 'react'
 import { Modal, Image, View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent, Platform, TouchableHighlight, ScrollView } from 'react-native'
 import colors from '../../colors';
 import styles from "../../style"
 import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
-import { StatusBar } from 'expo-status-bar';
-import CircleButton from '../../components/circleButton';
-import TabButton from '../../components/tabButton';
-import { useRouter } from 'expo-router';
-import { Pressable } from 'react-native';
-import BottomModal from '../../components/smallModal';
-
-interface WorkoutProps {
-  workoutName: string,
-  day: string,
-  date: Date,
-  onPress: () => void
-}
-
-const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
-  return (
-    <View style={{
-      flexDirection: "row",
-      alignItems: "center",
-      paddingVertical: 7,
-      paddingHorizontal: 14,
-    }}>
-      <View style={{ width:'40%'}}>
-        <Text style={[styles.h4]}>
-          {props.day}
-        </Text>
-        <Text style={[styles.p, styles.lighterFont]}>
-          {props.date.toLocaleDateString('en-US', { year: '2-digit', month: '2-digit', day: '2-digit' })}
-        </Text>
-      </View>
-      <View style={{ width: '50%' }}>
-        <Text style={[styles.h4]}>{props.workoutName }</Text>
-      </View>
-      <TouchableOpacity  onPress={props.onPress}>
-        <Feather name="info" size={24} color={colors.yellow} />
-      </TouchableOpacity>
-    </View>
-  );
-}
-
-const RecentsWidget: FunctionComponent = () => {
-  const router = useRouter();
-  const [isModalVisible, setIsModalVisible] = useState(false);
-  const changeDays = () => {
-    if (!isModalVisible)
-      setIsModalVisible(true)
-  }
-  const daysCount = [3, 7, 14]
-  const days = ['Past 3 days', 'Past 7 days', 'Past 14 days']
-  const [index, setIndex] = useState(0);
-
-  return (
-    <>
-      <View style={recents.widgetHeader}>
-        <Text style={styles.h3}>Recent Workouts</Text>
-        <TouchableOpacity style={recents.widgetModalButton} onPress={() => changeDays()} >
-          <Text style={[styles.p, styles.lighterFont]}> Show {daysCount[index]} </Text>
-          <Entypo name="chevron-thin-down" size={14} color={colors.lighter} />
-        </TouchableOpacity>
-      </View>
-  
-      <View style={recents.widgetBody}>
-        {data.slice(0,daysCount[index] ).map((workOut, i) => {
-          return (
-            <View key={workOut.id}>
-              <DayCard
-                onPress={() => router.push('/screens/modals/details')}
-                day={workOut.day}
-                workoutName={workOut.workoutName}
-                date={workOut.date}
-              />
-              {i + 1 !== data.length && <View style={styles.divider} />}
-          </View>
-          );
-        })}
-      </View>
-      {isModalVisible &&
-        <BottomModal
-        header={
-          <View style={recents.widgetModalHeader}>
-            <Text style={[styles.h3, { paddingRight:7 }]}>Set Range</Text>
-            <MaterialIcons name="date-range" size={24} color="white" />
-          </View>
-        }
-        onExitPress={() => setIsModalVisible(false)}
-        selections={days}
-        onSelectionPress={setIndex}
-        />
-      }
-    </>
-  );
-}
-
-const ActiveWidget: FunctionComponent = () => {
-  const [inActiveWorkout, setInActiveWorkout] = useState(true);
-  const router = useRouter();
-  return (
-    <>
-      <View style={styles.widgetHeader}>
-        {inActiveWorkout ?
-          <Text style={styles.h3}>Active Workout</Text>
-          :
-          <Text style={styles.h3}>Todays Workout</Text>
-        }
-      </View>
-
-      <TouchableOpacity style={recents.widgetBody} onPress={() => router.push('/screens/modals/workout')}>
-        <View style={{
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent:"center",
-          paddingVertical: 14,
-          paddingHorizontal: 14,
-        }}>
-          <Text style={[styles.h4, {lineHeight:28}]}>Begin new workout</Text>
-          <AntDesign name="plus" size={28} color={colors.yellow} />
-        </View>
-      </TouchableOpacity>
-    </>
-  );
-}
+import { useRouter, useNavigation, useRootNavigation } from 'expo-router';
+import { dateToDDMMYY, fakeData } from '../../utilities';
+import { WorkoutContext } from '../../contexts/workoutContext';
+import { BottomModal } from '../../components/smallModal';
+//import Blank from '../../assets/images/svgs/blank.svg'
+import  MuscleMap from '../../assets/svgs/muscleMap.svg'
+import { MUSCLEMAP } from '../../utilities';
 
 const Home: FunctionComponent = () => {
   return (
@@ -137,30 +23,154 @@ const Home: FunctionComponent = () => {
   </>  
   )
 }
-
-const data = [
-  { day: 'Monday', workoutName: 'Quads & Glutes', date: new Date(), id:'1' },
-  { day: 'Wednesday', workoutName: 'Chest & Bi', date: new Date(), id:'2' },
-  { day: 'Friday', workoutName: 'Shoulders', date: new Date(), id: '3' },
-  { day: 'Thursday', workoutName: 'ASS DAY', date: new Date(), id: '4' },
-  { day: 'Tuesday', workoutName: 'Legs', date: new Date(), id: '5' },
-  { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '6' },
-  { day: 'Monday', workoutName: 'Quads & Glutes', date: new Date(), id:'7' },
-  { day: 'Wednesday', workoutName: 'Chest & Bi', date: new Date(), id:'8' },
-  { day: 'Friday', workoutName: 'Shoulders', date: new Date(), id: '9' },
-  { day: 'Thursday', workoutName: 'ASS DAY', date: new Date(), id: '10' },
-  { day: 'Tuesday', workoutName: 'Legs', date: new Date(), id: '50' },
-  { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '60' },
-  { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '66' },
-  { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '65' }
+interface MuscleProps {
+  ass: string;
+  neck: string;
+}
+const ActiveWidget: FunctionComponent = () => {
+  const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
+  const [muscles, setMuscles] = useState(['ass', 'chest']);
+  const router = useRouter();
+  
+  const onWidgetPress = () => {
+    if (!inActiveWorkout)
+      router.push('/screens/modals/workout')
+  }
 
 
-];
+  const dynamicProps = {
+    [`ass`]: colors.red,
+    [`neck`]: colors.red,
+    [`fill`]: '#2B2B2B',
+    [`border`]:Platform.OS === 'ios' ? colors.primary : 'ccc#2B2B2B'
+  }
+
+
+
+  return (
+    <>
+      <View style={styles.widgetHeader}>
+        <Text style={styles.h3}>Active Workout</Text>
+      </View>
+      <TouchableOpacity style={recents.widgetBody} onPress={() => onWidgetPress()}>
+            <View >
+              {inActiveWorkout ? 
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
+                  <View style={{}}>
+                    <Text style={[styles.h3a]}>{workoutName}</Text>
+                    <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate}</Text> 
+                  </View>
+                  <MuscleMap width={150} height={150} {...dynamicProps} />
+                    {/*<Blank {...{ hair:colors.red, pecs:colors.red}}/>*/}
+
+                </View>
+              : 
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
+                  <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
+                  <AntDesign name="plus" size={28} color={colors.yellow} />
+                </View> 
+              }
+            </View>
+      </TouchableOpacity >
+    </>
+
+  );
+}
+
+
+  interface WorkoutProps {
+    workoutName: string,
+    day: string,
+    date: string,
+    onPress: () => void
+  }
+    
+const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 7, paddingHorizontal: 14, }}>
+      <View style={{ width:'40%'}}>
+        <Text style={[styles.h4]}>{props.day}</Text>
+        <Text style={[styles.p, styles.lighterFont]}>{props.date}</Text>
+      </View>
+      <View style={{ width: '50%' }}>
+        <Text style={styles.h4}>{props.workoutName}</Text>
+      </View>
+      <TouchableOpacity  onPress={props.onPress}>
+        <Feather name="info" size={24} color={colors.yellow} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
+const RecentsWidget: FunctionComponent = () => {
+  const router = useRouter();
+  const [isDayModalVisible, setIsDayModalVisible] = useState(false);
+  const [dayCount, setDayCount] = useState(0);
+  
+  console.log(dayCount)
+  const handleDaySwitchModalVisibility = () => {
+    setIsDayModalVisible(!isDayModalVisible);
+  }
+
+  const handleDayCount = (i: number) => {
+    setDayCount(i);
+  }
+
+  const daysCount = [3, 7, 14]
+  return (
+    <>
+
+      <View style={recents.widgetHeader}>
+        <Text style={styles.h3}>Recent Workouts</Text>
+        <TouchableOpacity style={recents.widgetModalButton} onPress={() => handleDaySwitchModalVisibility()} >
+          <Text style={[styles.p, styles.lighterFont]}> Show {daysCount[dayCount]} </Text>
+          <Entypo name="chevron-thin-down" size={14} color={colors.lighter} />
+        </TouchableOpacity>
+      </View>
+  
+      <View style={recents.widgetBody}>
+        {fakeData.slice(0,daysCount[dayCount] ).map((workOut, index) => {
+          return (
+            <View key={workOut.id}>
+              <DayCard
+                onPress={() => router.push('/screens/modals/details')}
+                day={workOut.day}
+                workoutName={workOut.workoutName}
+                date={dateToDDMMYY(workOut.date)}
+              />
+              {index + 1 !== fakeData.length && <View style={styles.divider} />}
+          </View>
+          );
+        })}
+      </View>
+      {isDayModalVisible &&
+        <BottomModal
+          onSelectionPress={(selectionIndex) => handleDayCount(selectionIndex)}
+          onExitPress={() => handleDaySwitchModalVisibility()}
+          selections={['Previous 3 days', 'Previous 7 days', 'Previous 14 days']}
+          header={
+            <View style={recents.widgetModalHeader}>
+              <Text style={[styles.h3, { paddingRight:7 }]}>Set Range</Text>
+              <MaterialIcons name="date-range" size={24} color="white" />
+            </View>
+          }
+        />
+      }
+    </>
+  );
+}
 
 
 export default Home;
 
 const recents = StyleSheet.create({
+  widget: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 14,
+  },
   widgetHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -181,36 +191,3 @@ const recents = StyleSheet.create({
     
   }
 })
-
-
-/*
-
-const Card = (props:any) => {
-  return (
-    <View style={{
-      borderWidth: 1,
-      borderRadius: 2,
-      borderColor: '#ddd',
-      borderBottomWidth: 0,
-      shadowColor: '#000',
-      shadowOffset: { width: 0, height: 2 },
-      shadowOpacity: 0.1,
-      shadowRadius: 2,
-      elevation: 1,
-      marginLeft: 5,
-      marginRight: 5,
-      marginTop: 10
-    }}>
-    </View>
-  );
-}
-<Stack.Screen
-  options={{
-
-    title: "Home",
-    headerBackVisible: false,
-  }} 
-/>
-
-
-        */

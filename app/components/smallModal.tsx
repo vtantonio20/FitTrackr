@@ -1,4 +1,4 @@
-import { FunctionComponent } from "react";
+import { FunctionComponent, useMemo } from "react";
 import { TouchableHighlight, StyleSheet, Text, Modal, View, Platform, Dimensions, TouchableWithoutFeedback } from "react-native";
 import colors from "../colors";
 import styles from "../style";
@@ -34,10 +34,10 @@ interface BottomModalProps {
 }
 
 
-const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProps) => {
-  const handleSelect = (selectionsIndex:number) => {
+export const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProps) => {
+  const handleSelect = (selectionsIndex: number) =>
     props.onSelectionPress(selectionsIndex)
-  }
+
   return (
     <>
 
@@ -123,4 +123,3 @@ const modal = StyleSheet.create({
   }
 })
 
-export default BottomModal;

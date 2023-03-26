@@ -12,7 +12,7 @@ interface Props {
   name: string
 
 }
-const CircleButton: FunctionComponent<Props> = (props:Props) => {
+export const CircleButton: FunctionComponent<Props> = (props:Props) => {
   return (
     <View style={{alignItems:'center'}}>
       <View style={styles.circleButtonContainer}>
@@ -44,4 +44,3 @@ const styles = StyleSheet.create({
 });
 
 
-export default CircleButton;

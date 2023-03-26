@@ -5,6 +5,7 @@ import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import colors from '../../colors';
 import styles from '../../style';
 import { Entypo, AntDesign } from '@expo/vector-icons'; 
+import { DatePicker } from '../../components/datePicker';
 
 const Title = () => {
   return (
@@ -22,6 +23,7 @@ const Details = () => {
       }}
     />
       <View style={[styles.modalContainer]}>
+        <DatePicker editable={false} />
         <View style={[styles.flexRow, { paddingVertical: 14 }]}>
           <View>
             <Text style={[styles.h3]}>Recent Workouts</Text>
