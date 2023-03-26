@@ -34,10 +34,10 @@ interface BottomModalProps {
 }
 
 
-export const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProps) => {
-  const handleSelect = (selectionsIndex: number) =>
+const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProps) => {
+  const handleSelect = (selectionsIndex:number) => {
     props.onSelectionPress(selectionsIndex)
-
+  }
   return (
     <>
 
@@ -51,7 +51,7 @@ export const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomMo
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}
       />
-      <Modal animationType="slide" transparent={true} >
+      <Modal  animationType="slide" transparent={true} >
       <View style={modal.modalContainer}>
         {/*Header*/}
         {props.header &&
@@ -123,3 +123,4 @@ const modal = StyleSheet.create({
   }
 })
 
+export default BottomModal;

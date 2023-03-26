@@ -1,4 +1,3 @@
-
 module.exports = {
   "replaceAttrValues": {
     "#2B2B2B": "{props.border}",
@@ -31,32 +30,3 @@ module.exports = {
     "#ffffff": "{props.fillAll}"
   }
 }
-
-    /*
-    [props.border}"{props.fill}",
-    [props.hair}"{props.fill}",
-    [props.face}"{props.fill}",
-    [props.neck}"{props.fill}",
-    [props.traps}"{props.fill}",
-    [props.upperBack}"{props.fill}",
-    [props.delts}"{props.fill}",
-    [props.scapula}"{props.fill}",
-    [props.pecs}"{props.fill}",
-    [props.triceps}"{props.fill}",
-    [props.lats}"{props.fill}",
-    [props.biceps}"{props.fill}",
-    [props.obliques}"{props.fill}",
-    [props.abs}"{props.fill}",
-    [props.forearms}"{props.fill}",
-    [props.lowerBack}"{props.fill}",
-    [props.lowerCore}"{props.fill}",
-    [props.abductors}"{props.fill}",
-    [props.ass}"{props.fill}",
-    [props.quads}"{props.fill}",
-    [props.hands}"{props.fill}",
-    [props.hamstrings}"{props.fill}",
-    [props.knees}"{props.fill}",
-    [props.backKnee}"{props.fill}" ,
-    [props.shins}"{props.fill}",
-    [props.calves}"{props.fill}",
-    [props.foot}"{props.fill}"*/

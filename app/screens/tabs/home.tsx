@@ -6,7 +6,7 @@ import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/ve
 import { useRouter, useNavigation, useRootNavigation } from 'expo-router';
 import { dateToDDMMYY, fakeData } from '../../utilities';
 import { WorkoutContext } from '../../contexts/workoutContext';
-import { BottomModal } from '../../components/smallModal';
+import  BottomModal  from '../../components/smallModal';
 //import Blank from '../../assets/images/svgs/blank.svg'
 import  MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { MUSCLEMAP } from '../../utilities';
@@ -41,8 +41,8 @@ const ActiveWidget: FunctionComponent = () => {
   const dynamicProps = {
     [`ass`]: colors.red,
     [`neck`]: colors.red,
-    [`fill`]: '#2B2B2B',
-    [`border`]:Platform.OS === 'ios' ? colors.primary : 'ccc#2B2B2B'
+    [`fillAll`]: '#2B2B2B',
+    [`border`]:Platform.OS === 'ios' ? colors.primary : '#2B2B2B'
   }
 
 
@@ -105,31 +105,21 @@ const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
 const RecentsWidget: FunctionComponent = () => {
   const router = useRouter();
   const [isDayModalVisible, setIsDayModalVisible] = useState(false);
-  const [dayCount, setDayCount] = useState(0);
-  
-  console.log(dayCount)
-  const handleDaySwitchModalVisibility = () => {
-    setIsDayModalVisible(!isDayModalVisible);
-  }
-
-  const handleDayCount = (i: number) => {
-    setDayCount(i);
-  }
-
+  const [dayCountIndex, setDayCountIndex] = useState(0);
   const daysCount = [3, 7, 14]
+  
   return (
     <>
-
       <View style={recents.widgetHeader}>
         <Text style={styles.h3}>Recent Workouts</Text>
-        <TouchableOpacity style={recents.widgetModalButton} onPress={() => handleDaySwitchModalVisibility()} >
-          <Text style={[styles.p, styles.lighterFont]}> Show {daysCount[dayCount]} </Text>
+        <TouchableOpacity style={recents.widgetModalButton} onPress={() => setIsDayModalVisible(!isDayModalVisible)} >
+          <Text style={[styles.p, styles.lighterFont]}> Show {daysCount[dayCountIndex]} </Text>
           <Entypo name="chevron-thin-down" size={14} color={colors.lighter} />
         </TouchableOpacity>
       </View>
   
       <View style={recents.widgetBody}>
-        {fakeData.slice(0,daysCount[dayCount] ).map((workOut, index) => {
+        {fakeData.slice(0,daysCount[dayCountIndex] ).map((workOut, index) => {
           return (
             <View key={workOut.id}>
               <DayCard
@@ -145,8 +135,8 @@ const RecentsWidget: FunctionComponent = () => {
       </View>
       {isDayModalVisible &&
         <BottomModal
-          onSelectionPress={(selectionIndex) => handleDayCount(selectionIndex)}
-          onExitPress={() => handleDaySwitchModalVisibility()}
+          onSelectionPress={(selectionIndex:number) => setDayCountIndex(selectionIndex)}
+          onExitPress={() => setIsDayModalVisible(false)}
           selections={['Previous 3 days', 'Previous 7 days', 'Previous 14 days']}
           header={
             <View style={recents.widgetModalHeader}>
@@ -156,6 +146,7 @@ const RecentsWidget: FunctionComponent = () => {
           }
         />
       }
+      
     </>
   );
 }
