@@ -9,7 +9,6 @@ import { WorkoutContext } from '../../contexts/workoutContext';
 import  BottomModal  from '../../components/smallModal';
 //import Blank from '../../assets/images/svgs/blank.svg'
 import  MuscleMap from '../../assets/svgs/muscleMap.svg'
-import { MUSCLEMAP } from '../../utilities';
 
 const Home: FunctionComponent = () => {
   return (
@@ -23,36 +22,38 @@ const Home: FunctionComponent = () => {
   </>  
   )
 }
-interface MuscleProps {
-  ass: string;
-  neck: string;
-}
+
 const ActiveWidget: FunctionComponent = () => {
   const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
-  const [muscles, setMuscles] = useState(['ass', 'chest']);
   const router = useRouter();
-  
-  const onWidgetPress = () => {
+ 
+  const createDynamicProps = (muscles: string[]) => {
+    const dynamicProps: { [key: string]: string } = {};
+    dynamicProps['border'] = '#2B2B2B'
+    dynamicProps['fillAll'] = colors.white
+    for (const key of muscles) {
+      dynamicProps[key] = colors.red;
+    }
+    return dynamicProps;
+  };
+
+  const muscles = useMemo(() => {
+    if (inActiveWorkout) {
+      return createDynamicProps(targetMuscles);
+    }
+  }, [inActiveWorkout, targetMuscles])
+
+  const handleWidgetPress = () => {
     if (!inActiveWorkout)
       router.push('/screens/modals/workout')
   }
-
-
-  const dynamicProps = {
-    [`ass`]: colors.red,
-    [`neck`]: colors.red,
-    [`fillAll`]: '#2B2B2B',
-    [`border`]:Platform.OS === 'ios' ? colors.primary : '#2B2B2B'
-  }
-
-
 
   return (
     <>
       <View style={styles.widgetHeader}>
         <Text style={styles.h3}>Active Workout</Text>
       </View>
-      <TouchableOpacity style={recents.widgetBody} onPress={() => onWidgetPress()}>
+      <TouchableOpacity style={recents.widgetBody} onPress={() => handleWidgetPress()}>
             <View >
               {inActiveWorkout ? 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
@@ -60,9 +61,7 @@ const ActiveWidget: FunctionComponent = () => {
                     <Text style={[styles.h3a]}>{workoutName}</Text>
                     <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate}</Text> 
                   </View>
-                  <MuscleMap width={150} height={150} {...dynamicProps} />
-                    {/*<Blank {...{ hair:colors.red, pecs:colors.red}}/>*/}
-
+                  <MuscleMap width={150} height={150}  {...muscles} />
                 </View>
               : 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
@@ -78,12 +77,12 @@ const ActiveWidget: FunctionComponent = () => {
 }
 
 
-  interface WorkoutProps {
-    workoutName: string,
-    day: string,
-    date: string,
-    onPress: () => void
-  }
+interface WorkoutProps {
+  workoutName: string,
+  day: string,
+  date: string,
+  onPress: () => void
+}
     
 const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
   return (
@@ -150,8 +149,6 @@ const RecentsWidget: FunctionComponent = () => {
     </>
   );
 }
-
-
 export default Home;
 
 const recents = StyleSheet.create({

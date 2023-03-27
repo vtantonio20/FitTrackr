@@ -7,11 +7,14 @@ import { MUSCLES } from '../../utilities';
 import { WorkoutContext } from '../../contexts/workoutContext';
 import { Bubble } from '../../components/bubbleButton';
 import { DatePicker } from '../../components/datePicker';
+import { useForm } from 'react-hook-form';
 
 
 export const Workout: FunctionComponent = () => {
   const navigation = useNavigation();
   const { setInActiveWorkout, setWorkout, setWorkoutDate, setTargetMuscles } = useContext(WorkoutContext);
+  const { register, handleSubmit } = useForm();
+
 
   const onSubmit = () => {
     setInActiveWorkout(true);
@@ -48,7 +51,10 @@ export const Workout: FunctionComponent = () => {
           
           <View style={form.element}>
             <Text style={form.elementHeader}>Target Muscles: <Text style={styles.p}>(optional)</Text></Text>
-            <TextInput style={form.formTextArea}/>
+            <TextInput
+              style={form.formTextArea}
+              
+            />
             <FlatList 
               horizontal={true}
               data={MUSCLES}

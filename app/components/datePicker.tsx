@@ -8,7 +8,7 @@ import { Bubble } from "./bubbleButton";
 
 
 
-interface DatePickerProps{ editable:boolean}
+interface DatePickerProps{ editable:boolean, parentDate: (data:Date) => void}
 export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
@@ -16,26 +16,22 @@ export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerP
   const android = Platform.OS === 'android';
 
 
-
-  
-  const DateButton: FunctionComponent = () => {
-    return ( 
-      <TouchableOpacity style={[datePicker.dateButton, { justifyContent: "center" }]} onPress={() => props.editable && setShowDatePicker(true)}>
-        <Text style={[styles.p, { color: colors.lighter }]}>{dateToWDDDMMYY(date)}</Text>
-      </TouchableOpacity> 
-    );
-  }
-  const onChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
-    if (android && event.type == "set")
+  const onSubmitDate = () => {
+    if (Platform.OS === 'ios') {
       setShowDatePicker(false)
-    setDate(selectedDate || date);
+    }
+    props.parentDate(date);
   }
 
-  const handleShowDatePicker = () => {
-    if (props.editable)
-      setShowDatePicker(!showDatePicker); 
+  const onChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
+    if (Platform.OS === 'android' && event.type == "set") {
+      setShowDatePicker(false)
+      onSubmitDate();
+    }
+    setDate(selectedDate || new Date());
   }
-  
+
+
   return (
     <>
       {showDatePicker ?
@@ -49,13 +45,19 @@ export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerP
               onChange={onChange}
               accentColor={colors.yellow}    
             />
-            {ios && <Bubble name={'Set Date'} textStyle={styles.h4} onPress={() => props.editable && setShowDatePicker(!showDatePicker)} />}
-            {android && <DateButton/> }
+            {ios && <Bubble name={'Set Date'} textStyle={styles.h4} onPress={() => props.editable && onSubmitDate()} />}
+            {android && (
+              <TouchableOpacity style={[datePicker.dateButton, { justifyContent: "center" }]} onPress={() => props.editable && setShowDatePicker(true)}>
+                <Text style={[styles.p, { color: colors.lighter }]}>{dateToWDDDMMYY(date)}</Text>
+              </TouchableOpacity> 
+            ) }
           </View>
         )
         :
         (
-          <DateButton/>
+          <TouchableOpacity style={[datePicker.dateButton, { justifyContent: "center" }]} onPress={() => props.editable && setShowDatePicker(true)}>
+            <Text style={[styles.p, { color: colors.lighter }]}>{dateToWDDDMMYY(date)}</Text>
+          </TouchableOpacity>
         )
       }
     </>
