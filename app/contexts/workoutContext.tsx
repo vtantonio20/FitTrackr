@@ -4,17 +4,17 @@ import { createContext, useContext } from 'react'
 interface WorkoutProps {
   inActiveWorkout: boolean
   workoutName: string;
-  workoutDate: string;
+  workoutDate: Date;
   targetMuscles: string[];
   setInActiveWorkout: (value:boolean) => void;
   setWorkout: (value: string) => void;
-  setWorkoutDate: (value: string) => void;  //TODO change to date
+  setWorkoutDate: (value: Date) => void;  //TODO change to date
   setTargetMuscles: (values: string[]) => void;
 }
 export const WorkoutContext = createContext<WorkoutProps>({
   inActiveWorkout: false,
   workoutName: '',
-  workoutDate: '',
+  workoutDate: new Date(),
   targetMuscles: [],
   setInActiveWorkout: () => {},
   setWorkout: () => { },

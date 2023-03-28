@@ -1,10 +1,10 @@
-import React, { FunctionComponent, useContext, useState, useMemo } from 'react'
+import React, { FunctionComponent, useContext, useState, useMemo, useEffect } from 'react'
 import { Modal, Image, View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent, Platform, TouchableHighlight, ScrollView } from 'react-native'
 import colors from '../../colors';
 import styles from "../../style"
 import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
 import { useRouter, useNavigation, useRootNavigation } from 'expo-router';
-import { dateToDDMMYY, fakeData } from '../../utilities';
+import { dateToDDMMYY, dateToWDDDMMYY, fakeData, muscleSvgProps } from '../../utilities';
 import { WorkoutContext } from '../../contexts/workoutContext';
 import  BottomModal  from '../../components/smallModal';
 //import Blank from '../../assets/images/svgs/blank.svg'
@@ -26,26 +26,22 @@ const Home: FunctionComponent = () => {
 const ActiveWidget: FunctionComponent = () => {
   const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
   const router = useRouter();
- 
-  const createDynamicProps = (muscles: string[]) => {
-    const dynamicProps: { [key: string]: string } = {};
-    dynamicProps['border'] = '#2B2B2B'
-    dynamicProps['fillAll'] = colors.white
-    for (const key of muscles) {
-      dynamicProps[key] = colors.red;
-    }
-    return dynamicProps;
-  };
 
-  const muscles = useMemo(() => {
-    if (inActiveWorkout) {
-      return createDynamicProps(targetMuscles);
+  const [muscleMapSvg, setMuscleMapSvg] = useState({});
+  useEffect(() => {
+    if (targetMuscles) {
+      const temp = muscleSvgProps(targetMuscles);
+      console.log(temp)
+      setMuscleMapSvg(temp);
     }
   }, [inActiveWorkout, targetMuscles])
 
+  
   const handleWidgetPress = () => {
-    if (!inActiveWorkout)
-      router.push('/screens/modals/workout')
+    if (inActiveWorkout)
+      router.push('/screens/modals/log')
+    else
+      router.push('/screens/modals/createWorkout')
   }
 
   return (
@@ -55,13 +51,13 @@ const ActiveWidget: FunctionComponent = () => {
       </View>
       <TouchableOpacity style={recents.widgetBody} onPress={() => handleWidgetPress()}>
             <View >
-              {inActiveWorkout ? 
+              {(inActiveWorkout) ? 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
                   <View style={{}}>
-                    <Text style={[styles.h3a]}>{workoutName}</Text>
-                    <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate}</Text> 
+                    <Text style={[styles.h3a]}>{workoutName && workoutName}</Text>
+                    <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate && dateToWDDDMMYY(workoutDate)}</Text> 
                   </View>
-                  <MuscleMap width={150} height={150}  {...muscles} />
+                  <MuscleMap width={150} height={150}  {...muscleMapSvg} />
                 </View>
               : 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>

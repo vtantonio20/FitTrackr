@@ -17,14 +17,13 @@ export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerP
 
 
   const onSubmitDate = () => {
-    if (Platform.OS === 'ios') {
+    if (ios)
       setShowDatePicker(false)
-    }
     props.parentDate(date);
   }
 
   const onChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
-    if (Platform.OS === 'android' && event.type == "set") {
+    if (android && event.type == "set") {
       setShowDatePicker(false)
       onSubmitDate();
     }
@@ -79,6 +78,7 @@ const datePicker = StyleSheet.create({
     borderColor: colors.primary,
     borderWidth: 1,
     borderRadius: 7,
+    
   }
   
 })

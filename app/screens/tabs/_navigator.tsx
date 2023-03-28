@@ -26,7 +26,7 @@ const Navigator: FunctionComponent = () => {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'FitTrackr'}}/>
+      <Stack.Screen options={{ title: 'FitTrackr',}}/>
       <StatusBar style="light"/>
       {renderTab()}
       <View style={styles.optionsContainer}>
