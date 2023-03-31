@@ -27,13 +27,17 @@ export default StyleSheet.create({
     },
     containerWrapper: {
         paddingHorizontal: 14,
-        paddingBottom: 14 
+        paddingBottom: 14
     },
     widgetHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         marginVertical: 14 
+    },
+    widgetBody: {
+        backgroundColor: colors.primary,
+        borderRadius: 7
     },
     flexRow: {
         flexDirection: "row",
@@ -63,6 +67,11 @@ export default StyleSheet.create({
         fontFamily: "Lato-Regular",
         
     },
+    h3a: {
+        fontSize: 20,
+        color: colors.white,
+        fontFamily: "Lato-Regular",
+    },
     h4: {
         fontSize: 18,
         color: colors.white,
@@ -78,8 +87,20 @@ export default StyleSheet.create({
         borderColor: colors.darker,
         borderWidth: StyleSheet.hairlineWidth
     },
-
     lighterFont: {
         fontFamily: Platform.OS === 'ios' ? "Lato-Light" : "Lato-Regular"
-    }
+    },
+  suggestion: {
+    backgroundColor: colors.primary,
+    borderRadius: 7,
+    paddingHorizontal: 7,
+    margin: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row'
+    },
+    focusedInput: {
+        borderColor: 'rgba(255, 255, 10, 0.1)',
+    },
+
 });

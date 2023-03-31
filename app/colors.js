@@ -1,6 +1,5 @@
 import {Appearance} from 'react-native';
-let darkMode = Appearance.getColorScheme() === 'light' ? false  : true;
-
+export const darkMode = Appearance.getColorScheme() === 'light' ? false : true;
 darkMode ?
     colors = {
         primary: '#181823',
@@ -11,7 +10,8 @@ darkMode ?
         yellow: '#F0EB8D',
         lighter: '#b4b4b4',
         white: '#FFF',
-        back: '#000'
+        back: '#000',
+        lightYellow: 'rgba(240, 235, 141, 0.54)'
     }
     :
     colors = {
@@ -23,6 +23,7 @@ darkMode ?
         yellow: '#0f1472',
         lighter: '#4b4b4b',
         white: '#000',
-        back: '#000'
+        back: '#000',
+        lightYellow: 'rgba(15, 235, 141, 0.54)'
     }
 export default colors;

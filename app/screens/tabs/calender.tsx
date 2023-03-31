@@ -1,6 +1,5 @@
 import React, { FunctionComponent, useState } from 'react'
 import { View, Text, Platform, Button } from 'react-native'
-import BottomModal from '../../components/smallModal'
 import colors from '../../colors';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
 
