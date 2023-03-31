@@ -1,10 +1,11 @@
 import { FunctionComponent, useMemo } from "react";
-import { TouchableHighlight, StyleSheet, Text, Modal, View, Platform, Dimensions, TouchableWithoutFeedback } from "react-native";
+import { TouchableHighlight, StyleSheet, Text, Modal, View, Platform, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import colors from "../colors";
 import styles from "../style";
-import { Feather } from '@expo/vector-icons'; 
+import { Feather, Entypo } from '@expo/vector-icons'; 
 const windowWidth = Dimensions.get('window').width;
 const windowHeight = Dimensions.get('window').height;
+
 /*
   Here is working example of calling this in a parent
   const [isModalVisible, setIsModalVisible] = useState(true);
@@ -35,7 +36,7 @@ interface BottomModalProps {
 
 
 const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProps) => {
-  const handleSelect = (selectionsIndex:number) => {
+  const handleSelect = (selectionsIndex: number) => {
     props.onSelectionPress(selectionsIndex)
   }
   return (
@@ -95,6 +96,19 @@ const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProp
     </Modal>
   </>
     
+  );
+}
+
+interface ModalButtonProps {
+  text: string,
+  onPress: () => void;
+} 
+export const ModalButton = (props:ModalButtonProps) => {
+  return (
+    <TouchableOpacity style={styles.flexRow} onPress={ props.onPress }>
+      <Text style={[styles.p, styles.lighterFont, {paddingRight:3.5}]}> { props.text }</Text>
+      <Entypo name="chevron-thin-down" size={14} color={colors.lighter} />
+    </TouchableOpacity>
   );
 }
 const modal = StyleSheet.create({

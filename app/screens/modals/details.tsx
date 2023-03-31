@@ -23,7 +23,7 @@ const Details = () => {
       }}
     />
       <View style={[styles.modalContainer]}>
-        <DatePicker editable={false} />
+        <DatePicker editable={false} parentDate={()=>{}} />
         <View style={[styles.flexRow, { paddingVertical: 14 }]}>
           <View>
             <Text style={[styles.h3]}>Recent Workouts</Text>

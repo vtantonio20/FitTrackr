@@ -45,7 +45,7 @@ const Welcome: FunctionComponent = () => {
                     borderColor: colors.darker,
                     borderWidth: StyleSheet.hairlineWidth,
                 }}>
-                    <Text style={[styles.h3, ]}>Add new workout</Text>
+                    <Text style={[styles.h3, ]}>Next</Text>
                     <Fontisto name="arrow-right" size={24} color="white" />
                 </TouchableOpacity >
             </Link>

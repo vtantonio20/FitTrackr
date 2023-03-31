@@ -5,37 +5,54 @@ import styles from "../style";
 import colors from "../colors";
 import { dateToWDDDMMYY } from "../utilities";
 import { Bubble } from "./bubbleButton";
+import { Fontisto } from '@expo/vector-icons'; 
 
 
 
-interface DatePickerProps{ editable:boolean, parentDate: (data:Date) => void}
-export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerProps) => {
+interface DatePickerProps{
+  editable: boolean,
+  parentDate: (data: Date) => void,
+  focused?: (is: boolean) => void
+}
+export const DatePicker: FunctionComponent<DatePickerProps> = (props: DatePickerProps) => {
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [date, setDate] = useState(new Date());
   const ios = Platform.OS === 'ios';
   const android = Platform.OS === 'android';
 
+  const toggleFocus = (to:boolean) => {
+    if (props.focused)
+      props.focused(to);
+  }
 
   const onSubmitDate = () => {
-    if (ios)
+    if (ios) {
       setShowDatePicker(false)
+    }
     props.parentDate(date);
+    toggleFocus(false);
   }
 
   const onChange = (event: DateTimePickerEvent, selectedDate: Date | undefined) => {
     if (android && event.type == "set") {
       setShowDatePicker(false)
       onSubmitDate();
-    }
+    } 
     setDate(selectedDate || new Date());
   }
 
+  const handleButtonClick = () => {
+    if (props.editable) {
+      setShowDatePicker(true)
+      toggleFocus(true);
+    }
+  }
 
   return (
     <>
       {showDatePicker ?
         (
-          <View style={ios && datePicker.iosStyle}>
+          <View>
             <DateTimePicker
               testID='dateTimePicker'
               value={date}
@@ -46,16 +63,18 @@ export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerP
             />
             {ios && <Bubble name={'Set Date'} textStyle={styles.h4} onPress={() => props.editable && onSubmitDate()} />}
             {android && (
-              <TouchableOpacity style={[datePicker.dateButton, { justifyContent: "center" }]} onPress={() => props.editable && setShowDatePicker(true)}>
-                <Text style={[styles.p, { color: colors.lighter }]}>{dateToWDDDMMYY(date)}</Text>
+              <TouchableOpacity style={[{ flexDirection:"row", alignItems: "center"}]} onPress={handleButtonClick}>
+                <Fontisto name="date" size={24} color={colors.yellow} />
+                <Text style={[styles.p, { color: colors.lighter, paddingLeft:7 }]}>{dateToWDDDMMYY(date)}</Text>
               </TouchableOpacity> 
             ) }
           </View>
         )
         :
         (
-          <TouchableOpacity style={[datePicker.dateButton, { justifyContent: "center" }]} onPress={() => props.editable && setShowDatePicker(true)}>
-            <Text style={[styles.p, { color: colors.lighter }]}>{dateToWDDDMMYY(date)}</Text>
+          <TouchableOpacity style={[{ flexDirection:"row", alignItems: "center"}]} onPress={handleButtonClick}>
+            <Fontisto name="date" size={24} color={colors.yellow} />
+            <Text style={[styles.p, { color: colors.lighter, paddingLeft:7 }]}>{dateToWDDDMMYY(date)}</Text>
           </TouchableOpacity>
         )
       }
@@ -67,17 +86,9 @@ export const DatePicker: FunctionComponent<DatePickerProps> = (props:DatePickerP
 const datePicker = StyleSheet.create({
   dateButton: {
     color: colors.lighter,
-    height: 36,
-    paddingHorizontal: 7,
-    borderColor: colors.primary,
-    borderWidth:1,
-    borderRadius: 7,
   },
   iosStyle: {
-    paddingHorizontal: 7,
-    borderColor: colors.primary,
-    borderWidth: 1,
-    borderRadius: 7,
+
     
   }
   

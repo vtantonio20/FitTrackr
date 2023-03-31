@@ -10,7 +10,7 @@ import { fonts } from "./utilities";
 
 const WorkoutIcon = () => {
     return (
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => handle()}>
             <View style={{ paddingHorizontal: 10 }}>
                 <FontAwesome5 name="dumbbell" size={22} color={colors.yellow} />
                 <AntDesign name="plus" size={11} color={colors.yellow}

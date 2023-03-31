@@ -4,11 +4,15 @@ import colors from '../../colors';
 import styles from "../../style"
 import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
 import { useRouter, useNavigation, useRootNavigation } from 'expo-router';
-import { dateToDDMMYY, dateToWDDDMMYY, fakeData, muscleSvgProps } from '../../utilities';
+import { dateToDDMMYY, dateToWD, dateToWDDDMMYY, fakeData, muscleSvgProps } from '../../utilities';
 import { WorkoutContext } from '../../contexts/workoutContext';
-import  BottomModal  from '../../components/smallModal';
+import  BottomModal, { ModalButton }  from '../../components/smallModal';
 //import Blank from '../../assets/images/svgs/blank.svg'
-import  MuscleMap from '../../assets/svgs/muscleMap.svg'
+import MuscleMap from '../../assets/svgs/muscleMap.svg'
+import { useMuscleSvg } from '../../hooks/useMuscleSvg';
+import { useModal } from '../../hooks/useModal';
+
+
 
 const Home: FunctionComponent = () => {
   return (
@@ -26,17 +30,17 @@ const Home: FunctionComponent = () => {
 const ActiveWidget: FunctionComponent = () => {
   const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
   const router = useRouter();
+  const muscleMapSvg = useMuscleSvg(targetMuscles)
 
+  /*
   const [muscleMapSvg, setMuscleMapSvg] = useState({});
   useEffect(() => {
     if (targetMuscles) {
       const temp = muscleSvgProps(targetMuscles);
-      console.log(temp)
       setMuscleMapSvg(temp);
     }
-  }, [inActiveWorkout, targetMuscles])
+  }, [inActiveWorkout, targetMuscles])*/
 
-  
   const handleWidgetPress = () => {
     if (inActiveWorkout)
       router.push('/screens/modals/log')
@@ -49,13 +53,14 @@ const ActiveWidget: FunctionComponent = () => {
       <View style={styles.widgetHeader}>
         <Text style={styles.h3}>Active Workout</Text>
       </View>
-      <TouchableOpacity style={recents.widgetBody} onPress={() => handleWidgetPress()}>
+      <TouchableOpacity style={styles.widgetBody} onPress={() => handleWidgetPress()}>
             <View >
               {(inActiveWorkout) ? 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
                   <View style={{}}>
-                    <Text style={[styles.h3a]}>{workoutName && workoutName}</Text>
-                    <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate && dateToWDDDMMYY(workoutDate)}</Text> 
+                    <Text style={[styles.h3]}>{workoutName && workoutName}</Text>
+                    <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate && dateToWD(workoutDate)}</Text> 
+                    <Text style={[styles.h4, styles.lighterFont, { }]}>{workoutDate && dateToDDMMYY(workoutDate)}</Text> 
                   </View>
                   <MuscleMap width={150} height={150}  {...muscleMapSvg} />
                 </View>
@@ -99,22 +104,17 @@ const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
 
 const RecentsWidget: FunctionComponent = () => {
   const router = useRouter();
-  const [isDayModalVisible, setIsDayModalVisible] = useState(false);
-  const [dayCountIndex, setDayCountIndex] = useState(0);
-  const daysCount = [3, 7, 14]
-  
+  const modal = useModal(['Previous 3 days', 'Previous 7 days', 'Previous 14 days'], [3,7,14]);
+
   return (
     <>
-      <View style={recents.widgetHeader}>
+      <View style={styles.widgetHeader}>
         <Text style={styles.h3}>Recent Workouts</Text>
-        <TouchableOpacity style={recents.widgetModalButton} onPress={() => setIsDayModalVisible(!isDayModalVisible)} >
-          <Text style={[styles.p, styles.lighterFont]}> Show {daysCount[dayCountIndex]} </Text>
-          <Entypo name="chevron-thin-down" size={14} color={colors.lighter} />
-        </TouchableOpacity>
+        <ModalButton onPress={() => modal.toggleOpen()} text={'Show ' + modal.numericValue } />
       </View>
   
       <View style={recents.widgetBody}>
-        {fakeData.slice(0,daysCount[dayCountIndex] ).map((workOut, index) => {
+        {fakeData.slice(0,modal.numericValue ).map((workOut, index) => {
           return (
             <View key={workOut.id}>
               <DayCard
@@ -128,11 +128,11 @@ const RecentsWidget: FunctionComponent = () => {
           );
         })}
       </View>
-      {isDayModalVisible &&
+      {modal.modalOpen &&
         <BottomModal
-          onSelectionPress={(selectionIndex:number) => setDayCountIndex(selectionIndex)}
-          onExitPress={() => setIsDayModalVisible(false)}
-          selections={['Previous 3 days', 'Previous 7 days', 'Previous 14 days']}
+          onSelectionPress={(selectionIndex:number) => modal.changeIndex(selectionIndex)}
+          onExitPress={() => modal.toggleOpen()}
+          selections={modal.selections}
           header={
             <View style={recents.widgetModalHeader}>
               <Text style={[styles.h3, { paddingRight:7 }]}>Set Range</Text>

@@ -22,42 +22,6 @@ export const muscleSvgProps = (targetMuscles:string[]) => {
     }
     return dynamicProps;
 };
-
-
-export const MUSCLESMAPPED = {
-    "Lower Body": {
-        "Legs": [
-            "Quads", "Hamstrings", "Ass", "Abductors", "Calves", "Knees", "Foot", 
-        ],
-        "Core": [
-            "Lower_Core", "Abs", "Lower_Back", "Obliques", "Lats"
-        ]
-    },
-    "Upper Body": {
-        "Back": [
-            "Scapula", "Upper_Back", "Traps"
-        ],
-        "Arms": [
-            "Shoulders", "Triceps", "Biceps", "Forearms", "Hands"
-        ],
-        "Chest": [
-            "Pectorals"
-        ],
-        "Head": [
-            "Neck", "Face"
-        ]
-    }
-
-}
-export const MUSCLEGROUPS = [
-    "Quads", "Hamstrings", "Ass", "Abductors", "Calves", "Knees", "Foot", "Back_Knee", "Shins",
-    "Lower_Core", "Abs", "Lower_Back", "Obliques", "Lats",
-    "Scapula", "Upper_Back", "Traps",
-    "Shoulders", "Triceps", "Biceps", "Forearms", "Hands",
-    "Pectorals",
-    "Neck", "Face",
-    "Border", "Hair"
-]
 export const MUSCLEMAP = {
     Border: "#2B2B2B",
     Hair: "#e5e5e5",
@@ -78,7 +42,7 @@ export const MUSCLEMAP = {
     Lower_Core: "#f5f5f5",
     Abductors: "#f6f6f6",
     Ass: "#f7f7f7",
-    Quads: "#f8f8f8",
+    Quadriceps: "#f8f8f8",
     Hands: "#f9f9f9",
     Hamstrings: "#fafafa",
     Knees: "#fbfbfb",
@@ -86,8 +50,7 @@ export const MUSCLEMAP = {
     Shins: "#fdfdfd",
     Calves: "#fefefe",
     Foot: "#ffffff"
-}
-
+  }
 export const fakeData = [
     { day: 'Monday', workoutName: 'Quads & Glutes', date: new Date(), id:'1' },
     { day: 'Wednesday', workoutName: 'Chest & Bi', date: new Date(), id:'2' },

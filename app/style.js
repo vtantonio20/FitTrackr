@@ -35,6 +35,10 @@ export default StyleSheet.create({
         alignItems: "center",
         marginVertical: 14 
     },
+    widgetBody: {
+        backgroundColor: colors.primary,
+        borderRadius: 7
+    },
     flexRow: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -83,8 +87,20 @@ export default StyleSheet.create({
         borderColor: colors.darker,
         borderWidth: StyleSheet.hairlineWidth
     },
-
     lighterFont: {
         fontFamily: Platform.OS === 'ios' ? "Lato-Light" : "Lato-Regular"
-    }
+    },
+  suggestion: {
+    backgroundColor: colors.primary,
+    borderRadius: 7,
+    paddingHorizontal: 7,
+    margin: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row'
+    },
+    focusedInput: {
+        borderColor: 'rgba(255, 255, 10, 0.1)',
+    },
+
 });
