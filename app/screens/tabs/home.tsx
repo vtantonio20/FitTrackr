@@ -7,7 +7,6 @@ import { useRouter, useNavigation, useRootNavigation } from 'expo-router';
 import { dateToDDMMYY, dateToWD, dateToWDDDMMYY, fakeData, muscleSvgProps } from '../../utilities';
 import { WorkoutContext } from '../../contexts/workoutContext';
 import  BottomModal, { ModalButton }  from '../../components/smallModal';
-//import Blank from '../../assets/images/svgs/blank.svg'
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { useModal } from '../../hooks/useModal';

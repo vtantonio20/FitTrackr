@@ -9,7 +9,6 @@ import colors from "./colors";
 import { FontAwesome5, AntDesign } from '@expo/vector-icons'; 
 import { fonts } from "./utilities";
 import Welcome from "./screens/welcome/welcome";
-import supabase from "./config/supabase";
 
 export default function Page() { 
 

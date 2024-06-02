@@ -9,10 +9,6 @@ import { StatusBar } from 'expo-status-bar'
 import Calender from './calender'
 import Setting from './setting'
 import { TabButton } from '../../components/tabButton';
-import supabase from "../../config/supabase";
-const handle = async () => {
-    console.log(supabase)
-}
 
 const Navigator: FunctionComponent = () => {
   /*
