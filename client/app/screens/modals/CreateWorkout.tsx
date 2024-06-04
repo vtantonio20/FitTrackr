@@ -13,12 +13,17 @@ import { useSuggested } from '../../hooks/useSuggestions';
 import { useModal } from '../../hooks/useModal';
 import BottomModal, { ModalButton } from '../../components/smallModal';
 import { getMuscles, MUSCLEGROUPS } from '../../static/muscles';
-import { MaterialCommunityIcons } from '@expo/vector-icons'; 
+import { MaterialCommunityIcons } from '@expo/vector-icons';
+import useDate from '../../hooks/useDate';
+import axios from 'axios';
+import { API_URL } from '../../config';
+
 export const Workout: FunctionComponent = () => {
   const router = useRouter();
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
   const { setInActiveWorkout, setWorkout, setWorkoutDate, setTargetMuscles } = useContext(WorkoutContext);
+
   const { control, handleSubmit, setValue, getValues ,formState: { errors } } = useForm({
     defaultValues: {
       workoutName: '',
@@ -26,14 +31,13 @@ export const Workout: FunctionComponent = () => {
       targetMuscles: [],
     }
   });
-  const { remove, append } = useFieldArray<any>({ name: "targetMuscles", control });
 
-  //Dates
-  const [date, setDate] = useState<Date>();
-  useEffect(() => {
-    setValue("workoutDate", date || new Date());
-  }, [date])
+  const { remove, append } = useFieldArray<any>({ 
+    name: "targetMuscles",
+    control
+  });
 
+  const [date, setDate] = useDate(setValue)
   
   const modal = useModal(MUSCLEGROUPS);
   const muscles = useSuggested(getMuscles(modal.selected));
@@ -54,10 +58,24 @@ export const Workout: FunctionComponent = () => {
 
   const onSubmitForm = (data: any) => {
     setInActiveWorkout(true);
-    setWorkout(getValues('workoutName') );
+    setWorkout(getValues('workoutName'));
     setWorkoutDate(getValues('workoutDate'))
     setTargetMuscles(muscles.selectedSuggestions)
+
+    const workoutName = data['workoutName'];
+    const workoutDate = data['workoutDate'];
+    const targetMuscles = data['targetMuscles'].map((muscle: any) => muscle['targetMuscle']);
+    const isActiveWorkout = true;
+
     router.push('/screens/tabs/_navigator')
+    axios.post(`${API_URL}/create-workout`, {
+      name: workoutName,
+      date: workoutDate,
+      targetMuscles: targetMuscles,
+      isActiveWorkout: isActiveWorkout
+    }).then(res => {
+      console.log(res)
+    })
   }
 
   return (

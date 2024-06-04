@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 /*
   This hook provides the ability to have a suggestions array
-  that a use can select values from, and causing two arrays 
+  that a user can select values from, and causing two arrays 
   to be returned, one for the selected suggestions, and another
   for unselected suggestions.
 */

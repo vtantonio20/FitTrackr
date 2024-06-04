@@ -3,7 +3,7 @@ import colors from './colors';
 import { FontAwesome5, AntDesign } from '@expo/vector-icons'; 
 import { TouchableOpacity, Text, View } from "react-native";
 import { useFonts } from "expo-font";
-import Loading from "./screens/loading/loading";
+import Loading from "./screens/loading/Loading";
 import React, { useState } from 'react'
 import { WorkoutContext } from "./contexts/workoutContext";
 import { fonts } from "./utilities";

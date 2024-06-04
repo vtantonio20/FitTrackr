@@ -42,9 +42,9 @@ const ActiveWidget: FunctionComponent = () => {
 
   const handleWidgetPress = () => {
     if (inActiveWorkout)
-      router.push('/screens/modals/log')
+      router.push('/screens/modals/Log')
     else
-      router.push('/screens/modals/createWorkout')
+      router.push('/screens/modals/CreateWorkout')
   }
 
   return (
