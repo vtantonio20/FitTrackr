@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 
 
-export const useModal = (selections:string[], numeric?: number[] , initalState?:boolean) => {
-  const [modalOpen, setModalOpen] = useState(initalState || false);
+export const useModal = (selections:string[], numeric?: number[] , isOpen?:boolean) => {
+  const [modalOpen, setModalOpen] = useState(isOpen || false);
   const [selected, setSelected] = useState(selections[0])
   const [numericValue, setNumericValue] = useState(numeric ? numeric[0] : undefined);
   const [update, toggleUpdate] = useState<boolean>(false)

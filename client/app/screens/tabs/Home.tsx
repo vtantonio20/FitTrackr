@@ -3,22 +3,56 @@ import { Modal, Image, View, Text, StyleSheet, TouchableOpacity, GestureResponde
 import colors from '../../colors';
 import styles from "../../style"
 import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
-import { useRouter, useNavigation, useRootNavigation } from 'expo-router';
-import { dateToDDMMYY, dateToWD, dateToWDDDMMYY, fakeData, muscleSvgProps } from '../../utilities';
-import { WorkoutContext } from '../../contexts/workoutContext';
+import { useRouter } from 'expo-router';
+import { dateToDDMMYY, dateToWD, fakeData } from '../../utilities';
 import  BottomModal, { ModalButton }  from '../../components/smallModal';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
-import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { useModal } from '../../hooks/useModal';
-
+import axios from 'axios';
+import { API_URL } from '../../config';
+import useWorkout from '../../hooks/useWorkout';
 
 
 const Home: FunctionComponent = () => {
+  const [activeWorkout, setActiveWorkout] = useState({})
+  const [inactiveWorkouts, setInactiveWorkouts] = useState([])
+
+  useEffect(() => {
+    const fetchWorkoutData = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/workouts`);
+        
+        const activeWorkoutData = response.data['active_workout'];
+        if (activeWorkoutData != null) {
+          setActiveWorkout({
+            workoutName: activeWorkoutData.name,
+            workoutDate: new Date(activeWorkoutData.date),
+            targetMuscles: activeWorkoutData.target_muscles.map((muscle: any) => muscle.name),
+            isActive: activeWorkoutData.is_active
+          })
+        }
+
+        const inactiveWorkoutsData = response.data['inactive_workouts'];
+        if (inactiveWorkoutsData != null) {
+          setInactiveWorkouts(inactiveWorkoutsData.map((inactiveWorkout: any) => ({
+            workoutName: inactiveWorkout.name,
+            workoutDate: inactiveWorkout.date,
+            targetMuscles: inactiveWorkout.target_muscles.map((muscle: any) => muscle.name),
+            isActive: inactiveWorkout.is_active
+          })))
+        }
+      } catch (e) {
+        console.error('Error fetching workout data:', e);
+      }
+    }
+    fetchWorkoutData()
+  }, [])
+
   return (
     <>
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
-          <ActiveWidget/>
+          <ActiveWidget activeWorkout={activeWorkout}/>
           <RecentsWidget />
         </View>
       </ScrollView>
@@ -26,22 +60,12 @@ const Home: FunctionComponent = () => {
   )
 }
 
-const ActiveWidget: FunctionComponent = () => {
-  const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
+const ActiveWidget: FunctionComponent<any> = (props:any) => {
+  const { workoutName, workoutDate, isActive, muscleMapSvg } = useWorkout(props.activeWorkout);
   const router = useRouter();
-  const muscleMapSvg = useMuscleSvg(targetMuscles)
-
-  /*
-  const [muscleMapSvg, setMuscleMapSvg] = useState({});
-  useEffect(() => {
-    if (targetMuscles) {
-      const temp = muscleSvgProps(targetMuscles);
-      setMuscleMapSvg(temp);
-    }
-  }, [inActiveWorkout, targetMuscles])*/
 
   const handleWidgetPress = () => {
-    if (inActiveWorkout)
+    if (isActive)
       router.push('/screens/modals/Log')
     else
       router.push('/screens/modals/CreateWorkout')
@@ -54,7 +78,7 @@ const ActiveWidget: FunctionComponent = () => {
       </View>
       <TouchableOpacity style={styles.widgetBody} onPress={() => handleWidgetPress()}>
             <View >
-              {(inActiveWorkout) ? 
+              {isActive ? 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
                   <View style={{}}>
                     <Text style={[styles.h3]}>{workoutName && workoutName}</Text>
@@ -72,38 +96,13 @@ const ActiveWidget: FunctionComponent = () => {
             </View>
       </TouchableOpacity >
     </>
-
   );
 }
 
-
-interface WorkoutProps {
-  workoutName: string,
-  day: string,
-  date: string,
-  onPress: () => void
-}
-    
-const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
-  return (
-    <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 7, paddingHorizontal: 14, }}>
-      <View style={{ width:'40%'}}>
-        <Text style={[styles.h4]}>{props.day}</Text>
-        <Text style={[styles.p, styles.lighterFont]}>{props.date}</Text>
-      </View>
-      <View style={{ width: '50%' }}>
-        <Text style={styles.h4}>{props.workoutName}</Text>
-      </View>
-      <TouchableOpacity  onPress={props.onPress}>
-        <Feather name="info" size={24} color={colors.yellow} />
-      </TouchableOpacity>
-    </View>
-  );
-}
 
 const RecentsWidget: FunctionComponent = () => {
-  const router = useRouter();
   const modal = useModal(['Previous 3 days', 'Previous 7 days', 'Previous 14 days'], [3,7,14]);
+  const router = useRouter();
 
   return (
     <>
@@ -144,6 +143,31 @@ const RecentsWidget: FunctionComponent = () => {
     </>
   );
 }
+
+interface WorkoutProps {
+  workoutName: string,
+  day: string,
+  date: string,
+  onPress: () => void
+}
+    
+const DayCard: FunctionComponent<WorkoutProps> = (props: WorkoutProps) => {
+  return (
+    <View style={{ flexDirection: "row", alignItems: "center", paddingVertical: 7, paddingHorizontal: 14, }}>
+      <View style={{ width:'40%'}}>
+        <Text style={[styles.h4]}>{props.day}</Text>
+        <Text style={[styles.p, styles.lighterFont]}>{props.date}</Text>
+      </View>
+      <View style={{ width: '50%' }}>
+        <Text style={styles.h4}>{props.workoutName}</Text>
+      </View>
+      <TouchableOpacity  onPress={props.onPress}>
+        <Feather name="info" size={24} color={colors.yellow} />
+      </TouchableOpacity>
+    </View>
+  );
+}
+
 export default Home;
 
 const recents = StyleSheet.create({

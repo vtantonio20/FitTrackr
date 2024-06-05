@@ -1,7 +1,7 @@
 
 import React, { FunctionComponent, useState, useContext, useEffect, useMemo } from 'react'
 import { Stack, useNavigation, useRouter } from 'expo-router';
-import { View, Text, TouchableOpacity, TextInput, FlatList, StyleSheet, ScrollView, TextStyle, StyleProp, Pressable } from 'react-native';
+import { View, Text, TouchableOpacity, TextInput, FlatList, StyleSheet, ScrollView, TextStyle, StyleProp, Pressable, Switch } from 'react-native';
 import colors from '../../colors';
 import styles from "../../style";
 import { WorkoutContext } from '../../contexts/workoutContext';
@@ -24,7 +24,7 @@ export const Workout: FunctionComponent = () => {
   const changeFocus = (to: string) => setFocusOn(to);
   const { setInActiveWorkout, setWorkout, setWorkoutDate, setTargetMuscles } = useContext(WorkoutContext);
 
-  const { control, handleSubmit, setValue, getValues ,formState: { errors } } = useForm({
+  const { control, handleSubmit, setValue, getValues, formState: { errors } } = useForm({
     defaultValues: {
       workoutName: '',
       workoutDate: new Date(),
@@ -65,14 +65,15 @@ export const Workout: FunctionComponent = () => {
     const workoutName = data['workoutName'];
     const workoutDate = data['workoutDate'];
     const targetMuscles = data['targetMuscles'].map((muscle: any) => muscle['targetMuscle']);
-    const isActiveWorkout = true;
+    const isActiveWorkout = false;
 
     router.push('/screens/tabs/_navigator')
+    
     axios.post(`${API_URL}/create-workout`, {
       name: workoutName,
       date: workoutDate,
-      targetMuscles: targetMuscles,
-      isActiveWorkout: isActiveWorkout
+      target_muscles: targetMuscles,
+      is_active: isActiveWorkout
     }).then(res => {
       console.log(res)
     })
@@ -91,7 +92,6 @@ export const Workout: FunctionComponent = () => {
           <View style={styles.widgetHeader}>
             <Text style={styles.h2}>Set Details</Text>
           </View>
-          
           <View style={form.element}>
             <Text style={form.elementHeader}>Name: </Text>
             {errors.workoutName && <Text style={[styles.p, { color: colors.red }]}>This is required.</Text>}
@@ -124,7 +124,7 @@ export const Workout: FunctionComponent = () => {
             </View>
           </View>
           
-          <View style={form.element}>
+          <View style={[form.element, {paddingBottom:0}]}>
             <View style={styles.flexRow}>
               <Text style={form.elementHeader}>Target Muscles: <Text style={styles.p}>(optional)</Text></Text>
               <ModalButton onPress={() => modal.toggleOpen()} text={modal.selected} />
@@ -159,6 +159,12 @@ export const Workout: FunctionComponent = () => {
               style={{margin:0}}
             />    
           </View>
+
+          <View style={[styles.flexRow, form.toggleActiveArea]}>
+            <Text style={[form.elementHeader, {paddingBottom:0}]}>Make Active Workout</Text>
+            <Switch></Switch>
+          </View>
+          
           {/*Submit Button */}
           <TouchableOpacity style={form.submitContainer} onPress={handleSubmit(onSubmitForm)}>
             <Text style={[styles.h3, {lineHeight:28}]}>Start Logging</Text>
@@ -208,6 +214,12 @@ const form = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row'
+  },
+  toggleActiveArea: {
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginRight: 1.5,
+    paddingBottom: 14
   }
 })
 export default Workout;
