@@ -29,7 +29,7 @@ export default () => {
     const [workoutName, setWorkout] = useState();
     const [workoutDate, setWorkoutDate] = useState();
     const [targetMuscles, setTargetMuscles] = useState();
-
+    const [exercises, setExercises] = useState();
     
     const [fontsLoaded] = useFonts(fonts);
     if (!fontsLoaded) {
@@ -41,7 +41,8 @@ export default () => {
                 workoutName, setWorkout,
                 inActiveWorkout, setInActiveWorkout,
                 workoutDate, setWorkoutDate,
-                targetMuscles, setTargetMuscles
+                targetMuscles, setTargetMuscles,
+                exercises, setExercises,
             }}>
             <Stack
                 screenOptions={{

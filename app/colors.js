@@ -11,7 +11,9 @@ darkMode ?
         lighter: '#b4b4b4',
         white: '#FFF',
         back: '#000',
-        lightYellow: 'rgba(240, 235, 141, 0.54)'
+        lightYellow: 'rgba(240, 235, 141, 0.54)',
+        blue: 'rgba(15, 235, 141, 1)'
+
     }
     :
     colors = {

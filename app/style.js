@@ -88,7 +88,8 @@ export default StyleSheet.create({
         borderWidth: StyleSheet.hairlineWidth
     },
     lighterFont: {
-        fontFamily: Platform.OS === 'ios' ? "Lato-Light" : "Lato-Regular"
+        fontFamily: Platform.OS === 'ios' ? "Lato-Light" : "Lato-Regular",
+        color:colors.lighter
     },
   suggestion: {
     backgroundColor: colors.primary,

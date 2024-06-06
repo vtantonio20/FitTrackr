@@ -9,10 +9,6 @@ import { StatusBar } from 'expo-status-bar'
 import Calender from './calender'
 import Setting from './setting'
 import { TabButton } from '../../components/tabButton';
-import supabase from "../../config/supabase";
-const handle = async () => {
-    console.log(supabase)
-}
 
 const Navigator: FunctionComponent = () => {
   /*
@@ -77,7 +73,7 @@ const Navigator: FunctionComponent = () => {
             icon={<FontAwesome5 name="dumbbell" size={24} color={'workout' === activeTab ? colors.yellow : colors.white} />} 
             name='New Workout'
             focused={'workout' === activeTab}
-          />*/}
+          />
 
 
           <TabButton
@@ -85,7 +81,7 @@ const Navigator: FunctionComponent = () => {
             icon={<FontAwesome  name="calendar" size={28} color={'calendar' === activeTab ? colors.yellow : colors.white} />} 
             name='Calender'
             focused={'calendar' === activeTab}
-          />
+          />*/}
 
           <TabButton
             onPress={() => setActiveTab('account')}

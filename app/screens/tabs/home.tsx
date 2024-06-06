@@ -32,15 +32,6 @@ const ActiveWidget: FunctionComponent = () => {
   const router = useRouter();
   const muscleMapSvg = useMuscleSvg(targetMuscles)
 
-  /*
-  const [muscleMapSvg, setMuscleMapSvg] = useState({});
-  useEffect(() => {
-    if (targetMuscles) {
-      const temp = muscleSvgProps(targetMuscles);
-      setMuscleMapSvg(temp);
-    }
-  }, [inActiveWorkout, targetMuscles])*/
-
   const handleWidgetPress = () => {
     if (inActiveWorkout)
       router.push('/screens/modals/log')
@@ -62,7 +53,7 @@ const ActiveWidget: FunctionComponent = () => {
                     <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{workoutDate && dateToWD(workoutDate)}</Text> 
                     <Text style={[styles.h4, styles.lighterFont, { }]}>{workoutDate && dateToDDMMYY(workoutDate)}</Text> 
                   </View>
-                  <MuscleMap width={150} height={150}  {...muscleMapSvg} />
+                  <MuscleMap width={150} height={150}  {...muscleMapSvg.muscleMapSvg} />
                 </View>
               : 
                 <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>

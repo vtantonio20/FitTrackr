@@ -1,20 +1,24 @@
 import { Stack, useRouter } from 'expo-router';
-import React, { useContext, useEffect } from 'react'
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
+import React, { useContext, useEffect, useState } from 'react'
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList, Touchable} from 'react-native';
 import colors from '../../colors';
 import { WorkoutContext } from '../../contexts/workoutContext';
 import styles from "../../style";
 import { dateToDDMMYY, dateToWD, dateToWDDDMMYY } from '../../utilities';
-import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
+import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome,Ionicons, MaterialCommunityIcons} from '@expo/vector-icons'; 
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { Bubble } from '../../components/bubbleButton';
-import { AddExercise, Exercise } from '../../components/exercise';
 import { useModal } from '../../hooks/useModal';
+import { Swipeable } from 'react-native-gesture-handler';
 
 const Log = () => {
-  const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
+  const { inActiveWorkout, workoutName, workoutDate, targetMuscles, exercises } = useContext(WorkoutContext);
   const router = useRouter();
+
+  const handleNewExercisePress = () => {
+    router.push('/screens/modals/exercise')
+  }
   useEffect(() => {
     if (typeof(inActiveWorkout) === undefined || !inActiveWorkout )
       console.log('Inactive workout')  
@@ -37,18 +41,53 @@ const Log = () => {
             <Text style={styles.h3}>{workoutDate && dateToWD(workoutDate)}'s Session</Text>
             <Text style={[styles.h4, styles.lighterFont]}>{workoutDate && dateToDDMMYY(workoutDate)}</Text>
           </View>
-          {/*<Exercise name='squats' sets='4' reps=''/>*/} 
-          <AddExercise/>
-          <View style={styles.widgetHeader}>
-            <TouchableOpacity style={form.imageContainer}>
-              <MuscleMap width={150} height={150}  {...muscleMapSvg} />
-            </TouchableOpacity>
-          </View>
 
+          {exercises != undefined && 
+            <>
+            {
+              exercises.map((e, index) => {
+                return (
+                  <>
+                    <View style={[styles.widgetHeader, {marginTop:0, marginBottom:3.5}]}>
+                      <Text style={styles.h4}>Exercise {index + 1}:</Text>
+                    </View>      
+                    <Swipeable>
 
+                    <TouchableOpacity style={{flexDirection:'row', backgroundColor:colors.primary, padding:14, marginBottom:14, borderRadius:7, justifyContent:'space-between', alignItems:'center'}}>
+                      <MaterialCommunityIcons name="weight-lifter" size={24} color={colors.yellow} />
+                      <Text style={styles.h3a}>{e.exerciseName}</Text>
+                      <View >
+                        {
+                          e.sets.map((s, index) => {
+                            return (
+                              <View style={{alignSelf:'flex-end'}}>
+                                <Text style={styles.p}>{s.reps} X {s.weight}Ibs</Text>
+                              </View>
+                            )
+                          })
+                        }
+                      </View>
+                      </TouchableOpacity>
+                      </Swipeable>
+                  </>
+                )
+              })
+            }
+            </>
+          }
+
+          <TouchableOpacity style={styles.widgetBody} onPress={handleNewExercisePress}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
+              <Text style={[styles.h4, { lineHeight: 28 }]}>Add Exercise</Text>
+              <AntDesign name="plus" size={28} color={colors.yellow} />
+            </View> 
+          </TouchableOpacity>
 
         </View>
       </ScrollView>
+      <View style={{ position: "absolute", bottom: 50, backgroundColor:colors.primary,padding:14, borderRadius:100, alignSelf:'center' }}>
+        <Text style={styles.h3}>End Workout</Text>
+      </View>
     </>
   )
 }

@@ -29,7 +29,7 @@ export const useModal = (selections:string[], numeric?: number[] , initalState?:
     changeIndex,
     getIndex,
     numericValue,
-    selected,
+    selectedGroup: selected,
     modalOpen,
     selections
   }

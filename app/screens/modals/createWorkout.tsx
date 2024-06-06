@@ -36,7 +36,7 @@ export const Workout: FunctionComponent = () => {
 
   
   const modal = useModal(MUSCLEGROUPS);
-  const muscles = useSuggested(getMuscles(modal.selected));
+  const muscles = useSuggested(getMuscles(modal.selectedGroup));
   const appendMuscle = (muscle: string) => {
     setFocusOn('target')
     if (muscles.appendSuggestion(muscle))
@@ -49,10 +49,10 @@ export const Workout: FunctionComponent = () => {
   }
   
   useEffect(() => {
-    muscles.setNewSuggestions(getMuscles(modal.selected))
-  }, [modal.selected])
+    muscles.setNewSuggestions(getMuscles(modal.selectedGroup))
+  }, [modal.selectedGroup])
 
-  const onSubmitForm = (data: any) => {
+  const onSubmitForm = () => {
     setInActiveWorkout(true);
     setWorkout(getValues('workoutName') );
     setWorkoutDate(getValues('workoutDate'))
@@ -82,7 +82,7 @@ export const Workout: FunctionComponent = () => {
             <Controller
               name="workoutName"
               control={control}
-              rules={{required:false}}
+              rules={{required:true}}
               render={({ field: { onChange, onBlur, value } }) => (
 
                 <TextInput
@@ -109,7 +109,7 @@ export const Workout: FunctionComponent = () => {
           <View style={form.element}>
             <View style={styles.flexRow}>
               <Text style={form.elementHeader}>Target Muscles: <Text style={styles.p}>(optional)</Text></Text>
-              <ModalButton onPress={() => modal.toggleOpen()} text={modal.selected} />
+              <ModalButton onPress={() => modal.toggleOpen()} text={modal.selectedGroup} />
             </View>
             <Controller
               name="targetMuscles"
@@ -170,7 +170,7 @@ const form = StyleSheet.create({
     paddingBottom: 14
   },
   elementHeader: {
-    ...styles.h4,
+    ...styles.h3a,
     paddingBottom: 7,
     color: colors.white
   },

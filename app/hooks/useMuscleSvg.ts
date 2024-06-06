@@ -7,7 +7,7 @@ type props = {
 export const useMuscleSvg = (targetMuscles:string[]) => {
   const [muscleMapSvg, setMuscleMapSvg] = useState({});
 
-  const muscleSvgProps = (targetMuscles:string[]) => {
+  const setShaded = (targetMuscles:string[]) => {
     const dynamicProps: { [key: string]: string } = {};
     dynamicProps['Border'] = '#2B2B2B'
     dynamicProps['FillAll'] = colors.white
@@ -18,10 +18,10 @@ export const useMuscleSvg = (targetMuscles:string[]) => {
   };
   useEffect(() => {
     if (targetMuscles) {
-      const temp = muscleSvgProps(targetMuscles);
+      const temp = setShaded(targetMuscles);
       setMuscleMapSvg(temp);
     }
   }, [targetMuscles])
-  return muscleMapSvg;
+  return {muscleMapSvg, setShaded};
 
 }
