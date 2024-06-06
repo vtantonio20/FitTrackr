@@ -9,17 +9,36 @@ workout_muscle = db.Table('workout_muscle', db.Model.metadata,
     db.Column('muscle_id', db.Integer, db.ForeignKey('muscle.id'), primary_key=True)
 )
 
-class Muscle(db.Model):
-    __tablename__ = 'muscle'
+class MuscleGroup(db.Model):
+    __tablename__ = 'muscle_group'
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(100), nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False)
+
     def __init__(self, name):
         self.name=name
 
     def to_dict(self):
         return {
             "id": self.id,
-            "name": self.name
+            "name": self.name,
+        }
+    
+class Muscle(db.Model):
+    __tablename__ = 'muscle'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)    
+    group_id = db.Column(db.Integer, db.ForeignKey('muscle_group.id'), nullable=False)
+    group = relationship('MuscleGroup', backref=db.backref('muscles', lazy=True))
+
+    def __init__(self, name, group):
+        self.name=name
+        self.group = group
+
+    def to_dict(self):
+        return {
+            "id": self.id,
+            "name": self.name,
+            "group": self.group.to_dict()
         }
 
 class Workout(db.Model):

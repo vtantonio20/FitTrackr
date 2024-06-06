@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 
 
-export const useModal = (selections:string[], numeric?: number[] , isOpen?:boolean) => {
+export const useSelectionModal = (selections:string[], numeric?: number[] , isOpen?:boolean) => {
   const [modalOpen, setModalOpen] = useState(isOpen || false);
   const [selected, setSelected] = useState(selections[0])
   const [numericValue, setNumericValue] = useState(numeric ? numeric[0] : undefined);
@@ -13,12 +13,13 @@ export const useModal = (selections:string[], numeric?: number[] , isOpen?:boole
     if (numeric)
       setNumericValue(numeric[index]);
     toggleUpdate(true)
-
   }
 
   const getIndex = (text: string) => {
-    selections.findIndex((val, index, text) => {
-      return index;
+    return selections.findIndex((val, index) => {
+      if (val === text){
+        return index;
+      }
     });
   }
   useEffect(() => {
@@ -26,8 +27,10 @@ export const useModal = (selections:string[], numeric?: number[] , isOpen?:boole
   }, [update])
   return {
     toggleOpen,
+    toggleUpdate,
     changeIndex,
     getIndex,
+    setSelected,
     numericValue,
     selected,
     modalOpen,

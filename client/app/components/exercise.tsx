@@ -5,7 +5,7 @@ import styles from "../style";
 import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
 import BottomModal, { ModalButton } from './smallModal';
-import { useModal } from '../hooks/useModal';
+import { useSelectionModal } from '../hooks/useSelectionModal';
 import { SimpleLineIcons  } from '@expo/vector-icons'; 
 import { useSuggested } from '../hooks/useSuggestions';
 import { getWorkouts, WORKOUTGROUPS } from '../static/workouts';
@@ -44,7 +44,7 @@ export const AddExercise = () => {
     }
   });
   const { remove, append } = useFieldArray<any>({ name: "sets", control });
-  const modal = useModal(WORKOUTGROUPS);
+  const modal = useSelectionModal(WORKOUTGROUPS);
   const suggestions = useSuggested(getWorkouts(modal.selected));
 
   useEffect(() => {

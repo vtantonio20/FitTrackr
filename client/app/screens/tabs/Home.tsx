@@ -7,7 +7,7 @@ import { useRouter } from 'expo-router';
 import { dateToDDMMYY, dateToWD, fakeData } from '../../utilities';
 import  BottomModal, { ModalButton }  from '../../components/smallModal';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
-import { useModal } from '../../hooks/useModal';
+import { useSelectionModal } from '../../hooks/useSelectionModal';
 import axios from 'axios';
 import { API_URL } from '../../config';
 import useWorkout from '../../hooks/useWorkout';
@@ -53,7 +53,7 @@ const Home: FunctionComponent = () => {
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
           <ActiveWidget activeWorkout={activeWorkout}/>
-          <RecentsWidget />
+          <RecentsWidget workouts={inactiveWorkouts}/>
         </View>
       </ScrollView>
   </>  
@@ -100,8 +100,8 @@ const ActiveWidget: FunctionComponent<any> = (props:any) => {
 }
 
 
-const RecentsWidget: FunctionComponent = () => {
-  const modal = useModal(['Previous 3 days', 'Previous 7 days', 'Previous 14 days'], [3,7,14]);
+const RecentsWidget: FunctionComponent<any> = (workouts:any) => {
+  const modal = useSelectionModal(['Previous 3 days', 'Previous 7 days', 'Previous 14 days'], [3,7,14]);
   const router = useRouter();
 
   return (
@@ -116,7 +116,7 @@ const RecentsWidget: FunctionComponent = () => {
           return (
             <View key={workOut.id}>
               <DayCard
-                onPress={() => router.push('/screens/modals/details')}
+                onPress={() => router.push('/screens/modals/Details')}
                 day={workOut.day}
                 workoutName={workOut.workoutName}
                 date={dateToDDMMYY(workOut.date)}

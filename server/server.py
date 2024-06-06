@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from models import db, Muscle, Workout
+from models import MuscleGroup, db, Muscle, Workout
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -8,10 +8,23 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 CORS(app)
 
 with app.app_context():
-    db.init_app(app)
-    db.create_all()
 
 
+    @app.route("/temp-delete")
+    def temp_delete():
+        active_workout = Workout.query.filter_by(is_active=True).first()
+        if active_workout:
+            db.session.delete(active_workout)
+            db.session.commit()
+            return "success"
+        return "not success"
+    
+    @app.route("/muscles")
+    def get_muscles():
+        muscles =Muscle.query.all()
+        return {
+            "muscles": [m.to_dict() for m in muscles]
+        }
     @app.route("/workouts")
     def get_workouts():
         include_all = request.args.get('include-all', default='false')
@@ -50,11 +63,10 @@ with app.app_context():
         for muscle_name in target_muscles_names:
             muscle = Muscle.query.filter_by(name=muscle_name).first()
             if not muscle:
-                muscle = Muscle(name=muscle_name)
-                db.session.add(muscle)
+                return {"error": "attempted to add new muscle not in database"}
+
             target_muscles.append(muscle)
         
-        print(target_muscles)
         workout = Workout(name, date, target_muscles, is_active)
         
         db.session.add(workout)
@@ -62,5 +74,30 @@ with app.app_context():
 
         return {"success": True, "workout": workout.to_dict()}
     
+    def init_db():
+        muscle_groups = {
+            "Legs": ["Quadriceps", "Hamstrings", "Calves", "Ass", "Abductors", "Knees", "Foot"],
+            "Core": ["Lower_Core", "Abs", "Lower_Back", "Obliques"],
+            "Back": ["Scapula", "Upper_Back", "Traps", "Lats"],
+            "Arms": ["Shoulders", "Triceps", "Biceps", "Forearms", "Hands"],
+            "Chest": ["Pectorals"],
+            "Head": ["Neck", "Face"]
+        }
+        if not MuscleGroup.query.all():
+            for group_name, muscle_names in muscle_groups.items():
+                group = MuscleGroup(name=group_name)
+                db.session.add(group)
+                db.session.flush()
+
+                for muscle_name in muscle_names:
+                    muscle = Muscle(name=muscle_name, group=group)
+                    db.session.add(muscle)
+            db.session.commit()
+    
+    db.init_app(app)
+    db.create_all()
+    
+    init_db()
+
     if __name__ == "__main__":
         app.run(host="0.0.0.0", port=8080, debug=True)

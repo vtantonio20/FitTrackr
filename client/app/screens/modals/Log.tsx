@@ -10,7 +10,7 @@ import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { Bubble } from '../../components/bubbleButton';
 import { AddExercise, Exercise } from '../../components/exercise';
-import { useModal } from '../../hooks/useModal';
+import { useSelectionModal } from '../../hooks/useSelectionModal';
 
 const Log = () => {
   const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
