@@ -13,12 +13,12 @@ import { useSelectionModal } from '../../hooks/useSelectionModal';
 import BottomModal, { ModalButton } from '../../components/smallModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useDate from '../../hooks/useDate';
-import axios from 'axios';
-import { API_URL } from '../../config';
+import { useMutation, useQuery } from 'react-query';
+import { createWorkout, fetchMuscleMapData } from '../../api';
 
 export const Workout: FunctionComponent = () => {
   const router = useRouter();
-
+  
   // Handle Form Stuff
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
@@ -36,26 +36,41 @@ export const Workout: FunctionComponent = () => {
     control
   });
 
-  const onSubmitForm = (data: any) => {
-    const workoutName = data.workoutName;
-    const workoutDate = data.workoutDate;
-    const targetMuscles = data.targetMuscles.map((muscle: any) => muscle['targetMuscle']);
-    const isActiveWorkout = data.makeActive;
-    
-    axios.post(`${API_URL}/create-workout`, {
-      name: workoutName,
-      date: workoutDate,
-      target_muscles: targetMuscles,
-      is_active: isActiveWorkout
-    }).then(res => {
-      router.push('/screens/tabs/_navigator')
-    })
-  }
+  const [date, setDate] = useDate(setValue);
 
-  const [date, setDate] = useDate(setValue)
-  
+  // Handle fetching and managing state of the muscle suggestions
+  const [updateMuscles, setUpdateMuscles] = useState(false);  
+  const { data, error, isLoading } = useQuery('muscles', fetchMuscleMapData, {
+    onSuccess: () => {
+      setUpdateMuscles(true)
+    }
+  })
+
+  const buildMuscleMapFromJson = (jsonData: any) => {
+    if (!data)
+      return {}
+    const musclesData = jsonData.muscles;
+    const map: any = {};
+    if (!musclesData) {
+      return map;
+    }
+    musclesData.forEach((m: any) => {
+      const groupName = m.group.name;
+      const muscleName = m.name;
+
+      // If the group name does not exist, create it and add muscle name to group
+      if (!map[groupName]) {
+        map[groupName] = [];
+      }
+      map[groupName].push(muscleName);
+
+    });
+    
+    return map;
+  };
+
   // A map of muscle group names to list of muscles per group name
-  const [muscleMap, setMuscleMap] = useState<any>({})
+  const muscleMap = buildMuscleMapFromJson(data);
   // This selection modal will be a modal to for choosing which group name to show
   const selectionModal = useSelectionModal(Object.keys(muscleMap));
   // This will represent the selected group
@@ -69,7 +84,7 @@ export const Workout: FunctionComponent = () => {
   useEffect(() => {
     const groupIndex = selectedGroup ? selectionModal.getIndex(selectedGroup) : 0;
     selectionModal.changeIndex(groupIndex)
-  }, [muscleMap])
+  }, [updateMuscles])
 
   // Updates the suggestions when selection modal changes
   useEffect(() => {
@@ -89,28 +104,38 @@ export const Workout: FunctionComponent = () => {
     }
   }
 
-  // fetches muscle map
-  useEffect(() => {
-    const fetchMuscleMap = async () => {
-      const response = await axios.get(`${API_URL}/muscles`);
-      const musclesData = response.data['muscles'];
-      // Object that will store each group to list of muscles
-      const muscleGroups:any = {};
-      if (musclesData != null){
-        musclesData.forEach((m:any) => {
-          const groupName = m.group.name;
-          const muscleName = m.name;
-          // if group name does not exist create it and add muscle name to group
-          if (!muscleGroups[groupName]) {
-            muscleGroups[groupName] = []
-          }
-          muscleGroups[groupName].push(muscleName)
-        })
-        setMuscleMap(muscleGroups)
-      }
+  // Submit Functionality
+  const submitMutation = useMutation(createWorkout, {
+    onSuccess: () => {
+      router.push('/screens/tabs/_navigator');
     }
-    fetchMuscleMap()
-  }, [])
+  })
+
+  const onSubmitForm = (data: any) => {
+    const workoutName = data.workoutName;
+    const workoutDate = data.workoutDate;
+    const targetMuscles = data.targetMuscles.map((muscle: any) => muscle['targetMuscle']);
+    const isActiveWorkout = data.makeActive;
+
+    const workoutData = {
+      name: workoutName,
+      date: workoutDate,
+      target_muscles: targetMuscles,
+      is_active: isActiveWorkout
+    };
+
+    submitMutation.mutate(workoutData);
+  }
+
+  if (isLoading) {
+    return <View><Text>Loading...</Text></View>;
+  }
+
+  if (error) {
+    console.error('Error fetching workout data:', error);
+    return <View><Text>Error loading data</Text></View>;
+  }
+
   return (
     <>
       <Stack.Screen

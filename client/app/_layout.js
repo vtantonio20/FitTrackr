@@ -1,3 +1,4 @@
+import { QueryClient, QueryClientProvider } from 'react-query';
 import { Stack, useRouter, Slot } from "expo-router";
 import colors from './colors';
 import { FontAwesome5, AntDesign } from '@expo/vector-icons'; 
@@ -25,6 +26,8 @@ const WorkoutIcon = () => {
     );
 }
 export default () => {
+    const queryClient = new QueryClient();
+
     const [inActiveWorkout, setInActiveWorkout] = useState();
     const [workoutName, setWorkout] = useState();
     const [workoutDate, setWorkoutDate] = useState();
@@ -36,13 +39,7 @@ export default () => {
         return  <Loading/>
     }
     return (
-        <WorkoutContext.Provider
-            value={{
-                workoutName, setWorkout,
-                inActiveWorkout, setInActiveWorkout,
-                workoutDate, setWorkoutDate,
-                targetMuscles, setTargetMuscles
-            }}>
+        <QueryClientProvider client={queryClient}>
             <Stack
                 screenOptions={{
                     headerBackVisible: false,
@@ -61,6 +58,6 @@ export default () => {
                     headerRight: () => <WorkoutIcon/>
                 }}
             />
-        </WorkoutContext.Provider>
+        </QueryClientProvider>
     );
 }

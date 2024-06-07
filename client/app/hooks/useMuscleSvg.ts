@@ -1,9 +1,6 @@
 import { useEffect, useState } from "react";
 import colors from "../colors";
 
-type props = {
-
-}
 export const useMuscleSvg = (targetMuscles:string[]) => {
   const [muscleMapSvg, setMuscleMapSvg] = useState({});
 

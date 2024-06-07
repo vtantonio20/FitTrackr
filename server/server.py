@@ -25,6 +25,12 @@ with app.app_context():
         return {
             "muscles": [m.to_dict() for m in muscles]
         }
+    
+    @app.route('/workout/<int:workout_id>')
+    def get_workout(workout_id):
+        workout = Workout.query.filter_by(id=workout_id).first_or_404()
+        return workout.to_dict()
+    
     @app.route("/workouts")
     def get_workouts():
         include_all = request.args.get('include-all', default='false')
@@ -66,10 +72,15 @@ with app.app_context():
                 return {"error": "attempted to add new muscle not in database"}
 
             target_muscles.append(muscle)
-        
         workout = Workout(name, date, target_muscles, is_active)
-        
+
         db.session.add(workout)
+        db.session.flush()
+
+        #wait to get the workout id
+        if name == "":
+            workout.name = f'Workout {workout.id}'
+
         db.session.commit()
 
         return {"success": True, "workout": workout.to_dict()}

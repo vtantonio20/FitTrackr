@@ -1,47 +1,63 @@
-import { Stack, useRouter } from 'expo-router';
-import React, { useContext, useEffect } from 'react'
+import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
 import { ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
 import colors from '../../colors';
-import { WorkoutContext } from '../../contexts/workoutContext';
 import styles from "../../style";
 import { dateToDDMMYY, dateToWD, dateToWDDDMMYY } from '../../utilities';
 import { MaterialIcons, Feather, Entypo , AntDesign, FontAwesome} from '@expo/vector-icons'; 
-import { useMuscleSvg } from '../../hooks/useMuscleSvg';
-import MuscleMap from '../../assets/svgs/muscleMap.svg'
-import { Bubble } from '../../components/bubbleButton';
-import { AddExercise, Exercise } from '../../components/exercise';
-import { useSelectionModal } from '../../hooks/useSelectionModal';
+import { useQuery } from 'react-query';
+import { fetchWorkoutData } from '../../api';
 
 const Log = () => {
-  const { inActiveWorkout, workoutName, workoutDate, targetMuscles } = useContext(WorkoutContext);
+  const { data, error, isLoading } = useQuery('workouts', fetchWorkoutData)
   const router = useRouter();
-  useEffect(() => {
-    if (typeof(inActiveWorkout) === undefined || !inActiveWorkout )
-      console.log('Inactive workout')  
-    //router.push('/screens/tabs/_navigator')
-  }, [])
 
-  const muscleMapSvg = useMuscleSvg(targetMuscles)
+  if (isLoading) {
+    return <View><Text>Loading...</Text></View>;
+  }
 
+  if (error) {
+    console.error('Error fetching workout data:', error);
+    return <View><Text>Error loading data</Text></View>;
+  }
+
+  const activeWorkout = data.active_workout ? {
+    workoutName: data.active_workout.name,
+    workoutDate: new Date(data.active_workout.date),
+    targetMuscles: data.active_workout.target_muscles.map((muscle: any) => muscle.name),
+    isActive: data.active_workout.is_active,
+    id: data.active_workout.id,
+  } : {};
+
+  const handleNewExercisePress = () => {
+    router.push('/screens/modals/Exercise')
+  }
+  
   return (
     <>
       <Stack.Screen
         options={{
           headerBackVisible: true,
-          title: workoutName
+          title: activeWorkout.workoutName
         }}
       />
       <ScrollView style={[styles.modalContainer]}>
         <View style={styles.containerWrapper}>
           <View style={styles.widgetHeader}>
-            <Text style={styles.h3}>{workoutDate && dateToWD(workoutDate)}'s Session</Text>
-            <Text style={[styles.h4, styles.lighterFont]}>{workoutDate && dateToDDMMYY(workoutDate)}</Text>
+            <Text style={styles.h3}>{activeWorkout.workoutDate && dateToWD(activeWorkout.workoutDate)}'s Session</Text>
+            <Text style={[styles.h4, styles.lighterFont]}>{activeWorkout.workoutDate && dateToDDMMYY(activeWorkout.workoutDate)}</Text>
           </View>
           {/*<Exercise name='squats' sets='4' reps=''/>*/} 
-          <AddExercise/>
+          {/* <AddExercise/> */}
+          <TouchableOpacity style={styles.widgetBody} onPress={handleNewExercisePress}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
+              <Text style={[styles.h4, { lineHeight: 28 }]}>Add Exercise</Text>
+              <AntDesign name="plus" size={28} color={colors.yellow} />
+            </View> 
+          </TouchableOpacity>
+
           <View style={styles.widgetHeader}>
             <TouchableOpacity style={form.imageContainer}>
-              <MuscleMap width={150} height={150}  {...muscleMapSvg} />
+              {/* <MuscleMap width={150} height={150}  {...muscleMapSvg} /> */}
             </TouchableOpacity>
           </View>
 
