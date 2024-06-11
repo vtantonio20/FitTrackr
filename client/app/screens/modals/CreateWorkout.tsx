@@ -15,6 +15,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useDate from '../../hooks/useDate';
 import { useMutation, useQuery } from 'react-query';
 import { createWorkout, fetchMuscleMapData } from '../../api';
+import { WorkoutIcon } from '../../_layout';
 
 export const Workout: FunctionComponent = () => {
   const router = useRouter();
@@ -71,7 +72,7 @@ export const Workout: FunctionComponent = () => {
 
   // A map of muscle group names to list of muscles per group name
   const muscleMap = buildMuscleMapFromJson(data);
-  // This selection modal will be a modal to for choosing which group name to show
+  // This selection modal will be a modal for choosing which group name to show
   const selectionModal = useSelectionModal(Object.keys(muscleMap));
   // This will represent the selected group
   const selectedGroup = selectionModal.selected;
@@ -104,10 +105,15 @@ export const Workout: FunctionComponent = () => {
     }
   }
 
+  const [errorMessage, setErrorMessage] = useState();
   // Submit Functionality
   const submitMutation = useMutation(createWorkout, {
-    onSuccess: () => {
+    onSuccess: (data) => {
       router.push('/screens/tabs/_navigator');
+    },
+
+    onError: (error:any) => {
+      setErrorMessage(error.response.data.error)
     }
   })
 
@@ -141,17 +147,24 @@ export const Workout: FunctionComponent = () => {
       <Stack.Screen
         options={{
           headerBackVisible: true,
-          title: 'New Workout'
+          title: 'New Workout',
+          headerRight: () => <WorkoutIcon enabled={false}/>
+
         }}
       />
       <ScrollView style={[styles.modalContainer]}>
         <View style={styles.containerWrapper}>
+          { errorMessage &&
+            <View>
+              <Text style={{paddingTop:14, color:colors.red}}>{errorMessage}</Text>
+            </View>
+          }
           <View style={styles.widgetHeader}>
             <Text style={styles.h2}>Set Details</Text>
           </View>
           <View style={form.element}>
             <Text style={form.elementHeader}>Name: </Text>
-            {errors.workoutName && <Text style={[styles.p, { color: colors.red }]}>This is required.</Text>}
+            {/* FIGURE OUT WHAT THIS IS DOING {errors.workoutName && <Text style={[styles.p, { color: colors.red }]}>This is required.</Text>} */}
             <View style={[form.formTextArea, (focusOn === 'name') && styles.focusedInput, styles.flexRowLeft]}>
             <MaterialCommunityIcons name="dumbbell" size={24} color={colors.yellow} style={{paddingRight:7}} />
               <Controller

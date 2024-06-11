@@ -8,13 +8,18 @@ import Loading from "./screens/loading/Loading";
 import React, { useState } from 'react'
 import { WorkoutContext } from "./contexts/workoutContext";
 import { fonts } from "./utilities";
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
-const WorkoutIcon = () => {
+export const WorkoutIcon = (props) => {
+    const router = useRouter();
+    const handleWidgetPress = () => props.enabled && router.push('/screens/modals/CreateWorkout');
+    const iconColor = props.enabled ? colors.yellow : colors.secondary;
+    
     return (
-        <TouchableOpacity onPress={() => handle()}>
+        <TouchableOpacity onPress={handleWidgetPress}>
             <View style={{ paddingHorizontal: 10 }}>
-                <FontAwesome5 name="dumbbell" size={22} color={colors.yellow} />
-                <AntDesign name="plus" size={11} color={colors.yellow}
+                <FontAwesome5 name="dumbbell" size={22} color={iconColor} />
+                <AntDesign name="plus" size={11} color={iconColor}
                     style={{
                         position: "absolute",
                         top: 0,
@@ -27,37 +32,33 @@ const WorkoutIcon = () => {
 }
 export default () => {
     const queryClient = new QueryClient();
-
-    const [inActiveWorkout, setInActiveWorkout] = useState();
-    const [workoutName, setWorkout] = useState();
-    const [workoutDate, setWorkoutDate] = useState();
-    const [targetMuscles, setTargetMuscles] = useState();
-
-    
     const [fontsLoaded] = useFonts(fonts);
     if (!fontsLoaded) {
         return  <Loading/>
     }
     return (
         <QueryClientProvider client={queryClient}>
-            <Stack
-                screenOptions={{
-                    headerBackVisible: false,
-                    headerShadowVisible: false,
-                    headerTintColor: colors.white,
-                    headerStyle: { backgroundColor: colors.darker },
-                    headerTitleStyle: { fontFamily: "Nunito-Regular" },
-                    contentStyle: { fontFamily: "Nunito-Regular"},
-                    headerLargeTitleStyle: { fontFamily: "Nunito-Regular"},
-                    headerBackTitleStyle: { fontFamily: "Nunito-Regular"},
-                    headerTitleStyle: {
-                        fontFamily: "Nunito-Regular",
-                        fontSize: 24,
-                    },
-                    headerBackTitle: ' ',
-                    headerRight: () => <WorkoutIcon/>
-                }}
-            />
+            <GestureHandlerRootView >
+                <Stack
+                    screenOptions={{
+                        headerBackVisible: false,
+                        headerShadowVisible: false,
+                        headerTintColor: colors.white,
+                        headerStyle: { backgroundColor: colors.darker },
+                        headerTitleStyle: { fontFamily: "Nunito-Regular" },
+                        contentStyle: { fontFamily: "Nunito-Regular"},
+                        headerLargeTitleStyle: { fontFamily: "Nunito-Regular"},
+                        headerBackTitleStyle: { fontFamily: "Nunito-Regular"},
+                        headerTitleStyle: {
+                            fontFamily: "Nunito-Regular",
+                            fontSize: 24,
+                        },
+                        headerBackTitle: ' ',
+                        headerRight: () => <WorkoutIcon enabled={true}/>
+                    }}
+                />
+            </GestureHandlerRootView>
+
         </QueryClientProvider>
     );
 }

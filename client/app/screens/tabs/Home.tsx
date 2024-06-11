@@ -8,7 +8,6 @@ import { dateToDDMMYY, dateToWD, fakeData } from '../../utilities';
 import  BottomModal, { ModalButton }  from '../../components/smallModal';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useSelectionModal } from '../../hooks/useSelectionModal';
-import useWorkout from '../../hooks/useWorkout';
 import { useQuery } from "react-query";
 import { fetchWorkoutData } from '../../api';
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
@@ -25,28 +24,11 @@ const Home: FunctionComponent = () => {
     return <View><Text>Error loading data</Text></View>;
   }
 
-  const activeWorkout = data.active_workout ? {
-    workoutName: data.active_workout.name,
-    workoutDate: new Date(data.active_workout.date),
-    targetMuscles: data.active_workout.target_muscles.map((muscle: any) => muscle.name),
-    isActive: data.active_workout.is_active,
-    id: data.active_workout.id,
-  } : {};
-
-  const inactiveWorkouts = data.inactive_workouts
-    ? data.inactive_workouts.map((inactiveWorkoutData: any) => ({
-        workoutName: inactiveWorkoutData.name,
-        workoutDate: new Date(inactiveWorkoutData.date),
-        targetMuscles: inactiveWorkoutData.target_muscles.map((muscle: any) => muscle.name),
-        isActive: inactiveWorkoutData.is_active,
-        id: inactiveWorkoutData.id,
-      }))
-    : [];
   return (
     <>
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
-          <ActiveWidget activeWorkout={activeWorkout}/>
+          <ActiveWidget activeWorkout={data.active_workout}/>
           <RecentsWidget inactiveWorkouts={data.inactive_workouts}/>
         </View>
       </ScrollView>
@@ -56,11 +38,17 @@ const Home: FunctionComponent = () => {
 
 const ActiveWidget: FunctionComponent<any> = (props:any) => {
   const router = useRouter();
+  
+  const { workoutName, workoutDate, isActive, targetMuscles } = useMemo(() => {
+    const activeWorkout = props.activeWorkout;
+    return {
+      workoutName: activeWorkout?.name ?? null,
+      workoutDate: activeWorkout?.date ? new Date(activeWorkout.date) : null,
+      isActive: activeWorkout?.is_active ?? false, 
+      targetMuscles: activeWorkout?.target_muscles?.map((muscle: any) => muscle) ?? []
+    };
+  }, [props.activeWorkout]);
 
-  const workoutName = props.activeWorkout.workoutName;
-  const workoutDate = props.activeWorkout.workoutDate;
-  const targetMuscles = props.activeWorkout.targetMuscles;
-  const isActive = props.activeWorkout.isActive;
   const muscleMapSvg = useMuscleSvg(targetMuscles);
   
   const handleWidgetPress = () => {
@@ -103,16 +91,18 @@ const RecentsWidget: FunctionComponent<any> = (props:any) => {
   const selectionModal = useSelectionModal(['Previous 3 days', 'Previous 7 days', 'Previous 14 days'], [3,7,14]);
   const router = useRouter();
 
-  const inactiveWorkouts = props.inactiveWorkouts
-  ? props.inactiveWorkouts.map((inactiveWorkoutData:any) => ({
-      workoutName: inactiveWorkoutData.name,
-      workoutDate: new Date(inactiveWorkoutData.date),
-      targetMuscles: inactiveWorkoutData.target_muscles.map((muscle: any) => muscle.name),
-      isActive: inactiveWorkoutData.is_active,
-      id: inactiveWorkoutData.id,
-    }))
-  : [];
-  
+  const inactiveWorkouts = useMemo(() => {
+    return props.inactiveWorkouts
+      ? props.inactiveWorkouts.map((inactiveWorkoutData: any) => ({
+          // targetMuscles: inactiveWorkoutData.target_muscles.map((muscle: any) => muscle)
+          workoutName: inactiveWorkoutData.name,
+          workoutDate: new Date(inactiveWorkoutData.date),
+          isActive: inactiveWorkoutData.is_active,
+          id: inactiveWorkoutData.id
+        }))
+      : [];
+  }, [props.inactiveWorkouts]);
+
   return (
     <>
       <View style={styles.widgetHeader}>
@@ -121,12 +111,12 @@ const RecentsWidget: FunctionComponent<any> = (props:any) => {
       </View>
   
       <View style={recents.widgetBody}>
-        {inactiveWorkouts.slice(0,selectionModal.numericValue ).map((workout:any, index:any) => {
+        {inactiveWorkouts.slice(0, selectionModal.numericValue).map((workout:any, index:any) => {
           return (
             <View key={workout.id}>
               <DayCard
                 onPress={() => router.push('/screens/modals/Details')}
-                day={"Sunday"}
+                day={dateToWD(workout.workoutDate)}
                 workoutName={workout.workoutName}
                 date={dateToDDMMYY(workout.workoutDate)}
               />

@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-from models import MuscleGroup, db, Muscle, Workout
+from sqlalchemy import MetaData, Table, create_engine, inspect
+from models import ExerciseSet, MuscleGroup, db, Muscle, Workout, Exercise
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -8,7 +9,21 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 CORS(app)
 
 with app.app_context():
+        
+    @app.route("/temp-e")
+    def temp_e():
+        active_workout = Workout.query.filter_by(is_active=True).first()
+        e = Exercise(name="Ass Boned")
+        sets = []
+        sets.append(ExerciseSet(1,100))
+        sets.append(ExerciseSet(2,145))
+        sets.append(ExerciseSet(3,145))
 
+        e.sets = sets
+        active_workout.add_exercise(e)
+        db.session.add(e)
+        db.session.commit()
+        return "success"
 
     @app.route("/temp-delete")
     def temp_delete():
@@ -22,9 +37,12 @@ with app.app_context():
     @app.route("/muscles")
     def get_muscles():
         muscles =Muscle.query.all()
-        return {
-            "muscles": [m.to_dict() for m in muscles]
-        }
+        return { "muscles": [m.to_dict() for m in muscles] }
+    
+    @app.route('/exercises')
+    def get_exercises():
+        exercises = Exercise.query.all()
+        return {"exercises": [e.to_dict() for e in exercises]}
     
     @app.route('/workout/<int:workout_id>')
     def get_workout(workout_id):
@@ -33,27 +51,26 @@ with app.app_context():
     
     @app.route("/workouts")
     def get_workouts():
-        include_all = request.args.get('include-all', default='false')
-        include_all = include_all.lower() == 'true'
+        # include_all = request.args.get('include-all', default='false')
+        # include_all = include_all.lower() == 'true'
         
-        if include_all:
-            workouts = Workout.query.all()
-            return {"workouts": [w.to_dict() for w in workouts]}
+        # if include_all:
+        #     workouts = Workout.query.all()
+        #     return {"workouts": [w.to_dict() for w in workouts]}
 
         active_workout = Workout.query.filter_by(is_active=True).first()
         inactive_workouts = Workout.query.filter(Workout.is_active == False).all()
 
         if active_workout:
-            active_workout_data = active_workout.to_dict()
+            active_workout_data = active_workout.to_dict_condensed()
         else:
             active_workout_data = None
 
 
-        response_data ={
+        return jsonify({
             "active_workout": active_workout_data,
-            "inactive_workouts": [w.to_dict() for w in inactive_workouts]
-        }
-        return response_data
+            "inactive_workouts": [w.to_dict_condensed() for w in inactive_workouts]
+        }), 200
     
     @app.route("/create-workout", methods=["POST"])
     def create_workout():
@@ -64,13 +81,16 @@ with app.app_context():
         target_muscles_names = data.get('target_muscles', [])
         is_active = data.get('is_active', False)
 
+        # check if there is already a active workout if wanting to make an active
+        if is_active and Workout.query.filter_by(is_active=True).count() != 0:
+            return jsonify({"error": "Cannot create workout, you can only have one active workout."}), 409
+        
         # find the muscle and query for it
         target_muscles  = []
         for muscle_name in target_muscles_names:
             muscle = Muscle.query.filter_by(name=muscle_name).first()
             if not muscle:
-                return {"error": "attempted to add new muscle not in database"}
-
+                return jsonify({"error": "Attempted to add a new muscle not in the database"}), 400
             target_muscles.append(muscle)
         workout = Workout(name, date, target_muscles, is_active)
 
@@ -83,7 +103,7 @@ with app.app_context():
 
         db.session.commit()
 
-        return {"success": True, "workout": workout.to_dict()}
+        return jsonify({"success": True, "workout": workout.to_dict()}), 201
     
     def init_db():
         muscle_groups = {
@@ -94,6 +114,7 @@ with app.app_context():
             "Chest": ["Pectorals"],
             "Head": ["Neck", "Face"]
         }
+
         if not MuscleGroup.query.all():
             for group_name, muscle_names in muscle_groups.items():
                 group = MuscleGroup(name=group_name)
