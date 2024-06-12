@@ -16,3 +16,14 @@ export const createWorkout = async (workoutData) => {
     const response = await axios.post(`${API_URL}/create-workout`, workoutData);
     return response.data;
 };
+
+export const fetchExerciseData = async (musclesNamesList) => {
+    const params = { name: musclesNamesList };
+    const response = await axios.get(`${API_URL}/exercises`, { params });
+    return response.data;
+}
+
+export const addExerciseToWorkout = async (workoutId, exerciseData) => {
+    const response = await axios.patch(`${API_URL}/add-exercise/${workoutId}`, exerciseData);
+    return response.data;
+}

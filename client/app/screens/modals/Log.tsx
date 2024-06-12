@@ -33,7 +33,7 @@ const Log = () => {
       date: new Date(activeWorkout.date),
       targetMuscles: activeWorkout.target_muscles.map((muscle: any) => muscle),
       id: activeWorkout.id,
-      exercises: activeWorkout.exercises.map((exercise: any) => ({
+      exercises: activeWorkout.workout_exercises.map((exercise: any) => ({
         id: exercise.id,
         name: exercise.name,
         sets: exercise.sets.map((s: any) => ({
@@ -52,6 +52,10 @@ const Log = () => {
     router.push('/screens/modals/Exercise')
   }
 
+  const handleExercisePress = (e:any) => {
+    console.log(e)
+  }
+  
   return (
     <>
       <Stack.Screen
@@ -80,7 +84,7 @@ const Log = () => {
                       <Text style={styles.h4}>Exercise {exerciseIndex + 1}:</Text>
                     </View>
 
-                    <Swipeable 
+                    {/* <Swipeable 
                       overshootLeft={false}
                       overshootRight={false}
                       renderRightActions={(progress, dragX) => {
@@ -90,8 +94,8 @@ const Log = () => {
                           </View>
                         );
                       }}
-                      key={`swipeable-${exerciseIndex}`}>
-                      <TouchableOpacity style={[form.exerciseBubble]}>
+                      key={`swipeable-${exerciseIndex}`}> */}
+                      <TouchableOpacity style={[form.exerciseBubble]} onPress={() => handleExercisePress(e)}>
                         <MaterialCommunityIcons name="weight-lifter" size={24} color={colors.yellow} />
                         <Text style={styles.h3a}>{e.name}</Text>
                         <View >
@@ -106,7 +110,7 @@ const Log = () => {
                           }
                         </View>
                       </TouchableOpacity>
-                    </Swipeable>
+                    {/* </Swipeable> */}
                   </View>
                 )
               })
@@ -187,7 +191,8 @@ const form = StyleSheet.create({
     padding: 14, marginBottom: 14, 
     borderRadius: 7, 
     justifyContent: 'space-between', 
-    alignItems: 'center' 
+    alignItems: 'center',
+    height: 75
   }
 })
 export default Log;

@@ -1,19 +1,19 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sqlalchemy import MetaData, Table, create_engine, inspect
-from models import ExerciseSet, MuscleGroup, db, Muscle, Workout, Exercise
-
+from models import Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
+import json
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 
 CORS(app)
 
 with app.app_context():
-        
+    
     @app.route("/temp-e")
     def temp_e():
         active_workout = Workout.query.filter_by(is_active=True).first()
-        e = Exercise(name="Ass Boned")
+        e = WorkoutExercise(name="Ass Boned")
         sets = []
         sets.append(ExerciseSet(1,100))
         sets.append(ExerciseSet(2,145))
@@ -29,10 +29,16 @@ with app.app_context():
     def temp_delete():
         active_workout = Workout.query.filter_by(is_active=True).first()
         if active_workout:
+            for workout_exercise in active_workout.workout_exercises:
+                for exercise_set in workout_exercise.sets:
+                    db.session.delete(exercise_set)
+                db.session.flush()
+                db.session.delete(workout_exercise)
             db.session.delete(active_workout)
             db.session.commit()
             return "success"
         return "not success"
+    
     
     @app.route("/muscles")
     def get_muscles():
@@ -41,8 +47,17 @@ with app.app_context():
     
     @app.route('/exercises')
     def get_exercises():
+        filtered_muscle_names = request.args.getlist('name[]')
         exercises = Exercise.query.all()
-        return {"exercises": [e.to_dict() for e in exercises]}
+        if not filtered_muscle_names:
+            return {"exercises": [e.to_dict() for e in exercises]}
+
+        filtered_exercises = []
+        for exercise in exercises:
+            for filtered_muscle_name in filtered_muscle_names:
+                if filtered_muscle_name in exercise.get_target_muscle_names():
+                    filtered_exercises.append(exercise)
+        return {"exercises": [e.to_dict() for e in filtered_exercises]}
     
     @app.route('/workout/<int:workout_id>')
     def get_workout(workout_id):
@@ -72,6 +87,29 @@ with app.app_context():
             "inactive_workouts": [w.to_dict_condensed() for w in inactive_workouts]
         }), 200
     
+    @app.route("/add-exercise/<int:workout_id>", methods=['PATCH'])
+    def add_exercise(workout_id):
+        data = request.get_json()
+        workout = Workout.query.filter_by(id=workout_id).first_or_404()
+
+        name = data.get('name', 'N/A')
+        sets_data = data.get('sets', [])
+        
+        db_exercise_sets = []
+        for set_data in sets_data:
+            rep_num = set_data.get('rep_num')
+            weight = set_data.get('weight')
+            db_set = ExerciseSet(rep_num, weight)
+            db_exercise_sets.append(db_set)
+
+        db_workout_exercise = WorkoutExercise(name, db_exercise_sets)
+        workout.add_exercise(db_workout_exercise)
+        db.session.commit()
+        
+        return jsonify(workout.to_dict()), 200
+            
+
+
     @app.route("/create-workout", methods=["POST"])
     def create_workout():
         data = request.get_json()
@@ -92,6 +130,8 @@ with app.app_context():
             if not muscle:
                 return jsonify({"error": "Attempted to add a new muscle not in the database"}), 400
             target_muscles.append(muscle)
+        
+        # create the workout
         workout = Workout(name, date, target_muscles, is_active)
 
         db.session.add(workout)
@@ -106,25 +146,37 @@ with app.app_context():
         return jsonify({"success": True, "workout": workout.to_dict()}), 201
     
     def init_db():
-        muscle_groups = {
-            "Legs": ["Quadriceps", "Hamstrings", "Calves", "Ass", "Abductors", "Knees", "Foot"],
-            "Core": ["Lower_Core", "Abs", "Lower_Back", "Obliques"],
-            "Back": ["Scapula", "Upper_Back", "Traps", "Lats"],
-            "Arms": ["Shoulders", "Triceps", "Biceps", "Forearms", "Hands"],
-            "Chest": ["Pectorals"],
-            "Head": ["Neck", "Face"]
-        }
+        file_path = './instance/static_data.json'
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+            if isinstance(data, dict):
+                if not MuscleGroup.query.all():
+                    muscle_groups_data = data.get('muscle_groups')
+                    for group in muscle_groups_data:
+                        name = group.get("name")
+                        db_group = MuscleGroup(name)
+                        db.session.add(db_group)
+                        db.session.flush()
+                        
+                        muscle_name_data = group.get('muscle_names')
+                        for muscle_name in muscle_name_data:
+                            muscle = Muscle(muscle_name, db_group)
+                            db.session.add(muscle)
+                    db.session.commit()
 
-        if not MuscleGroup.query.all():
-            for group_name, muscle_names in muscle_groups.items():
-                group = MuscleGroup(name=group_name)
-                db.session.add(group)
-                db.session.flush()
-
-                for muscle_name in muscle_names:
-                    muscle = Muscle(name=muscle_name, group=group)
-                    db.session.add(muscle)
-            db.session.commit()
+                if not Exercise.query.all():
+                    exercise_data = data.get('exercises')
+                    for exercise in exercise_data:
+                        name = exercise.get("name")
+                        target_muscles  = []
+                        for muscle_name in exercise.get('muscle_names'):
+                            muscle = Muscle.query.filter_by(name=muscle_name).first()
+                            if muscle:
+                                target_muscles.append(muscle)
+                        db_exercise = Exercise(name, target_muscles)
+                        db.session.add(db_exercise)
+                        db.session.commit()
+                
     
     db.init_app(app)
     db.create_all()

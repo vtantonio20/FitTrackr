@@ -10,6 +10,11 @@ workout_muscle = Table('workout_muscle', db.Model.metadata,
     Column('muscle_id', Integer, ForeignKey('muscle.id'), primary_key=True)
 )
 
+exercise_muscle = Table('exercise_muscle', db.Model.metadata,
+    Column('exercise_id', Integer, ForeignKey('exercise.id'), primary_key=True),
+    Column('muscle_id', Integer, ForeignKey('muscle.id'), primary_key=True)
+)
+
 class MuscleGroup(db.Model):
     __tablename__ = 'muscle_group'
     id = Column(Integer, primary_key=True)
@@ -35,19 +40,43 @@ class Muscle(db.Model):
         self.name=name
         self.group = group
 
+    def to_dict(self, isJustName=False):
+        if isJustName:
+            return {"id": self.id, "name": self.name }
+        else:
+            return {"id": self.id, "name": self.name, "group": self.group.to_dict() }
+
+class Exercise(db.Model):
+    __table__name = "exercise"
+    id = Column(Integer, primary_key=True)
+    name = Column(String(100), nullable=False)
+    target_muscles = relationship('Muscle', secondary=exercise_muscle, backref=db.backref('exercises', lazy='dynamic'))
+
+    def __init__(self, name, target_muscles):
+        self.name = name
+        self.target_muscles = target_muscles or []
+
+    def get_target_muscle_names(self):
+        target_muscle_names = []
+        for muscle in self.target_muscles:
+            target_muscle_names.append(muscle.name)
+        return target_muscle_names
+    
     def to_dict(self):
         return {
             "id": self.id,
             "name": self.name,
-            "group": self.group.to_dict()
+            "target_muscles": [muscle.to_dict(isJustName=True) for muscle in self.target_muscles],
         }
 
+
+# The user defomed exercise set mapped to each workout exercise
 class ExerciseSet(db.Model):
     __table__name = "exercise_set"
     id = Column(Integer, primary_key=True)
     rep_num = Column(Integer, nullable=False)
     weight = Column(Integer)
-    exercise_id = Column(Integer, ForeignKey('exercise.id'), nullable=False)
+    workout_exercise_id = Column(Integer, ForeignKey('workout_exercise.id'), nullable=False)
     
     def __init__(self, rep_num, weight):
         self.rep_num = rep_num
@@ -60,15 +89,16 @@ class ExerciseSet(db.Model):
             "weight": self.weight
         }
 
-class Exercise(db.Model):
-    __tablename__ = 'exercise'
+class WorkoutExercise(db.Model):
+    __tablename__ = 'workout_exercise'
     id = Column(Integer, primary_key=True)
     name = Column(String(100), nullable=False)
-    sets = relationship('ExerciseSet', backref=db.backref('parent_exercise', lazy=True))
+    sets = relationship('ExerciseSet', backref=db.backref('parent_workout_exercise', lazy=True))
     workout_id = Column(Integer, ForeignKey('workout.id'), nullable=False)
 
-    def __init__(self, name):
+    def __init__(self, name, sets=[]):
         self.name = name
+        self.sets = sets
 
     # def add_set(self, number, weight):
     #     self.sets.append(ExerciseSet(number=number, weight=weight))
@@ -88,16 +118,16 @@ class Workout(db.Model):
     date = Column(String(80), nullable=False)
     is_active = Column(Boolean, default=False)
     target_muscles = relationship('Muscle', secondary=workout_muscle, backref=db.backref('workouts', lazy='dynamic'))
-    exercises = relationship('Exercise', backref=db.backref('parent_workout', lazy=True))
+    workout_exercises = relationship('WorkoutExercise', backref=db.backref('parent_workout', lazy=True))
 
-    def __init__(self, name, date, target_muscles, is_active=False, exercises=[]):
+    def __init__(self, name, date, target_muscles, is_active=False):
         self.name = name
         self.date = date
         self.is_active = is_active
         self.target_muscles = target_muscles or []
 
-    def add_exercise(self, exercise):
-        self.exercises.append(exercise)
+    def add_exercise(self, workout_exercise):
+        self.workout_exercises.append(workout_exercise)
 
     def to_dict(self):
         return {
@@ -106,7 +136,7 @@ class Workout(db.Model):
             "date": self.date,
             "is_active": self.is_active,
             "target_muscles": [muscle.to_dict() for muscle in self.target_muscles],
-            "exercises": [e.to_dict() for e in self.exercises]
+            "workout_exercises": [e.to_dict() for e in self.workout_exercises]
         }
 
     def to_dict_condensed(self):
@@ -117,8 +147,7 @@ class Workout(db.Model):
                 "date": self.date,
                 "is_active": self.is_active,
                 "target_muscles": [muscle.name for muscle in self.target_muscles],
-                "exercises": [e.to_dict() for e in self.exercises]
-
+                "workout_exercises": [e.to_dict() for e in self.workout_exercises]
             }
         else:
             return {

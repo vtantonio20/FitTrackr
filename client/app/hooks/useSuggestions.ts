@@ -1,14 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-
-type Suggested = {
-  appendSuggestion: (suggestion: string) => boolean;
-  removeSuggestion: (suggestion: string) => boolean;
-  setNewSuggestions: (suggestion: string[]) => void;
-  unselectedSuggestions: string[];
-  selectedSuggestions: string[];
-}
-
-export const useSuggested = (group: string[]): Suggested => {
+export const useSuggested = (group: any[]): any => {
   const [groupSuggestions, setGroupSuggestions] = useState(group);
   const [inputSuggestions, setInputSuggestions] = useState<Set<string>>(new Set());
 

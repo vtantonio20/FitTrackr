@@ -4,7 +4,7 @@ export const MUSCLESMAPPED = {
         "Quadriceps", "Hamstrings", "Calves", "Ass", "Abductors", "Knees", "Foot",
     ],
     "Core": [
-        "Lower_Core", "Abs", "Lower_Back", "Obliques", 
+        "Lowe Core", "Abs", "Lower_Back", "Obliques", 
     ],
     "Back": [
         "Scapula", "Upper_Back", "Traps", "Lats"
