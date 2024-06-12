@@ -46,7 +46,7 @@ const Log = () => {
   }, [data.active_workout])
 
   
-  // const muscleMapSvg = useMuscleSvg(targetMuscles);
+  const muscleMapSvg = useMuscleSvg(targetMuscles);
 
   const handleNewExercisePress = () => {
     router.push('/screens/modals/Exercise')
@@ -103,7 +103,7 @@ const Log = () => {
                             e.sets.map((s: any, index: any) => {
                               return (
                                 <View key={s.id} style={{ alignSelf: 'flex-end' }}>
-                                  <Text style={styles.p}>{s.rep} X {s.weight}Ibs</Text>
+                                  <Text style={styles.p}>{s.rep} x {s.weight} Ibs</Text>
                                 </View>
                               )
                             })
@@ -124,11 +124,11 @@ const Log = () => {
               <AntDesign name="plus" size={28} color={colors.yellow} />
             </View> 
           </TouchableOpacity>
-          {/* <View style={styles.widgetHeader}>
+          <View style={[styles.widgetHeader]}>
             <TouchableOpacity style={form.imageContainer}>
               <MuscleMap width={150} height={150}  {...muscleMapSvg} />
             </TouchableOpacity>
-          </View> */}
+          </View>
         </View>
       </ScrollView>
     </>

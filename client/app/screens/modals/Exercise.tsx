@@ -8,7 +8,6 @@ import BottomModal, { ModalButton } from '../../components/smallModal';
 import { useSelectionModal } from '../../hooks/useSelectionModal';
 import { SimpleLineIcons  } from '@expo/vector-icons'; 
 import { useSuggested } from '../../hooks/useSuggestions';
-import { getWorkouts, WORKOUTGROUPS } from '../../static/workouts';
 import DraggableFlatList, { DragEndParams, ScaleDecorator } from 'react-native-draggable-flatlist'
 import { Stack, useRouter } from 'expo-router';
 import { dateToDDMMYY, dateToWD } from '../../utilities';
