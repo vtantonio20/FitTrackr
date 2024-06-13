@@ -1,4 +1,4 @@
-import { FunctionComponent, useMemo } from "react";
+import { FunctionComponent, useMemo, useState } from "react";
 import { TouchableHighlight, StyleSheet, Text, Modal, View, Platform, Dimensions, TouchableWithoutFeedback, TouchableOpacity } from "react-native";
 import colors from "../colors";
 import styles from "../style";
@@ -39,10 +39,10 @@ const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProp
   const handleSelect = (selectionsIndex: number) => {
     props.onSelectionPress(selectionsIndex)
   }
+
   return (
     <>
-
-      <View
+      <View 
         style={{
           position:'absolute',
           top: 0,
@@ -52,49 +52,50 @@ const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProp
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}
       />
-      <Modal  animationType="slide" transparent={true} >
-      <View style={modal.modalContainer}>
-        {/*Header*/}
-        {props.header &&
-          <View style={modal.modalHeader}>
-            {props.header}
-            <Feather name="x" size={36} color="white" onPress={() => props.onExitPress()} />
-          </View>
-        }
-        {props.title &&
-          <View style={modal.modalHeader}>
-            <Text style={styles.h3 }>{props.title}</Text>
-          <Feather name="x" size={36} color="white" onPress={() => props.onExitPress()} />
+
+      <Modal animationType="slide" transparent={true}>
+        <View style={modal.modalContainer}>
+          {/*Header*/}
+          {props.header &&
+            <View style={modal.modalHeader}>
+              {props.header}
+              <Feather name="x" size={36} color="white" onPress={() => props.onExitPress()} />
+            </View>
+          }
+          {props.title &&
+            <View style={modal.modalHeader}>
+              <Text style={styles.h3}>{props.title}</Text>
+              <Feather name="x" size={36} color="white" onPress={() => props.onExitPress()} />
+            </View>
+          }
+
+          {/*Body*/}
+          {props.body &&
+            <>
+              {props.body}
+            </>
+          }
+          {props.selections &&
+            <View style={modal.modalBodyContainer}>
+              {props.selections.map((text, index) => {
+                return (
+                  <TouchableHighlight
+                    key={text}
+                    style={[modal.selection]}
+                    underlayColor={colors.darker}
+                    onPress={() => {
+                      handleSelect(index);
+                      props.onExitPress();
+                    }}>
+                    <Text style={[styles.h4, styles.lighterFont]}>{text}</Text>
+                  </TouchableHighlight>
+                );
+              })}
+            </View>
+          }
         </View>
-        }
-        
-        {/*Body*/}
-        {props.body &&
-          <>
-          { props.body }
-          </>
-        }
-        {props.selections &&
-          <View style={modal.modalBodyContainer}>
-            {props.selections.map((text, index) => {
-              return (
-                <TouchableHighlight
-                  key={text}
-                  style={[modal.selection]}
-                  underlayColor={colors.darker}
-                  onPress={() => {
-                    handleSelect(index);
-                    props.onExitPress();
-                  }}>
-                  <Text style={[styles.h4, styles.lighterFont]}>{text}</Text>
-                </TouchableHighlight>
-              );
-            })}
-          </View>
-        }
-      </View>
-    </Modal>
-  </>
+      </Modal>
+    </>
     
   );
 }
@@ -102,12 +103,13 @@ const BottomModal: FunctionComponent<BottomModalProps> = (props: BottomModalProp
 interface ModalButtonProps {
   text: string,
   onPress: () => void;
+  showing: boolean;
 } 
 export const ModalButton = (props:ModalButtonProps) => {
   return (
-    <TouchableOpacity style={styles.flexRow} onPress={ props.onPress }>
+    <TouchableOpacity style={[styles.flexRow, {backgroundColor: colors.primary, margin: 0, padding:7, borderRadius:7}]} onPress={ props.onPress }>
       <Text style={[styles.p, styles.lighterFont, {paddingRight:3.5}]}> { props.text }</Text>
-      <Entypo name="chevron-thin-down" size={14} color={colors.lighter} />
+      <Entypo name={props.showing ? "chevron-thin-up" : "chevron-thin-down"} size={12} color={colors.lighter} />
     </TouchableOpacity>
   );
 }

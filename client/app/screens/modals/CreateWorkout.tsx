@@ -19,7 +19,7 @@ import { WorkoutIcon } from '../../_layout';
 
 export const Workout: FunctionComponent = () => {
   const router = useRouter();
-  
+
   // Handle Form Stuff
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
@@ -108,7 +108,7 @@ export const Workout: FunctionComponent = () => {
   const [errorMessage, setErrorMessage] = useState();
   // Submit Functionality
   const submitMutation = useMutation(createWorkout, {
-    onSuccess: (data) => {
+    onSuccess: () => {
       router.push('/screens/tabs/_navigator');
     },
 
@@ -172,7 +172,6 @@ export const Workout: FunctionComponent = () => {
                 control={control}
                 rules={{ required: false }}
                 render={({ field: { onChange, onBlur, value } }) => (
-
                   <TextInput
                     style={{ color: colors.lighter, flexGrow: 1 }}
                     onFocus={() => changeFocus('name')}
@@ -201,7 +200,7 @@ export const Workout: FunctionComponent = () => {
               <View style={[form.element, { paddingBottom: 0 }]}>
                 <View style={styles.flexRow}>
                   <Text style={form.elementHeader}>Target Muscles: <Text style={styles.p}>(optional)</Text></Text>
-                  <ModalButton onPress={() => selectionModal.toggleOpen()} text={selectionModal.selected} />
+                  <ModalButton onPress={() => selectionModal.toggleOpen()} text={selectionModal.selected} showing={selectionModal.modalOpen}/>
                 </View>
 
                 <View style={[form.formTextArea, (focusOn === 'targetMuscles') && styles.focusedInput]}>

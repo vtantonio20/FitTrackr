@@ -31,6 +31,8 @@ export const useSelectionModal = (selections:string[], numeric?: number[] , isOp
     changeIndex,
     getIndex,
     setSelected,
+    setModalOpen,
+    update,
     numericValue,
     selected,
     modalOpen,

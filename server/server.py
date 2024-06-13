@@ -3,27 +3,14 @@ from flask_cors import CORS
 from sqlalchemy import MetaData, Table, create_engine, inspect
 from models import Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
 import json
+from datetime import datetime, timedelta
+
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 
 CORS(app)
 
 with app.app_context():
-    
-    @app.route("/temp-e")
-    def temp_e():
-        active_workout = Workout.query.filter_by(is_active=True).first()
-        e = WorkoutExercise(name="Ass Boned")
-        sets = []
-        sets.append(ExerciseSet(1,100))
-        sets.append(ExerciseSet(2,145))
-        sets.append(ExerciseSet(3,145))
-
-        e.sets = sets
-        active_workout.add_exercise(e)
-        db.session.add(e)
-        db.session.commit()
-        return "success"
 
     @app.route("/temp-delete")
     def temp_delete():
@@ -64,23 +51,30 @@ with app.app_context():
         workout = Workout.query.filter_by(id=workout_id).first_or_404()
         return workout.to_dict()
     
+    def find_next_sunday():
+        today = datetime.today()
+        # Calculate how many days to add to get to the next Sunday
+        days_to_add = (6 - today.weekday() + 7) % 7
+        next_sunday = today + timedelta(days=days_to_add)
+        return next_sunday
+    
     @app.route("/workouts")
     def get_workouts():
-        # include_all = request.args.get('include-all', default='false')
-        # include_all = include_all.lower() == 'true'
-        
-        # if include_all:
-        #     workouts = Workout.query.all()
-        #     return {"workouts": [w.to_dict() for w in workouts]}
-
+        # default will be to get workouts in the past 7 days
+        # Convert seven_days_ago to string in the same format as the stored date
+        this_past_sunday_str = (find_next_sunday() - timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        this_sunday_str = (find_next_sunday()).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         active_workout = Workout.query.filter_by(is_active=True).first()
-        inactive_workouts = Workout.query.filter(Workout.is_active == False).all()
+        inactive_workouts = Workout.query.filter(
+            Workout.is_active == False,
+            Workout.date >= this_past_sunday_str,
+            Workout.date < this_sunday_str
+        ).all()
 
         if active_workout:
             active_workout_data = active_workout.to_dict_condensed()
         else:
             active_workout_data = None
-
 
         return jsonify({
             "active_workout": active_workout_data,
@@ -107,15 +101,38 @@ with app.app_context():
         db.session.commit()
         
         return jsonify(workout.to_dict()), 200
-            
 
+    # @app.route("/edit-workout/<int:workout_id>", methods=["PATCH"])
+    # def edit_workout(workout_id):
+    #     data = request.get_json()
+    #     workout = Workout.query.filter_by(id=workout_id).first_or_404()
+
+        # name = data.get('name', workout.name)
+        # date = data.get('date', workout.date)
+        # target_muscles_names = data.get('target_muscles', workout.target_muscles)
+        # is_active = data.get('is_active', workout.is_active)
+
+        # # check if there is already a active workout if wanting to make is active
+        # if is_active and not workout.is_active and Workout.query.filter_by(is_active=True).count() != 0:
+        #     return jsonify({"error": "Cannot update workout, you can only have one active workout."}), 409
+
+        
 
     @app.route("/create-workout", methods=["POST"])
     def create_workout():
         data = request.get_json()
 
-        name = data.get('name', "N/A")
-        date = data.get('date', "N/A")
+        # ensure the date is not null
+        date_str = data.get('date', "")
+        if not date_str:
+            return jsonify({"error": "Cannot create workout, you must have a date."}), 409
+        try:
+            date = datetime.fromisoformat(date_str.replace('Z', ''))
+        except ValueError:
+            return jsonify({"error": "Invalid date format"}), 400
+
+        # get the values from request
+        name = data.get('name', "")
         target_muscles_names = data.get('target_muscles', [])
         is_active = data.get('is_active', False)
 
@@ -123,7 +140,7 @@ with app.app_context():
         if is_active and Workout.query.filter_by(is_active=True).count() != 0:
             return jsonify({"error": "Cannot create workout, you can only have one active workout."}), 409
         
-        # find the muscle and query for it
+        # find the muscles and query for them
         target_muscles  = []
         for muscle_name in target_muscles_names:
             muscle = Muscle.query.filter_by(name=muscle_name).first()
@@ -133,11 +150,10 @@ with app.app_context():
         
         # create the workout
         workout = Workout(name, date, target_muscles, is_active)
-
         db.session.add(workout)
         db.session.flush()
 
-        #wait to get the workout id
+        # if there was not a name make auto name
         if name == "":
             workout.name = f'Workout {workout.id}'
 

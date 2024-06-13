@@ -113,13 +113,13 @@ const SetInput: FunctionComponent<any> = (props:any) => {
   )
 }
 
-const AddExercise: FunctionComponent = () => {
-  const sets:any[] = [];
+const AddExercise: FunctionComponent = (props:any) => {
+  const sets:any[] = props.sets ? props.sets : [];
 
   const router = useRouter();
 
   // Form handling
-  const { control, handleSubmit, setValue, getValues, formState: { errors } } = useForm({defaultValues: { exerciseName: ''}});
+  const { control, setValue, getValues } = useForm({defaultValues: { exerciseName: ''}});
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
 
@@ -161,7 +161,7 @@ const AddExercise: FunctionComponent = () => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const submitMutation = useMutation((data:any) => addExerciseToWorkout(workoutId, data), {
     onSuccess: () => {
-      router.push('/screens/modals/Log')
+      router.back()
     },
     onError: (error:any) => {
       // setErrorMessage(error.response.data.error)
@@ -231,7 +231,7 @@ const AddExercise: FunctionComponent = () => {
       
         <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
             <Text style={form.elementHeader}>Name: </Text>
-            <ModalButton onPress={() => {/*modal.toggleOpen()*/}} text={"muscle"/*modal.selectedGroup*/} />
+            <ModalButton onPress={() => {/*modal.toggleOpen()*/}} text={"muscle"/*modal.selectedGroup*/}showing={true} />
         </View>
           
         <Controller

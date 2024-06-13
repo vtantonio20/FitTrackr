@@ -1,5 +1,5 @@
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table, DateTime
 from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
@@ -115,7 +115,7 @@ class Workout(db.Model):
     __tablename__ = "workout"
     id = Column(Integer, primary_key=True)
     name = Column(String(80), nullable=False)
-    date = Column(String(80), nullable=False)
+    date = Column(DateTime, nullable=False)
     is_active = Column(Boolean, default=False)
     target_muscles = relationship('Muscle', secondary=workout_muscle, backref=db.backref('workouts', lazy='dynamic'))
     workout_exercises = relationship('WorkoutExercise', backref=db.backref('parent_workout', lazy=True))
@@ -133,7 +133,7 @@ class Workout(db.Model):
         return {
             "id": self.id,
             "name": self.name,
-            "date": self.date,
+            "date": self.date.isoformat() + 'Z',
             "is_active": self.is_active,
             "target_muscles": [muscle.to_dict() for muscle in self.target_muscles],
             "workout_exercises": [e.to_dict() for e in self.workout_exercises]
@@ -144,7 +144,7 @@ class Workout(db.Model):
             return {
                 "id": self.id,
                 "name": self.name,
-                "date": self.date,
+                "date": self.date.isoformat() + 'Z',
                 "is_active": self.is_active,
                 "target_muscles": [muscle.name for muscle in self.target_muscles],
                 "workout_exercises": [e.to_dict() for e in self.workout_exercises]
@@ -153,7 +153,7 @@ class Workout(db.Model):
             return {
                 "id": self.id,
                 "name": self.name,
-                "date": self.date,
+                "date": self.date.isoformat() + 'Z',
                 "is_active": self.is_active,
             }
     

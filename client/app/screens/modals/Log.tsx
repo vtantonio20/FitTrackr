@@ -8,15 +8,20 @@ import { useQuery } from 'react-query';
 import { fetchWorkoutData } from '../../api';
 import { Swipeable } from 'react-native-gesture-handler';
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { inActiveWorkout } from '../../contexts/workoutContext';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { WorkoutIcon } from '../../_layout';
 
 const Log = () => {
-  const { data, error, isLoading } = useQuery('workouts', fetchWorkoutData)
+  const { data, error, isLoading, refetch } = useQuery('workouts', fetchWorkoutData)
   const router = useRouter();
 
+  useEffect(() => {
+    console.log("ref")
+    refetch()
+  }, [])
+  
   if (isLoading) {
     return <View><Text>Loading...</Text></View>;
   }
