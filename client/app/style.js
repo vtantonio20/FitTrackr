@@ -85,7 +85,7 @@ export default StyleSheet.create({
     },
     divider: {
         borderColor: colors.darker,
-        borderWidth: StyleSheet.hairlineWidth
+        borderWidth: Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1
     },
     lighterFont: {
         fontFamily: Platform.OS === 'ios' ? "Lato-Light" : "Lato-Regular"

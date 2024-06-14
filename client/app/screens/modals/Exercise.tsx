@@ -9,10 +9,10 @@ import { useSelectionModal } from '../../hooks/useSelectionModal';
 import { SimpleLineIcons  } from '@expo/vector-icons'; 
 import { useSuggested } from '../../hooks/useSuggestions';
 import DraggableFlatList, { DragEndParams, ScaleDecorator } from 'react-native-draggable-flatlist'
-import { Stack, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { useMutation, useQuery } from 'react-query';
-import { addExerciseToWorkout, fetchExerciseData, fetchWorkoutData } from '../../api';
+import { addExerciseToWorkout, fetchExerciseData, fetchWorkoutData, fetchWorkoutsData } from '../../api';
 import { WorkoutIcon } from '../../_layout';
 
 const SetInput: FunctionComponent<any> = (props:any) => {
@@ -114,6 +114,7 @@ const SetInput: FunctionComponent<any> = (props:any) => {
 }
 
 const AddExercise: FunctionComponent = (props:any) => {
+  const {id} = useLocalSearchParams();
   const sets:any[] = props.sets ? props.sets : [];
 
   const router = useRouter();
@@ -124,16 +125,17 @@ const AddExercise: FunctionComponent = (props:any) => {
   const changeFocus = (to: string) => setFocusOn(to);
 
   // Fetch Workout Data Handling
-  const { data, error, isLoading } = useQuery('workouts', fetchWorkoutData)
+  const { data, error, isLoading, refetch } = useQuery('workout', () => fetchWorkoutData(id))  
   const { workoutName, workoutDate, workoutTargetMuscles, workoutId } = useMemo(() => {
+    if (!data) return {}
     return {
-      workoutName: data.active_workout.name,
-      workoutDate: new Date(data.active_workout.date),
-      workoutId: data.active_workout.id,
-      workoutTargetMuscles: data.active_workout.target_muscles.map((muscle: any) => muscle)
+      workoutName: data.name,
+      workoutDate: new Date(data.date),
+      workoutTargetMuscles: data.target_muscles.map((muscle: any) => muscle),
+      workoutId: data.id,
     }
-  }, [data.active_workout])
-
+  }, [data])
+  
   // Fetch Suggested Exercises Data Handling
   const [updateExercises, setUpdateExercises] = useState(false);
   const { data: exercisesData, error: exercisesError, isLoading: areExercisesLoading } = useQuery(['exercises', workoutTargetMuscles], () => fetchExerciseData(workoutTargetMuscles), {
@@ -161,7 +163,8 @@ const AddExercise: FunctionComponent = (props:any) => {
   const [errorMessage, setErrorMessage] = useState<string>();
   const submitMutation = useMutation((data:any) => addExerciseToWorkout(workoutId, data), {
     onSuccess: () => {
-      router.back()
+      // router.back()
+      router.navigate({pathname:'/screens/modals/Log', params:{refresh:"true", id:id}})
     },
     onError: (error:any) => {
       // setErrorMessage(error.response.data.error)

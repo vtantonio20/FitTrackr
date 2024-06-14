@@ -2,8 +2,13 @@ import axios from "axios";
 
 export const API_URL = 'http://192.168.1.88:5000/'
 
-export const fetchWorkoutData = async () => {
+export const fetchWorkoutsData = async () => {
     const response = await axios.get(`${API_URL}/workouts`);
+    return response.data;
+}
+
+export const fetchWorkoutData = async (workoutId) => {
+    const response = await axios.get(`${API_URL}/workout/${workoutId}`);
     return response.data;
 }
 

@@ -1,44 +1,38 @@
 import { Stack, useRouter, useLocalSearchParams } from 'expo-router';
-import { ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList} from 'react-native';
+import { ScrollView, View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import colors from '../../colors';
 import styles from "../../style";
-import { dateToDDMMYY, dateToWD, dateToWDDDMMYY } from '../../utilities';
+import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { MaterialIcons, EvilIcons , Entypo , AntDesign, MaterialCommunityIcons} from '@expo/vector-icons'; 
 import { useQuery } from 'react-query';
 import { fetchWorkoutData } from '../../api';
-import { Swipeable } from 'react-native-gesture-handler';
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
-import { useEffect, useMemo } from 'react';
-import { inActiveWorkout } from '../../contexts/workoutContext';
+import { useCallback, useEffect, useMemo } from 'react';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { WorkoutIcon } from '../../_layout';
 
 const Log = () => {
-  const { data, error, isLoading, refetch } = useQuery('workouts', fetchWorkoutData)
   const router = useRouter();
-
-  useEffect(() => {
-    console.log("ref")
-    refetch()
-  }, [])
+  const { id, refresh } =  useLocalSearchParams();
+  const { data, error, isLoading, refetch } = useQuery('workout', () => fetchWorkoutData(id))
   
-  if (isLoading) {
-    return <View><Text>Loading...</Text></View>;
-  }
-
-  if (error) {
-    console.error('Error fetching workout data:', error);
-    return <View><Text>Error loading data</Text></View>;
-  }
+  // Triggers a refresh if localsearchparam says to refresh
+  useEffect(() => {
+    if (id && refresh === "true"){
+      refetch()
+      router.setParams({id:id[0], refresh:"false"})
+    }
+  }, [refresh])
 
   const { name, date, targetMuscles, exercises } = useMemo(() => {
-    const activeWorkout = data.active_workout;
+    if (!data)
+      return {}
     return {
-      name: activeWorkout.name,
-      date: new Date(activeWorkout.date),
-      targetMuscles: activeWorkout.target_muscles.map((muscle: any) => muscle),
-      id: activeWorkout.id,
-      exercises: activeWorkout.workout_exercises.map((exercise: any) => ({
+      name: data.name,
+      date: new Date(data.date),
+      targetMuscles: data.target_muscles.map((muscle: any) => muscle),
+      id: data.id,
+      exercises: data.workout_exercises.map((exercise: any) => ({
         id: exercise.id,
         name: exercise.name,
         sets: exercise.sets.map((s: any) => ({
@@ -48,19 +42,27 @@ const Log = () => {
         }))
       }))
     }
-  }, [data.active_workout])
+  }, [data])
 
   
   const muscleMapSvg = useMuscleSvg(targetMuscles);
 
   const handleNewExercisePress = () => {
-    router.push('/screens/modals/Exercise')
+    router.push({pathname:'/screens/modals/Exercise', params:{id:id}})
   }
 
   const handleExercisePress = (e:any) => {
     console.log(e)
   }
-  
+
+  if (isLoading) {
+    return <View><Text>Loading...</Text></View>;
+  }
+
+  if (error) {
+    console.error('Error fetching workout data:', error);
+    return <View><Text>Error loading data</Text></View>;
+  }
   return (
     <>
       <Stack.Screen
@@ -68,7 +70,6 @@ const Log = () => {
           headerBackVisible: true,
           title: name,
           headerRight: () => <WorkoutIcon enabled={false}/>
-
         }}
       />
       <ScrollView style={[styles.modalContainer]}>
@@ -125,15 +126,21 @@ const Log = () => {
 
           <TouchableOpacity style={styles.widgetBody} onPress={handleNewExercisePress}>
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
-              <Text style={[styles.h4, { lineHeight: 28 }]}>Add Exercise</Text>
+              <Text style={[styles.h4, { lineHeight: 28 }]}>Add Exercise </Text>
               <AntDesign name="plus" size={28} color={colors.yellow} />
-            </View> 
+            </View>
           </TouchableOpacity>
-          <View style={[styles.widgetHeader]}>
+          <TouchableOpacity style={[styles.widgetBody, {marginTop:14}]} onPress={handleNewExercisePress}>
+            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
+              <Text style={[styles.h4, { lineHeight: 28 }]}>Edit Workout Details </Text>
+              <MaterialIcons name="edit-note" size={28} color={colors.yellow} />
+            </View>
+          </TouchableOpacity>
+          {/* <View style={[styles.widgetHeader]}>
             <TouchableOpacity style={form.imageContainer}>
-              <MuscleMap width={150} height={150}  {...muscleMapSvg} />
+              <MuscleMap width={100} height={100}  {...muscleMapSvg} />
             </TouchableOpacity>
-          </View>
+          </View> */}
         </View>
       </ScrollView>
     </>

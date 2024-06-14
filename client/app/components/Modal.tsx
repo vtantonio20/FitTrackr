@@ -35,7 +35,7 @@ export const ActionSelectionModal: React.FunctionComponent<ActionSelectionModalP
         <View style={modal.modalContainer}>
           <View style={modal.modalHeader}>
             <Text style={styles.h3}>{title}</Text>
-            <Feather name="x" size={36} color="white" onPress={onExitPress} />
+            <Feather name="x" size={36} color="white" onPress={onExitPress} style={{borderRadius:14}}/>
           </View>
           {selections &&
             <View style={modal.modalBodyContainer}>
@@ -69,7 +69,7 @@ interface InitActionModalButtonProps {
 
 export const InitActionModalButton: React.FunctionComponent<InitActionModalButtonProps> = ({ onPress, showing, text }) => {
   return (
-    <TouchableOpacity style={[styles.flexRow, { backgroundColor: colors.primary, margin: 0, padding: 7, borderRadius: 7 }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.flexRow, {  margin: 0, padding: 7 }]} onPress={onPress}>
       <Text style={[styles.p, styles.lighterFont, { paddingRight: 3.5 }]}> {text}</Text>
       <Entypo name={showing ? "chevron-thin-up" : "chevron-thin-down"} size={12} color={colors.lighter} />
     </TouchableOpacity>
