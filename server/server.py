@@ -32,6 +32,11 @@ with app.app_context():
         muscles =Muscle.query.all()
         return { "muscles": [m.to_dict() for m in muscles] }
     
+    @app.route('/exercise/<int:exercise_id>')
+    def get_exercise(exercise_id):
+        exercise = Exercise.query.filter_by(id=exercise_id).first_or_404()
+        return exercise.to_dict()
+
     @app.route('/exercises')
     def get_exercises():
         filtered_muscle_names = request.args.getlist('name[]')
@@ -46,6 +51,12 @@ with app.app_context():
                     filtered_exercises.append(exercise)
         return {"exercises": [e.to_dict() for e in filtered_exercises]}
     
+    @app.route('/workout/exercise/<int:exercise_id>')
+    def get_workout_exercise(exercise_id):
+        workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
+        return workout_exercise.to_dict()
+    
+
     @app.route('/workout/<int:workout_id>')
     def get_workout(workout_id):
         workout = Workout.query.filter_by(id=workout_id).first_or_404()

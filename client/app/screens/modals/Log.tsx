@@ -10,6 +10,8 @@ import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { useCallback, useEffect, useMemo } from 'react';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { WorkoutIcon } from '../../_layout';
+import { useWorkoutData } from '../../queries/WorkoutQueries';
+// import { useWorkoutData } from '../../queries/WorkoutQueries';
 
 const Log = () => {
   const router = useRouter();
@@ -52,7 +54,7 @@ const Log = () => {
   }
 
   const handleExercisePress = (e:any) => {
-    console.log(e)
+    router.push({pathname:'/screens/modals/Exercise', params:{id:id, exerciseId:e.id}})
   }
 
   if (isLoading) {
@@ -79,7 +81,7 @@ const Log = () => {
             <Text style={[styles.h4, styles.lighterFont]}>{date && dateToDDMMYY(date)}</Text>
           </View>
           {/*<Exercise name='squats' sets='4' reps=''/>*/} 
-          
+
           {exercises != undefined && 
             <>
             {
@@ -136,11 +138,7 @@ const Log = () => {
               <MaterialIcons name="edit-note" size={28} color={colors.yellow} />
             </View>
           </TouchableOpacity>
-          {/* <View style={[styles.widgetHeader]}>
-            <TouchableOpacity style={form.imageContainer}>
-              <MuscleMap width={100} height={100}  {...muscleMapSvg} />
-            </TouchableOpacity>
-          </View> */}
+
         </View>
       </ScrollView>
     </>

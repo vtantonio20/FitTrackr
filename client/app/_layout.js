@@ -30,8 +30,9 @@ export const WorkoutIcon = (props) => {
         </TouchableOpacity>
     );
 }
+const queryClient = new QueryClient();
+
 export default () => {
-    const queryClient = new QueryClient();
     const [fontsLoaded] = useFonts(fonts);
     if (!fontsLoaded) {
         return  <Loading/>

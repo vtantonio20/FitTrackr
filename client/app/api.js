@@ -32,3 +32,8 @@ export const addExerciseToWorkout = async (workoutId, exerciseData) => {
     const response = await axios.patch(`${API_URL}/add-exercise/${workoutId}`, exerciseData);
     return response.data;
 }
+
+export const fetchWorkoutExerciseData = async (exerciseId) => {
+    const response = await axios.get(`${API_URL}/workout/exercise/<int:exercise_id>/${exerciseId}`);
+    return response.data;
+}

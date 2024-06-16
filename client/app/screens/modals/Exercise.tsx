@@ -4,9 +4,7 @@ import colors from '../../colors'
 import styles from "../../style";
 import { MaterialIcons, Feather, Entypo , AntDesign, Ionicons} from '@expo/vector-icons'; 
 import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import BottomModal, { ModalButton } from '../../components/smallModal';
-import { useSelectionModal } from '../../hooks/useSelectionModal';
-import { SimpleLineIcons  } from '@expo/vector-icons'; 
+import { ModalButton } from '../../components/smallModal';
 import { useSuggested } from '../../hooks/useSuggestions';
 import DraggableFlatList, { DragEndParams, ScaleDecorator } from 'react-native-draggable-flatlist'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -114,9 +112,9 @@ const SetInput: FunctionComponent<any> = (props:any) => {
 }
 
 const AddExercise: FunctionComponent = (props:any) => {
-  const {id} = useLocalSearchParams();
+  const {id, exerciseId} = useLocalSearchParams();
   const sets:any[] = props.sets ? props.sets : [];
-
+  console.log(exerciseId)
   const router = useRouter();
 
   // Form handling
@@ -125,7 +123,7 @@ const AddExercise: FunctionComponent = (props:any) => {
   const changeFocus = (to: string) => setFocusOn(to);
 
   // Fetch Workout Data Handling
-  const { data, error, isLoading, refetch } = useQuery('workout', () => fetchWorkoutData(id))  
+  const { data, error, isLoading } = useQuery('workout', () => fetchWorkoutData(id))  
   const { workoutName, workoutDate, workoutTargetMuscles, workoutId } = useMemo(() => {
     if (!data) return {}
     return {
@@ -135,7 +133,10 @@ const AddExercise: FunctionComponent = (props:any) => {
       workoutId: data.id,
     }
   }, [data])
-  
+
+  // Fetch Exercise Data if EDIT
+  // const { data, error, isLoading } = useQuery('workout', () => fetchWorkoutData(id))  
+
   // Fetch Suggested Exercises Data Handling
   const [updateExercises, setUpdateExercises] = useState(false);
   const { data: exercisesData, error: exercisesError, isLoading: areExercisesLoading } = useQuery(['exercises', workoutTargetMuscles], () => fetchExerciseData(workoutTargetMuscles), {

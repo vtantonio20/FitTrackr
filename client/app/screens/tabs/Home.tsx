@@ -77,9 +77,8 @@ const ActiveWidget: FunctionComponent<any> = (props:any) => {
   
   // Handles routing when widget is pressed
   const handleWidgetPress = () => {
-    const id = 1;
     if (isActive)
-      router.push({ pathname: '/screens/modals/Log', params: {id:workoutId, isActive:isActive}})
+      router.push({ pathname: '/screens/modals/Log', params: {id:workoutId}})
     else
       router.push('/screens/modals/CreateWorkout')
   }
