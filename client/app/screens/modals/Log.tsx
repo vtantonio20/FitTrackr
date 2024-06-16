@@ -4,88 +4,62 @@ import colors from '../../colors';
 import styles from "../../style";
 import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { MaterialIcons, EvilIcons , Entypo , AntDesign, MaterialCommunityIcons} from '@expo/vector-icons'; 
-import { useQuery } from 'react-query';
-import { fetchWorkoutData } from '../../api';
-import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { useCallback, useEffect, useMemo } from 'react';
-import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { WorkoutIcon } from '../../_layout';
-import { useWorkoutData } from '../../queries/WorkoutQueries';
-// import { useWorkoutData } from '../../queries/WorkoutQueries';
+import { WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 
 const Log = () => {
   const router = useRouter();
   const { id, refresh } =  useLocalSearchParams();
-  const { data, error, isLoading, refetch } = useQuery('workout', () => fetchWorkoutData(id))
-  
+  const workoutData = useWorkoutData(id);
+  const workout = workoutData.workout;
+    
   // Triggers a refresh if localsearchparam says to refresh
   useEffect(() => {
     if (id && refresh === "true"){
-      refetch()
+      workoutData.refetch()
       router.setParams({id:id[0], refresh:"false"})
     }
   }, [refresh])
-
-  const { name, date, targetMuscles, exercises } = useMemo(() => {
-    if (!data)
-      return {}
-    return {
-      name: data.name,
-      date: new Date(data.date),
-      targetMuscles: data.target_muscles.map((muscle: any) => muscle),
-      id: data.id,
-      exercises: data.workout_exercises.map((exercise: any) => ({
-        id: exercise.id,
-        name: exercise.name,
-        sets: exercise.sets.map((s: any) => ({
-          id: s.id,
-          rep: s.rep_num,
-          weight: s.weight
-        }))
-      }))
-    }
-  }, [data])
-
   
-  const muscleMapSvg = useMuscleSvg(targetMuscles);
-
   const handleNewExercisePress = () => {
     router.push({pathname:'/screens/modals/Exercise', params:{id:id}})
   }
 
-  const handleExercisePress = (e:any) => {
+  const handleExercisePress = (e:WorkoutExercise) => {
     router.push({pathname:'/screens/modals/Exercise', params:{id:id, exerciseId:e.id}})
   }
 
-  if (isLoading) {
+  if (workoutData.isLoading) {
     return <View><Text>Loading...</Text></View>;
   }
 
-  if (error) {
-    console.error('Error fetching workout data:', error);
+  if (workoutData.error) {
+    console.error('Error fetching workout data:', workoutData.error);
     return <View><Text>Error loading data</Text></View>;
   }
+  
   return (
     <>
       <Stack.Screen
         options={{
           headerBackVisible: true,
-          title: name,
+          title: workout?.name || '',
           headerRight: () => <WorkoutIcon enabled={false}/>
         }}
       />
       <ScrollView style={[styles.modalContainer]}>
         <View style={styles.containerWrapper}>
           <View style={styles.widgetHeader}>
-            <Text style={styles.h3}>{date && dateToWD(date)}'s Session</Text>
-            <Text style={[styles.h4, styles.lighterFont]}>{date && dateToDDMMYY(date)}</Text>
+            <Text style={styles.h3}>{workout?.date && dateToWD(workout.date)}'s Session</Text>
+            <Text style={[styles.h4, styles.lighterFont]}>{workout?.date && dateToDDMMYY(workout.date)}</Text>
           </View>
           {/*<Exercise name='squats' sets='4' reps=''/>*/} 
 
-          {exercises != undefined && 
+          {workout?.exercises && 
             <>
             {
-              exercises.map((e: any, exerciseIndex: number) => {
+              workout.exercises.map((e: WorkoutExercise, exerciseIndex: number) => {
                 return (
                   <View key={e.id}>
                     <View style={[styles.widgetHeader, { marginTop: 0, marginBottom: 3.5 }]}>
@@ -108,7 +82,7 @@ const Log = () => {
                         <Text style={styles.h3a}>{e.name}</Text>
                         <View >
                           {
-                            e.sets.map((s: any, index: any) => {
+                            e.sets.map((s: WorkoutSet, index: any) => {
                               return (
                                 <View key={s.id} style={{ alignSelf: 'flex-end' }}>
                                   <Text style={styles.p}>{s.rep} x {s.weight} Ibs</Text>

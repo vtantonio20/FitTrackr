@@ -1,21 +1,21 @@
 import { useQuery } from "react-query"
 import { useMemo } from "react";
 import { fetchWorkoutData, fetchWorkoutsData } from "../api";
-import { useMuscleSvg } from "../hooks/useMuscleSvg";
+// import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
-interface WorkoutSet {
+export interface WorkoutSet {
   id:number;
   rep:number;
   weight:number;
 }
 
-interface WorkoutExercise {
+export interface WorkoutExercise {
   name:string;
   id:number;
   sets:WorkoutSet[];
 }
 
-interface Workout {
+export interface Workout {
   name: string;
   date: Date;
   isActive: boolean;
@@ -37,27 +37,23 @@ export const useWorkoutsData = () => {
       id: activeWorkoutData.id,
       targetMusclesNames: activeWorkoutData.target_muscles.map((muscle: string) => muscle),
     };
-  }, [data.active_workout]);
-
-  const activeMuscleMapSvg = useMuscleSvg(activeWorkout?.targetMusclesNames || []);
+  }, [data]);
 
   const inactiveWorkouts:Workout[] = useMemo(() => {
     if (!data) return undefined;
     const inactiveWorkoutData = data.inactive_workouts;
-    return inactiveWorkoutData.inactiveWorkouts
-      ? inactiveWorkoutData.inactiveWorkouts.map((inactiveWorkoutData:any):Workout => ({
+    return inactiveWorkoutData
+      ? inactiveWorkoutData.map((inactiveWorkoutData:any):Workout => ({
           name: inactiveWorkoutData.name,
           date: new Date(inactiveWorkoutData.date),
           isActive: inactiveWorkoutData.is_active,
           id: inactiveWorkoutData.id
         }))
       : [];
-  }, [data.inactive_workouts]);
-
+  }, [data]);
 
   return {
     activeWorkout,
-    activeMuscleMapSvg,
     inactiveWorkouts,
     error,
     isLoading,
@@ -67,7 +63,7 @@ export const useWorkoutsData = () => {
 
 export const useWorkoutData = (workoutId:any) => {
   const { data, error, isLoading, refetch } = useQuery('workout', () => fetchWorkoutData(workoutId))  
-  const workoutData:Workout | undefined = useMemo(() => {
+  const workout:Workout | undefined = useMemo(() => {
     if (!data) return undefined;
     return {
       name: data.name,
@@ -86,11 +82,17 @@ export const useWorkoutData = (workoutId:any) => {
       }))      
     };
   }, [data]);
+
+  // const muscleMapSvg = useMuscleSvg(workout ? (workout.targetMusclesNames ? workout.targetMusclesNames : []) : []);
+
   return {
-    workoutData,
+    workout,
     error,
     isLoading,
     refetch
   }
 }
 
+
+export const useWorkoutExerciseData = (workoutId:any, exerciseId:any) => {
+}

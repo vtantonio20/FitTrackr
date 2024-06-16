@@ -12,9 +12,16 @@ import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { useMutation, useQuery } from 'react-query';
 import { addExerciseToWorkout, fetchExerciseData, fetchWorkoutData, fetchWorkoutsData } from '../../api';
 import { WorkoutIcon } from '../../_layout';
+import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 
-const SetInput: FunctionComponent<any> = (props:any) => {
-  const [sets, setSets] = useState(props.sets);
+interface SetInputProps {
+  setsIn:WorkoutSet[];
+  onSubmit: () => void;
+}
+
+const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
+  const [sets, setSets] = useState(props.setsIn);
+  console.log(sets)
   const handleSetDrag = (data: any) => setSets(data.data);
 
   const getSetNum = (index: number|undefined) => {
@@ -22,8 +29,8 @@ const SetInput: FunctionComponent<any> = (props:any) => {
   }
   const addNewSet = () => {
     const lastSet = sets[sets.length - 1];
-    const newSet = [{
-      setNum: sets.length,
+    const newSet: WorkoutSet[] = [{
+      id: sets.length,
       rep: lastSet?.rep ?? '',
       weight: lastSet?.weight ?? ''
     }];
@@ -36,15 +43,13 @@ const SetInput: FunctionComponent<any> = (props:any) => {
   }
 
   const onRepChange = (val: string, index: number | undefined) => {
-    sets[index || 0].rep = val;
+    sets[index || 0].rep = parseInt(val);
   }
   
   const onWeightChange = (val: string, index: number | undefined) => {
-    sets[index || 0].weight = val;
+    sets[index || 0].weight = parseInt(val);
   }
-  const handleSubmit = () => {
-    props.onSubmit(sets)
-  }
+  const handleSubmit = () => { props.onSubmit }
   return (
     <>
       <View style={{ marginVertical: 14 }}>
@@ -58,9 +63,10 @@ const SetInput: FunctionComponent<any> = (props:any) => {
         <DraggableFlatList
           scrollEnabled={false}
           data={sets}
-          keyExtractor={(item:any) => (item.setNum.toString())}
+          keyExtractor={(item:any) => (item.id.toString())}
           onDragEnd={(data) => { handleSetDrag(data as any) }}
           renderItem={(item) => {
+            console.log(item)
             return (
               <ScaleDecorator>
                 <TouchableOpacity
@@ -73,7 +79,7 @@ const SetInput: FunctionComponent<any> = (props:any) => {
                   <Text style={[styles.h4, styles.lighterFont, { width: '25%', alignSelf: 'center', padding: 7 }]}>{getSetNum(item.getIndex())}</Text>
                   <View style={{ width: '33%', flexDirection: 'row', alignItems: 'center', }}>
                     <TextInput style={[styles.h4, styles.lighterFont, { padding: 7, backgroundColor: colors.darker, minWidth: 40, borderRadius: 7 }]}
-                      defaultValue={item.item.rep}
+                      defaultValue={JSON.stringify(item.item.rep)}
                       keyboardType='numeric'
                       returnKeyLabel='Done'
                       returnKeyType='done'
@@ -82,7 +88,7 @@ const SetInput: FunctionComponent<any> = (props:any) => {
                   </View>
                   <View style={{ width: '33%', flexDirection: 'row', alignItems: 'center' }}>
                     <TextInput style={[styles.h4, styles.lighterFont, { padding: 7, backgroundColor: colors.darker, minWidth: 40, borderRadius: 7 }]}
-                      defaultValue={item.item.weight}
+                      defaultValue={JSON.stringify(item.item.weight)}
                       keyboardType='number-pad'
                       returnKeyLabel='Done'
                       returnKeyType='done'
@@ -113,56 +119,52 @@ const SetInput: FunctionComponent<any> = (props:any) => {
 
 const AddExercise: FunctionComponent = (props:any) => {
   const {id, exerciseId} = useLocalSearchParams();
-  const sets:any[] = props.sets ? props.sets : [];
-  console.log(exerciseId)
   const router = useRouter();
 
-  // Form handling
-  const { control, setValue, getValues } = useForm({defaultValues: { exerciseName: ''}});
-  const [focusOn, setFocusOn] = useState('');
-  const changeFocus = (to: string) => setFocusOn(to);
+
 
   // Fetch Workout Data Handling
-  const { data, error, isLoading } = useQuery('workout', () => fetchWorkoutData(id))  
-  const { workoutName, workoutDate, workoutTargetMuscles, workoutId } = useMemo(() => {
-    if (!data) return {}
-    return {
-      workoutName: data.name,
-      workoutDate: new Date(data.date),
-      workoutTargetMuscles: data.target_muscles.map((muscle: any) => muscle),
-      workoutId: data.id,
+  const workoutData = useWorkoutData(id);
+  const workout = workoutData.workout;
+  const exercise = workout?.exercises?.find((e) => {
+    if (exerciseId && exerciseId === String(e.id)) {
+      return e;
     }
-  }, [data])
+  })
 
-  // Fetch Exercise Data if EDIT
-  // const { data, error, isLoading } = useQuery('workout', () => fetchWorkoutData(id))  
+  const sets:WorkoutSet[] = exercise ? (exercise.sets ? exercise.sets : []) : [];
+
+  // Form handling
+  const [focusOn, setFocusOn] = useState('');
+  const changeFocus = (to: string) => setFocusOn(to);
+  const { control, setValue, getValues } = useForm({defaultValues: { exerciseName: exercise ? exercise.name : ''}});
 
   // Fetch Suggested Exercises Data Handling
-  const [updateExercises, setUpdateExercises] = useState(false);
-  const { data: exercisesData, error: exercisesError, isLoading: areExercisesLoading } = useQuery(['exercises', workoutTargetMuscles], () => fetchExerciseData(workoutTargetMuscles), {
-    onSuccess: () => {
-      setUpdateExercises(true);
-    }
-  });
-  const { exerciseNames } = useMemo(() => {
-    return { exerciseNames: exercisesData ? [... new Set(exercisesData.exercises.map((e: any) => e.name))] : [] }
-  }, [exercisesData])
+  // const [updateExercises, setUpdateExercises] = useState(false);
+  // const { data: exercisesData, error: exercisesError, isLoading: areExercisesLoading } = useQuery(['exercises', workoutTargetMuscles], () => fetchExerciseData(workoutTargetMuscles), {
+  //   onSuccess: () => {
+  //     setUpdateExercises(true);
+  //   }
+  // });
+  // const { exerciseNames } = useMemo(() => {
+  //   return { exerciseNames: exercisesData ? [... new Set(exercisesData.exercises.map((e: any) => e.name))] : [] }
+  // }, [exercisesData])
 
-  // Handle Suggestion Logic
-  const addSuggestion = (suggestion: string) => {
-    setValue("exerciseName", suggestion)
-  }
-  // const selectionModal = useModal(WORKOUTGROUPS);
-  const suggestions = useSuggested(exerciseNames);
-  // Updates the selection modal when muscleMap is changed (fetched)
-  useEffect(() => {
-    suggestions.setNewSuggestions(exerciseNames);
-  }, [updateExercises])
+  // // Handle Suggestion Logic
+  // const addSuggestion = (suggestion: string) => {
+  //   setValue("exerciseName", suggestion)
+  // }
+  // // const selectionModal = useModal(WORKOUTGROUPS);
+  // const suggestions = useSuggested(exerciseNames);
+  // // Updates the selection modal when muscleMap is changed (fetched)
+  // useEffect(() => {
+  //   suggestions.setNewSuggestions(exerciseNames);
+  // }, [updateExercises])
   
   
   // Submit Functionality
   const [errorMessage, setErrorMessage] = useState<string>();
-  const submitMutation = useMutation((data:any) => addExerciseToWorkout(workoutId, data), {
+  const submitMutation = useMutation((data:any) => addExerciseToWorkout(workout?.id, data), {
     onSuccess: () => {
       // router.back()
       router.navigate({pathname:'/screens/modals/Log', params:{refresh:"true", id:id}})
@@ -200,15 +202,19 @@ const AddExercise: FunctionComponent = (props:any) => {
       }
     }
   
-    submitMutation.mutate(newExerciseData);
+    if (!exerciseId) {
+      submitMutation.mutate(newExerciseData);
+    }else {
+      //handle update exercise
+    }
   }
 
-  if (isLoading || areExercisesLoading) {
+  if (workoutData.isLoading /*|| areExercisesLoading*/) {
     return <View><Text>Loading...</Text></View>;
   }
 
-  if (error || exercisesError) {
-    console.error('Error fetching workout data:', error);
+  if (workoutData.error/* || exercisesError*/) {
+    console.error('Error fetching workout data:', workoutData.error);
     return <View><Text>Error loading data</Text></View>;
   }
 
@@ -217,7 +223,7 @@ const AddExercise: FunctionComponent = (props:any) => {
       <Stack.Screen
           options={{
           headerBackVisible: true,
-          title: workoutName,
+          title: workout?.name || '',
           headerRight: () => <WorkoutIcon enabled={false}/>
         }}
       />
@@ -229,8 +235,8 @@ const AddExercise: FunctionComponent = (props:any) => {
           </View>
         }
         <View style={styles.widgetHeader}>
-          <Text style={styles.h3}>{workoutDate && dateToWD(workoutDate)}'s Session</Text>
-          <Text style={[styles.h4, styles.lighterFont]}>{workoutDate && dateToDDMMYY(workoutDate)}</Text>
+          <Text style={styles.h3}>{workout?.date && dateToWD(workout.date)}'s Session</Text>
+          <Text style={[styles.h4, styles.lighterFont]}>{workout?.date && dateToDDMMYY(workout.date)}</Text>
         </View>
       
         <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
@@ -254,7 +260,7 @@ const AddExercise: FunctionComponent = (props:any) => {
               />
           )}
         />
-        <FlatList
+        {/* <FlatList
           horizontal={true}
           data={suggestions.unselectedSuggestions}
           renderItem={({ item }) => (
@@ -262,8 +268,8 @@ const AddExercise: FunctionComponent = (props:any) => {
                 <Text style={[styles.p, { paddingRight: 1.5 }]}>{item}</Text>
             </TouchableOpacity>
           )}
-        />
-        <SetInput sets={sets} onSubmit={onSubmitForm}/>
+        /> */}
+        <SetInput setsIn={sets} onSubmit={onSubmitForm}/>
 
         {/*{modal.modalOpen &&
           <BottomModal
