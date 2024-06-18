@@ -1,7 +1,19 @@
-import { useQuery } from "react-query"
+import { useMutation, useQuery } from "react-query"
 import { useMemo } from "react";
-import { fetchWorkoutData, fetchWorkoutsData } from "../api";
+import { addExerciseToWorkout, fetchWorkoutData, fetchWorkoutsData } from "../api";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
+
+
+export interface PostWorkoutSet {
+  rep_num:number;
+  weight:number;
+  number:number;
+}
+
+export interface PostWorkoutExercise {
+  name:string;
+  sets:PostWorkoutSet[];
+}
 
 export interface WorkoutSet {
   id:number;
@@ -83,13 +95,52 @@ export const useWorkoutData = (workoutId:any) => {
     };
   }, [data]);
 
+  // Submit Mutation Logic
+  const createExerciseMutation = useMutation((data: PostWorkoutExercise) => {
+    if (workoutId == null) {
+      return Promise.reject("No workout ID provided");
+    }
+    return addExerciseToWorkout(workoutId, data)
+  });
+
+  const addNewExercise = (name:string, setsData:WorkoutSet[], onSuccess:() => void)  => {
+    const newExerciseData:PostWorkoutExercise = {
+      name: name,
+      sets: setsData.map((setData:any):PostWorkoutSet => ({
+        number: setData.setNum,
+        rep_num: setData.rep,
+        weight: setData.weight
+      }))
+    }
+
+    createExerciseMutation.mutate(newExerciseData, {
+      onSuccess() {
+        onSuccess();
+        refetch();
+      },
+    });
+  }
+  
+  // Submit Mutation Logic
+  // const updateExerciseMutation = useMutation((data: PostWorkoutExercise) => {
+  //   if (workoutId == null) {
+  //     return Promise.reject("No workout ID provided");
+  //   }
+  //   return addExerciseToWorkout(workoutId, data)
+  // });
+  // const updateExistingExercise = (exerciseId:any, name: string, setsData:WorkoutSet[], onSuccess:() => void) => {
+
+  // }
+
+
   // const muscleMapSvg = useMuscleSvg(workout ? (workout.targetMusclesNames ? workout.targetMusclesNames : []) : []);
 
   return {
     workout,
     error,
     isLoading,
-    refetch
+    refetch,
+    addNewExercise
   }
 }
 

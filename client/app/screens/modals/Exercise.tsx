@@ -12,119 +12,14 @@ import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { useMutation, useQuery } from 'react-query';
 import { addExerciseToWorkout, fetchExerciseData, fetchWorkoutData, fetchWorkoutsData } from '../../api';
 import { WorkoutIcon } from '../../_layout';
-import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
-
-interface SetInputProps {
-  setsIn:WorkoutSet[];
-  onSubmit: () => void;
-}
-
-const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
-  const [sets, setSets] = useState(props.setsIn);
-  console.log(sets)
-  const handleSetDrag = (data: any) => setSets(data.data);
-
-  const getSetNum = (index: number|undefined) => {
-    return index ? index + 1 : 1
-  }
-  const addNewSet = () => {
-    const lastSet = sets[sets.length - 1];
-    const newSet: WorkoutSet[] = [{
-      id: sets.length,
-      rep: lastSet?.rep ?? '',
-      weight: lastSet?.weight ?? ''
-    }];
-    setSets([...sets, ...newSet]);
-  }
-  const removeSet = (index: number | undefined) => {
-    const temp:any = [...sets];
-    temp.splice(index || 0, 1);
-    setSets(temp);
-  }
-
-  const onRepChange = (val: string, index: number | undefined) => {
-    sets[index || 0].rep = parseInt(val);
-  }
-  
-  const onWeightChange = (val: string, index: number | undefined) => {
-    sets[index || 0].weight = parseInt(val);
-  }
-  const handleSubmit = () => { props.onSubmit }
-  return (
-    <>
-      <View style={{ marginVertical: 14 }}>
-        {sets.length != 0 &&
-          <View style={{ flexDirection: 'row', paddingHorizontal: 7, paddingBottom: 14 }}>
-            <Text style={[styles.h3a, { width: '25%' }]}>Set</Text>
-            <Text style={[styles.h3a, { width: '33%' }]}>Rep</Text>
-            <Text style={[styles.h3a, { width: '33%' }]}>Weight (Ibs)</Text>
-          </View>
-        }
-        <DraggableFlatList
-          scrollEnabled={false}
-          data={sets}
-          keyExtractor={(item:any) => (item.id.toString())}
-          onDragEnd={(data) => { handleSetDrag(data as any) }}
-          renderItem={(item) => {
-            console.log(item)
-            return (
-              <ScaleDecorator>
-                <TouchableOpacity
-                  onLongPress={item.drag} disabled={item.isActive}
-                  style={{
-                    flexDirection: 'row', backgroundColor: colors.primary, padding: 10.5, borderBottomWidth: 1, borderBottomColor: colors.darker,
-                    borderTopLeftRadius: (item.getIndex() === 0) ? 7 : 0,
-                    borderTopRightRadius: (item.getIndex() === 0) ? 7 : 0,
-                  }}>
-                  <Text style={[styles.h4, styles.lighterFont, { width: '25%', alignSelf: 'center', padding: 7 }]}>{getSetNum(item.getIndex())}</Text>
-                  <View style={{ width: '33%', flexDirection: 'row', alignItems: 'center', }}>
-                    <TextInput style={[styles.h4, styles.lighterFont, { padding: 7, backgroundColor: colors.darker, minWidth: 40, borderRadius: 7 }]}
-                      defaultValue={JSON.stringify(item.item.rep)}
-                      keyboardType='numeric'
-                      returnKeyLabel='Done'
-                      returnKeyType='done'
-                      onChangeText={newRep => onRepChange(newRep, item.getIndex())}
-                    />
-                  </View>
-                  <View style={{ width: '33%', flexDirection: 'row', alignItems: 'center' }}>
-                    <TextInput style={[styles.h4, styles.lighterFont, { padding: 7, backgroundColor: colors.darker, minWidth: 40, borderRadius: 7 }]}
-                      defaultValue={JSON.stringify(item.item.weight)}
-                      keyboardType='number-pad'
-                      returnKeyLabel='Done'
-                      returnKeyType='done'
-                      onChangeText={newWeight => onWeightChange(newWeight, item.getIndex())}
-                    />
-                  </View>
-                  <TouchableOpacity onPress={() => removeSet(item.getIndex())} style={{ alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal:7 }} >
-                    <AntDesign name="delete" size={24} color={colors.lighter} />
-                  </TouchableOpacity>
-                </TouchableOpacity>
-              </ScaleDecorator>
-            );
-          }}
-        />
-        <TouchableOpacity onPress={() => addNewSet()} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, backgroundColor: colors.primary, borderBottomRightRadius: 7, borderBottomLeftRadius: 7, borderRadius: sets.length === 0 ? 7 : 0 }}>
-          <Text style={[styles.h4, { lineHeight: 28 }]}>Add new set</Text>
-          <AntDesign name="plus" size={28} color={colors.yellow} />
-        </TouchableOpacity>
-        {sets.length != 0 &&
-          <TouchableOpacity style={[form.submitContainer, { marginTop: 14 }]} onPress={handleSubmit}>
-            <Text style={[styles.h3, { lineHeight: 28 }]}>Save Changes</Text>
-          </TouchableOpacity>
-        }
-      </View>
-    </>
-  )
-}
+import { PostWorkoutExercise, PostWorkoutSet, WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 
 const AddExercise: FunctionComponent = (props:any) => {
-  const {id, exerciseId} = useLocalSearchParams();
+  const {workoutId, exerciseId} = useLocalSearchParams();
   const router = useRouter();
 
-
-
   // Fetch Workout Data Handling
-  const workoutData = useWorkoutData(id);
+  const workoutData = useWorkoutData(workoutId);
   const workout = workoutData.workout;
   const exercise = workout?.exercises?.find((e) => {
     if (exerciseId && exerciseId === String(e.id)) {
@@ -132,12 +27,14 @@ const AddExercise: FunctionComponent = (props:any) => {
     }
   })
 
-  const sets:WorkoutSet[] = exercise ? (exercise.sets ? exercise.sets : []) : [];
+  const sets = (exercise ? (exercise.sets ? exercise.sets : []) : []);
 
   // Form handling
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
   const { control, setValue, getValues } = useForm({defaultValues: { exerciseName: exercise ? exercise.name : ''}});
+
+
 
   // Fetch Suggested Exercises Data Handling
   // const [updateExercises, setUpdateExercises] = useState(false);
@@ -164,49 +61,28 @@ const AddExercise: FunctionComponent = (props:any) => {
   
   // Submit Functionality
   const [errorMessage, setErrorMessage] = useState<string>();
-  const submitMutation = useMutation((data:any) => addExerciseToWorkout(workout?.id, data), {
-    onSuccess: () => {
-      // router.back()
-      router.navigate({pathname:'/screens/modals/Log', params:{refresh:"true", id:id}})
-    },
-    onError: (error:any) => {
-      // setErrorMessage(error.response.data.error)
-    }
-  })
-
-  const onSubmitForm = (setsData:any) => {
-    const name = getValues("exerciseName")
-    const newExerciseData:any = {
-      name: name,
-      sets: setsData.map((setData:any) => ({
-        number: setData.setNum,
-        rep_num: setData.rep,
-        weight: setData.weight
-      }))
-    }
-
+  const onSubmitForm = (setsData:WorkoutSet[]) => {
+    const name = getValues("exerciseName");
     if (name === "") {
       setErrorMessage("A name is required.")
       return;
     }
 
-    for (const set of newExerciseData.sets) {
-      if (set.rep_num ===  ""){
+    for (const set of setsData) {
+      if (!set.rep){
         setErrorMessage("A rep number is required.")
         return;
       }
 
-      if (set.weight ===  ""){
+      if (!set.weight){
         setErrorMessage("A weight value is required.")
         return;
       }
     }
-  
-    if (!exerciseId) {
-      submitMutation.mutate(newExerciseData);
-    }else {
-      //handle update exercise
-    }
+
+    workoutData.addNewExercise(name, setsData, () => {
+      router.navigate({ pathname: '/screens/modals/Log', params: { refresh: "true", workoutId } });
+    })
   }
 
   if (workoutData.isLoading /*|| areExercisesLoading*/) {
@@ -269,7 +145,7 @@ const AddExercise: FunctionComponent = (props:any) => {
             </TouchableOpacity>
           )}
         /> */}
-        <SetInput setsIn={sets} onSubmit={onSubmitForm}/>
+        <SetInput setsData={sets} onSubmitSetsData={onSubmitForm}/>
 
         {/*{modal.modalOpen &&
           <BottomModal
@@ -284,6 +160,127 @@ const AddExercise: FunctionComponent = (props:any) => {
     </>
   )
 }
+
+
+interface SetInputProps {
+  setsData:WorkoutSet[];
+  onSubmitSetsData: (setsData:WorkoutSet[]) => WorkoutSet[];
+}
+
+const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
+  const [sets, setSets] = useState<WorkoutSet[]>(props.setsData);
+
+  const getSetNum = (index: number|undefined) => {
+    return index ? index + 1 : 1
+  }
+  const addNewSet = () => {
+    const lastSet = sets[sets.length - 1];
+    const newSet: WorkoutSet[] = [{
+      id: sets.length + 1,
+      rep: lastSet?.rep ?? '',
+      weight: lastSet?.weight ?? ''
+    }];
+    setSets([...sets, ...newSet]);
+  }
+  const removeSet = (index: number | undefined) => {
+    const temp:any = [...sets];
+    temp.splice(index || 0, 1);
+    setSets(temp);
+  }
+
+  const onRepChange = (val: string, index: number | undefined) => {
+    sets[index || 0].rep = parseInt(val);
+  }
+  
+  const onWeightChange = (val: string, index: number | undefined) => {
+    sets[index || 0].weight = parseInt(val);
+  }
+  const handleSetDrag = (data: any) => setSets(data.data);
+
+  const handleSubmit = () => {
+    props.onSubmitSetsData(sets)
+  }
+
+  // Whenever component mounts add one set defaultly
+  useEffect(() => {
+    if (sets.length == 0) {
+      addNewSet();
+    }
+  }, [])
+
+
+  return (
+    <>
+      <View style={{ marginVertical: 14 }}>
+        {sets.length != 0 &&
+          <View style={{ flexDirection: 'row', paddingHorizontal: 7, paddingBottom: 14 }}>
+            <Text style={[styles.h3a, { width: '25%' }]}>Set</Text>
+            <Text style={[styles.h3a, { width: '33%' }]}>Rep</Text>
+            <Text style={[styles.h3a, { width: '33%' }]}>Weight (Ibs)</Text>
+          </View>
+        }
+        <DraggableFlatList
+          scrollEnabled={false}
+          data={sets}
+          keyExtractor={(item:any) => (item.id.toString())}
+          onDragEnd={(data) => { handleSetDrag(data as any) }}
+          renderItem={(item) => {
+            const rep = item.item.rep && JSON.stringify(item.item.rep);
+            const weight = item.item.weight && JSON.stringify(item.item.weight);
+            return (
+              <ScaleDecorator>
+                <TouchableOpacity
+                  onLongPress={item.drag} disabled={item.isActive}
+                  style={{
+                    flexDirection: 'row', backgroundColor: colors.primary, padding: 10.5, borderBottomWidth: 1, borderBottomColor: colors.darker,
+                    borderTopLeftRadius: (item.getIndex() === 0) ? 7 : 0,
+                    borderTopRightRadius: (item.getIndex() === 0) ? 7 : 0,
+                  }}>
+                  <Text style={[styles.h4, styles.lighterFont, { width: '25%', alignSelf: 'center', padding: 7 }]}>{getSetNum(item.getIndex())}</Text>
+                  <View style={{ width: '33%', flexDirection: 'row', alignItems: 'center', }}>
+                    <TextInput style={[styles.h4, styles.lighterFont, { padding: 7, backgroundColor: colors.darker, minWidth: 40, borderRadius: 7 }]}
+                      defaultValue={rep}
+                      keyboardType='numeric'
+                      returnKeyLabel='Done'
+                      returnKeyType='done'
+                      onChangeText={newRep => onRepChange(newRep, item.getIndex())}
+                    />
+                  </View>
+                  <View style={{ width: '33%', flexDirection: 'row', alignItems: 'center' }}>
+                    <TextInput style={[styles.h4, styles.lighterFont, { padding: 7, backgroundColor: colors.darker, minWidth: 40, borderRadius: 7 }]}
+                      defaultValue={weight}
+                      keyboardType='number-pad'
+                      returnKeyLabel='Done'
+                      returnKeyType='done'
+                      onChangeText={newWeight => onWeightChange(newWeight, item.getIndex())}
+                    />
+                  </View>
+                  <TouchableOpacity onPress={() => removeSet(item.getIndex())} style={{ alignItems: 'flex-end', justifyContent: 'center', paddingHorizontal:7 }} >
+                    <AntDesign name="delete" size={24} color={colors.lighter} />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              </ScaleDecorator>
+            );
+          }}
+        />
+        <TouchableOpacity onPress={() => addNewSet()} style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, backgroundColor: colors.primary, borderBottomRightRadius: 7, borderBottomLeftRadius: 7, borderRadius: sets.length === 0 ? 7 : 0 }}>
+          <Text style={[styles.h4, { lineHeight: 28 }]}>Add new set</Text>
+          <AntDesign name="plus" size={28} color={colors.yellow} />
+        </TouchableOpacity>
+        <TouchableOpacity style={[form.submitContainer, { marginTop: 14 }]} onPress={handleSubmit}>
+          <Text style={[styles.h3, { lineHeight: 28 }]}>Save Changes</Text>
+        </TouchableOpacity>
+        
+        {/* {sets.length != 0 &&
+          <TouchableOpacity style={[form.submitContainer, { marginTop: 14 }]} onPress={handleSubmit}>
+            <Text style={[styles.h3, { lineHeight: 28 }]}>Save Changes</Text>
+          </TouchableOpacity>
+        } */}
+      </View>
+    </>
+  )
+}
+
 export default AddExercise;
 const form = StyleSheet.create({
   imageContainer: {

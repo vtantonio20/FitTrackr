@@ -100,8 +100,8 @@ class WorkoutExercise(db.Model):
         self.name = name
         self.sets = sets
 
-    # def add_set(self, number, weight):
-    #     self.sets.append(ExerciseSet(number=number, weight=weight))
+    def add_workout_set(self, exercise_set):
+        self.sets.append(exercise_set)
 
     def to_dict(self):
         return {

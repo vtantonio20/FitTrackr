@@ -62,7 +62,7 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
   // Handles routing when widget is pressed
   const handleWidgetPress = () => {
     if (activeWorkout.targetMusclesNames)
-      router.push({ pathname: '/screens/modals/Log', params: {id:activeWorkout.id}})
+      router.push({ pathname: '/screens/modals/Log', params: {workoutId:activeWorkout.id}})
     else
       router.push('/screens/modals/CreateWorkout')
   }
@@ -166,15 +166,6 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
 
   const handleWorkoutOnPress = (dayWorkout:WorkoutDay) => {
     const numberOfWorkouts = dayWorkout.workouts.length;
-    const pushRouterToExerciseLog = (id:number, isActive:any) => {
-      router.push({ 
-        pathname: '/screens/modals/Log', 
-        params: {
-          id:id,
-          isActive:isActive
-        }
-      })
-    };
 
     if (numberOfWorkouts === 0) {
       console.log('add workout')
@@ -182,7 +173,10 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
     }
     if (numberOfWorkouts === 1) {
       const singleWorkoutForDay = dayWorkout.workouts[0];
-      pushRouterToExerciseLog(singleWorkoutForDay.id, singleWorkoutForDay.isActive)
+      router.push({ 
+        pathname: '/screens/modals/Log', 
+        params: { workoutId:singleWorkoutForDay.id }
+      });
       return;
     }
     if (numberOfWorkouts > 1) {
@@ -197,7 +191,10 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
               selections={dayWorkout.workouts.map((w: Workout) => {
                 return {
                   text: w.name, action: () => {
-                    pushRouterToExerciseLog(w.id, w.isActive)
+                    router.push({ 
+                      pathname: '/screens/modals/Log', 
+                      params: { workoutId:w.id }
+                    });
                   }
                 }
               })}

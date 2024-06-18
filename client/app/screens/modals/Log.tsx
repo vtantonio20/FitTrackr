@@ -10,24 +10,24 @@ import { WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/Worko
 
 const Log = () => {
   const router = useRouter();
-  const { id, refresh } =  useLocalSearchParams();
-  const workoutData = useWorkoutData(id);
+  const { workoutId, refresh } =  useLocalSearchParams();
+  const workoutData = useWorkoutData(workoutId);
   const workout = workoutData.workout;
     
   // Triggers a refresh if localsearchparam says to refresh
   useEffect(() => {
-    if (id && refresh === "true"){
+    if (workoutId && refresh === "true"){
       workoutData.refetch()
-      router.setParams({id:id[0], refresh:"false"})
+      router.setParams({id:workoutId[0], refresh:"false"})
     }
   }, [refresh])
   
   const handleNewExercisePress = () => {
-    router.push({pathname:'/screens/modals/Exercise', params:{id:id}})
+    router.push({pathname:'/screens/modals/Exercise', params:{workoutId:workoutId}})
   }
 
   const handleExercisePress = (e:WorkoutExercise) => {
-    router.push({pathname:'/screens/modals/Exercise', params:{id:id, exerciseId:e.id}})
+    router.push({pathname:'/screens/modals/Exercise', params:{workoutId:workoutId, exerciseId:e.id}})
   }
 
   if (workoutData.isLoading) {
@@ -38,7 +38,7 @@ const Log = () => {
     console.error('Error fetching workout data:', workoutData.error);
     return <View><Text>Error loading data</Text></View>;
   }
-  
+
   return (
     <>
       <Stack.Screen

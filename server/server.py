@@ -113,6 +113,27 @@ with app.app_context():
         
         return jsonify(workout.to_dict()), 200
 
+    # @app.route("/edit-exercise/<int:exercise_id>", methods=['PATCH'])
+    # def edit_exercise(exercise_id):
+    #     data = request.get_json()
+    #     workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
+
+    #     name = data.get('name', workout_exercise.name)
+    #     sets_data = data.get('sets', workout_exercise.sets)
+        
+    #     db_exercise_sets = []
+    #     for set_data in sets_data:
+    #         rep_num = set_data.get('rep_num')
+    #         weight = set_data.get('weight')
+    #         db_set = ExerciseSet(rep_num, weight)
+    #         db_exercise_sets.append(db_set)
+
+    #     db_workout_exercise = WorkoutExercise(name, db_exercise_sets)
+    #     workout_exercise.add_workout_set(db_workout_exercise)
+    #     db.session.commit()
+
+        
+        return jsonify(workout_exercise.to_dict()), 200
     # @app.route("/edit-workout/<int:workout_id>", methods=["PATCH"])
     # def edit_workout(workout_id):
     #     data = request.get_json()
