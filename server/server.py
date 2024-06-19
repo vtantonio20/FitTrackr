@@ -12,20 +12,7 @@ CORS(app)
 
 with app.app_context():
 
-    @app.route("/temp-delete")
-    def temp_delete():
-        active_workout = Workout.query.filter_by(is_active=True).first()
-        if active_workout:
-            for workout_exercise in active_workout.workout_exercises:
-                for exercise_set in workout_exercise.sets:
-                    db.session.delete(exercise_set)
-                db.session.flush()
-                db.session.delete(workout_exercise)
-            db.session.delete(active_workout)
-            db.session.commit()
-            return "success"
-        return "not success"
-    
+
     
     @app.route("/muscles")
     def get_muscles():
@@ -113,27 +100,42 @@ with app.app_context():
         
         return jsonify(workout.to_dict()), 200
 
-    # @app.route("/edit-exercise/<int:exercise_id>", methods=['PATCH'])
-    # def edit_exercise(exercise_id):
-    #     data = request.get_json()
-    #     workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
+    @app.route("/temp-delete")
+    def temp_delete():
+        active_workout = Workout.query.filter_by(is_active=True).first()
+        if active_workout:
+            for workout_exercise in active_workout.workout_exercises:
+                for exercise_set in workout_exercise.sets:
+                    db.session.delete(exercise_set)
+                db.session.flush()
+                db.session.delete(workout_exercise)
+            db.session.delete(active_workout)
+            db.session.commit()
+            return "success"
+        return "not success"
+    
+    @app.route("/edit-exercise/<int:exercise_id>", methods=['PATCH'])
+    def edit_exercise(exercise_id):
+        data = request.get_json()
+        workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
 
-    #     name = data.get('name', workout_exercise.name)
-    #     sets_data = data.get('sets', workout_exercise.sets)
-        
-    #     db_exercise_sets = []
-    #     for set_data in sets_data:
-    #         rep_num = set_data.get('rep_num')
-    #         weight = set_data.get('weight')
-    #         db_set = ExerciseSet(rep_num, weight)
-    #         db_exercise_sets.append(db_set)
+        name = data.get('name', workout_exercise.name)
+        sets_data = data.get('sets', workout_exercise.sets)
+        for set_data in sets_data:
+            # print(sets_data)
+            # if set_data.id:
+            #     continue
+            rep_num = set_data.get('rep_num')
+            weight = set_data.get('weight')
+            db_set = ExerciseSet(rep_num, weight)
+            db_set.workout_exercise_id = workout_exercise.id  # Assign workout_exercise_id here
+            workout_exercise.sets.append(db_set)
 
-    #     db_workout_exercise = WorkoutExercise(name, db_exercise_sets)
-    #     workout_exercise.add_workout_set(db_workout_exercise)
-    #     db.session.commit()
-
+        workout_exercise.name = name
+        db.session.commit()
         
         return jsonify(workout_exercise.to_dict()), 200
+    
     # @app.route("/edit-workout/<int:workout_id>", methods=["PATCH"])
     # def edit_workout(workout_id):
     #     data = request.get_json()

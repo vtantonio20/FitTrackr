@@ -12,7 +12,7 @@ import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { useMutation, useQuery } from 'react-query';
 import { addExerciseToWorkout, fetchExerciseData, fetchWorkoutData, fetchWorkoutsData } from '../../api';
 import { WorkoutIcon } from '../../_layout';
-import { PostWorkoutExercise, PostWorkoutSet, WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
+import { WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 
 const AddExercise: FunctionComponent = (props:any) => {
   const {workoutId, exerciseId} = useLocalSearchParams();
@@ -80,9 +80,16 @@ const AddExercise: FunctionComponent = (props:any) => {
       }
     }
 
-    workoutData.addNewExercise(name, setsData, () => {
-      router.navigate({ pathname: '/screens/modals/Log', params: { refresh: "true", workoutId } });
-    })
+    if (!exerciseId){
+      workoutData.addNewExercise(name, setsData, () => {
+        router.navigate({ pathname: '/screens/modals/Log', params: { refresh: "true", workoutId } });
+      })
+    } else {
+      workoutData.updateExistingExercise(exerciseId, name, setsData, () => {
+        router.navigate({ pathname: '/screens/modals/Log', params: { refresh: "true", workoutId } });
+      })
+    }
+
   }
 
   if (workoutData.isLoading /*|| areExercisesLoading*/) {

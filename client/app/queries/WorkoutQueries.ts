@@ -1,19 +1,9 @@
 import { useMutation, useQuery } from "react-query"
 import { useMemo } from "react";
-import { addExerciseToWorkout, fetchWorkoutData, fetchWorkoutsData } from "../api";
+import { addExerciseToWorkout, fetchWorkoutData, fetchWorkoutsData, updateExerciseOnWorkout } from "../api";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
 
-export interface PostWorkoutSet {
-  rep_num:number;
-  weight:number;
-  number:number;
-}
-
-export interface PostWorkoutExercise {
-  name:string;
-  sets:PostWorkoutSet[];
-}
 
 export interface WorkoutSet {
   id:number;
@@ -95,6 +85,18 @@ export const useWorkoutData = (workoutId:any) => {
     };
   }, [data]);
 
+  interface PostWorkoutSet {
+    rep_num:number;
+    weight:number;
+    id:number | undefined;
+  }
+  
+  interface PostWorkoutExercise {
+    name:string;
+    sets:PostWorkoutSet[];
+    id:number | undefined;
+  }
+  
   // Submit Mutation Logic
   const createExerciseMutation = useMutation((data: PostWorkoutExercise) => {
     if (workoutId == null) {
@@ -106,8 +108,9 @@ export const useWorkoutData = (workoutId:any) => {
   const addNewExercise = (name:string, setsData:WorkoutSet[], onSuccess:() => void)  => {
     const newExerciseData:PostWorkoutExercise = {
       name: name,
+      id: undefined,
       sets: setsData.map((setData:any):PostWorkoutSet => ({
-        number: setData.setNum,
+        id: undefined,
         rep_num: setData.rep,
         weight: setData.weight
       }))
@@ -121,16 +124,35 @@ export const useWorkoutData = (workoutId:any) => {
     });
   }
   
-  // Submit Mutation Logic
-  // const updateExerciseMutation = useMutation((data: PostWorkoutExercise) => {
-  //   if (workoutId == null) {
-  //     return Promise.reject("No workout ID provided");
-  //   }
-  //   return addExerciseToWorkout(workoutId, data)
-  // });
-  // const updateExistingExercise = (exerciseId:any, name: string, setsData:WorkoutSet[], onSuccess:() => void) => {
 
-  // }
+  // Submit Mutation Logic
+  interface UpdateProps { data: PostWorkoutExercise, exerciseId: any }
+  const updateExerciseMutation = useMutation((props: UpdateProps) => {
+    if (workoutId == null) {
+      return Promise.reject("No workout ID provided");
+    }
+    return updateExerciseOnWorkout(props.exerciseId, props.data)
+  });
+  
+  const updateExistingExercise = (exerciseId:any, name: string, setsData:WorkoutSet[], onSuccess:() => void) => {
+    const newExerciseData:PostWorkoutExercise = {
+      name: name,
+      id: exerciseId,
+      sets: setsData.map((setData:any):PostWorkoutSet => ({
+        id: setData.id,
+        rep_num: setData.rep,
+        weight: setData.weight
+      }))
+    }
+    console.log(JSON.stringify(newExerciseData))
+
+    updateExerciseMutation.mutate({exerciseId:exerciseId, data:newExerciseData}, {
+      onSuccess() {
+        onSuccess();
+        refetch();
+      },
+    });
+  }
 
 
   // const muscleMapSvg = useMuscleSvg(workout ? (workout.targetMusclesNames ? workout.targetMusclesNames : []) : []);
@@ -140,7 +162,8 @@ export const useWorkoutData = (workoutId:any) => {
     error,
     isLoading,
     refetch,
-    addNewExercise
+    addNewExercise,
+    updateExistingExercise
   }
 }
 

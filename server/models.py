@@ -109,7 +109,6 @@ class WorkoutExercise(db.Model):
             "name": self.name,
             "sets": [(s.to_dict() if s is not None else []) for s in self.sets] 
         }
-        
 
 class Workout(db.Model):
     __tablename__ = "workout"
