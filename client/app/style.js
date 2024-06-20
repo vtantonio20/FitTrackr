@@ -27,7 +27,8 @@ export default StyleSheet.create({
     },
     containerWrapper: {
         paddingHorizontal: 14,
-        paddingBottom: 14
+        paddingBottom: 14,
+        marginBottom:28
     },
     widgetHeader: {
         flexDirection: "row",

@@ -19,24 +19,68 @@ with app.app_context():
         muscles =Muscle.query.all()
         return { "muscles": [m.to_dict() for m in muscles] }
     
-    @app.route('/exercise/<int:exercise_id>')
-    def get_exercise(exercise_id):
-        exercise = Exercise.query.filter_by(id=exercise_id).first_or_404()
-        return exercise.to_dict()
+    # @app.route('/exercise/<int:exercise_id>')
+    # def get_exercise(exercise_id):
+    #     exercise = Exercise.query.filter_by(id=exercise_id).first_or_404()
+    #     return exercise.to_dict()
+
+    @app.route('/exercise/<int:muscle_id>')
+    def get_exercises_by_muscle(muscle_id):
+        exercises = Exercise.query.filter(Exercise.target_muscles.any(id=muscle_id)).all()
+        return [{
+            "name": e.name,
+            "id": e.id
+        } for e in exercises]
+
 
     @app.route('/exercises')
     def get_exercises():
-        filtered_muscle_names = request.args.getlist('name[]')
+        filtered_muscle_names = [name.strip() for name in request.args.getlist('name')]
         exercises = Exercise.query.all()
         if not filtered_muscle_names:
             return {"exercises": [e.to_dict() for e in exercises]}
 
-        filtered_exercises = []
+        # this will be a map that will have muscle names as key with a list of exercises
+        muscle_to_exercise_map = {}
+        
+        # if create the keys of the map
+        for filtered_muscle_name in filtered_muscle_names:
+            if filtered_muscle_name not in muscle_to_exercise_map:
+                muscle_to_exercise_map[filtered_muscle_name] = []
+
+        # add the exercise to the correct key in the map
         for exercise in exercises:
-            for filtered_muscle_name in filtered_muscle_names:
-                if filtered_muscle_name in exercise.get_target_muscle_names():
-                    filtered_exercises.append(exercise)
-        return {"exercises": [e.to_dict() for e in filtered_exercises]}
+            for muscle_name in muscle_to_exercise_map.keys():   
+                if muscle_name in exercise.get_target_muscle_names():
+                    muscle_to_exercise_map[muscle_name].append(exercise)
+
+        response_data = []
+        for muscle_name in muscle_to_exercise_map:
+            muscle_id = Muscle.query.filter_by(name=muscle_name).first().id
+            response_data.append({
+                "name": muscle_name,
+                "id": muscle_id,
+                "exercises": [{
+                    "name":e.name,
+                    "id":e.id
+                } for e in muscle_to_exercise_map[muscle_name]]
+            })
+        return response_data
+    
+
+    # @app.route('/exercises')
+    # def get_exercises():
+    #     filtered_muscle_names = request.args.getlist('name[]')
+    #     exercises = Exercise.query.all()
+    #     if not filtered_muscle_names:
+    #         return {"exercises": [e.to_dict() for e in exercises]}
+
+    #     filtered_exercises = []
+    #     for exercise in exercises:
+    #         for filtered_muscle_name in filtered_muscle_names:
+    #             if filtered_muscle_name in exercise.get_target_muscle_names():
+    #                 filtered_exercises.append(exercise)
+    #     return {"exercises": [e.to_dict() for e in filtered_exercises]}
     
     @app.route('/workout/exercise/<int:exercise_id>')
     def get_workout_exercise(exercise_id):
@@ -70,7 +114,7 @@ with app.app_context():
         ).all()
 
         if active_workout:
-            active_workout_data = active_workout.to_dict_condensed()
+            active_workout_data = active_workout.to_dict()
         else:
             active_workout_data = None
 
@@ -119,38 +163,30 @@ with app.app_context():
         data = request.get_json()
         workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
 
-        name = data.get('name', workout_exercise.name)
-        sets_data = data.get('sets', workout_exercise.sets)
-        for set_data in sets_data:
-            # print(sets_data)
-            # if set_data.id:
-            #     continue
-            rep_num = set_data.get('rep_num')
-            weight = set_data.get('weight')
-            db_set = ExerciseSet(rep_num, weight)
-            db_set.workout_exercise_id = workout_exercise.id  # Assign workout_exercise_id here
-            workout_exercise.sets.append(db_set)
+        name_in = data.get('name')
+        sets_in = data.get('sets')
 
-        workout_exercise.name = name
+        if (name_in):
+            workout_exercise.name = name_in
+        
+        if (sets_in):
+            # delete the old set data
+            sets_data = workout_exercise.sets
+            for set_data in sets_data:
+                db.session.delete(set_data)
+            
+            db.session.flush()
+
+            # add the new set data
+            for set_in in sets_in:
+                rep_num = set_in.get('rep_num')
+                weight = set_in.get('weight')
+                db_set = ExerciseSet(rep_num, weight)
+                db_set.workout_exercise_id = workout_exercise.id  # Assign workout_exercise_id here
+                workout_exercise.sets.append(db_set)
+
         db.session.commit()
-        
         return jsonify(workout_exercise.to_dict()), 200
-    
-    # @app.route("/edit-workout/<int:workout_id>", methods=["PATCH"])
-    # def edit_workout(workout_id):
-    #     data = request.get_json()
-    #     workout = Workout.query.filter_by(id=workout_id).first_or_404()
-
-        # name = data.get('name', workout.name)
-        # date = data.get('date', workout.date)
-        # target_muscles_names = data.get('target_muscles', workout.target_muscles)
-        # is_active = data.get('is_active', workout.is_active)
-
-        # # check if there is already a active workout if wanting to make is active
-        # if is_active and not workout.is_active and Workout.query.filter_by(is_active=True).count() != 0:
-        #     return jsonify({"error": "Cannot update workout, you can only have one active workout."}), 409
-
-        
 
     @app.route("/create-workout", methods=["POST"])
     def create_workout():

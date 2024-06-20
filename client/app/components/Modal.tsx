@@ -27,11 +27,11 @@ export const ActionSelectionModal: React.FunctionComponent<ActionSelectionModalP
           top: 0,
           left: 0,
           width: windowWidth,
-          height: windowHeight,
+          height: windowHeight * 100,
           backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}
       />
-      <Modal animationType="slide" transparent={true}>
+      <Modal animationType="none" transparent={true}>
         <View style={modal.modalContainer}>
           <View style={modal.modalHeader}>
             <Text style={styles.h3}>{title}</Text>
@@ -69,7 +69,7 @@ interface InitActionModalButtonProps {
 
 export const InitActionModalButton: React.FunctionComponent<InitActionModalButtonProps> = ({ onPress, showing, text }) => {
   return (
-    <TouchableOpacity style={[styles.flexRow, {  margin: 0, padding: 7 }]} onPress={onPress}>
+    <TouchableOpacity style={[styles.flexRow, {  margin: 0, paddingVertical: 7 }]} onPress={onPress}>
       <Text style={[styles.p, styles.lighterFont, { paddingRight: 3.5 }]}> {text}</Text>
       <Entypo name={showing ? "chevron-thin-up" : "chevron-thin-down"} size={12} color={colors.lighter} />
     </TouchableOpacity>

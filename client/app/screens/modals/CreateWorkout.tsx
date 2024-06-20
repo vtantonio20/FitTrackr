@@ -160,7 +160,7 @@ export const Workout: FunctionComponent = () => {
             </View>
           }
           <View style={styles.widgetHeader}>
-            <Text style={styles.h2}>Set Details</Text>
+            <Text style={styles.h2}>Workout Details</Text>
           </View>
           <View style={form.element}>
             <Text style={form.elementHeader}>Name: </Text>

@@ -9,6 +9,7 @@ import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { Workout, useWorkoutsData } from '../../queries/WorkoutQueries';
+import { convertMusclesToMuscleNames } from '../../queries/DataUtilities';
 
 
 interface HomeWidgetProps {
@@ -18,7 +19,7 @@ interface HomeWidgetProps {
 }
 
 interface ActiveWidgetProps extends HomeWidgetProps {
-  activeWorkout:Workout
+  activeWorkout:Workout,
 }
 
 interface RecentsWidgetProps extends HomeWidgetProps {
@@ -26,6 +27,8 @@ interface RecentsWidgetProps extends HomeWidgetProps {
 }
 
 const Home: FunctionComponent = () => {
+  const router = useRouter();
+
   const [modalComponent, setModalComponent] = useState(null)
   const [showModal, setShowModal] = useState(false)
   const workoutsData = useWorkoutsData();
@@ -43,7 +46,17 @@ const Home: FunctionComponent = () => {
     <>
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
-          <ActiveWidget activeWorkout={workoutsData.activeWorkout} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+          {workoutsData.activeWorkout ?
+            <ActiveWidget activeWorkout={workoutsData.activeWorkout} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+          :
+          <TouchableOpacity style={styles.widgetBody} onPress={() => router.push('/screens/modals/CreateWorkout')}>
+              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
+                <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
+                <AntDesign name="plus" size={28} color={colors.yellow} />
+              </View>
+            </TouchableOpacity> 
+          }
+
           <RecentDaysWidget inactiveWorkouts={workoutsData.inactiveWorkouts} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
         </View>
       </ScrollView>
@@ -57,16 +70,8 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
   // The active workout
   const activeWorkout = props.activeWorkout;
   // The muscle map
-  const muscleMapSvg = useMuscleSvg(activeWorkout.targetMusclesNames ? activeWorkout.targetMusclesNames : []);
+  const muscleMapSvg = useMuscleSvg(activeWorkout.targetMuscles || []);
   
-  // Handles routing when widget is pressed
-  const handleWidgetPress = () => {
-    if (activeWorkout.targetMusclesNames)
-      router.push({ pathname: '/screens/modals/Log', params: {workoutId:activeWorkout.id}})
-    else
-      router.push('/screens/modals/CreateWorkout')
-  }
-
   // Edit, Clone, Delete Routes
   const [isShowingModal, setIsShowingModal] = useState(false)
   const handleShowModalComponent = (show:boolean) => {
@@ -77,8 +82,7 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
         title={'Active Workout Options'}
         onExitPress={() => handleShowModalComponent(false)}
         selections={[
-          {text:'Edit Workout', action: () => console.log("edit")},
-          {text:'Copy Workout', action: () => console.log("copy")},
+          {text:'Edit Workout Details', action: () => console.log("edit")},
           {text:'Delete Workout', action: () => console.log("delete")}
         ]}
       />
@@ -91,7 +95,7 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
         <Text style={styles.h3}>Active Workout</Text>
         <InitActionModalButton onPress={() => handleShowModalComponent(true)} showing={isShowingModal} text={'Options'}  />
       </View>
-      <TouchableOpacity style={styles.widgetBody} onPress={() => handleWidgetPress()}>
+      <TouchableOpacity style={styles.widgetBody} onPress={() => router.push({ pathname: '/screens/modals/Log', params: {workoutId:activeWorkout.id}})}>
         <View >
           {activeWorkout.isActive ? 
             <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
@@ -179,8 +183,8 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
       });
       return;
     }
+    // This will be the choose workout modal if a day is pressed with multiple workotus
     if (numberOfWorkouts > 1) {
-      // This will be the choose workout modal if a day is pressed with multiple workotus
       const handleShowModalComponent = (show:boolean, dayWorkout?:WorkoutDay) => {
         props.onToggleModal(show);
         if (dayWorkout) {

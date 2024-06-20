@@ -49,7 +49,7 @@ class Muscle(db.Model):
 class Exercise(db.Model):
     __table__name = "exercise"
     id = Column(Integer, primary_key=True)
-    name = Column(String(100), nullable=False)
+    name = Column(String(100), nullable=False, unique=True)
     target_muscles = relationship('Muscle', secondary=exercise_muscle, backref=db.backref('exercises', lazy='dynamic'))
 
     def __init__(self, name, target_muscles):

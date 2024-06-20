@@ -3,16 +3,15 @@ import { View, Text, TouchableOpacity, StyleSheet, TextInput, FlatList, ScrollVi
 import colors from '../../colors'
 import styles from "../../style";
 import { MaterialIcons, Feather, Entypo , AntDesign, Ionicons} from '@expo/vector-icons'; 
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import { ModalButton } from '../../components/smallModal';
-import { useSuggested } from '../../hooks/useSuggestions';
-import DraggableFlatList, { DragEndParams, ScaleDecorator } from 'react-native-draggable-flatlist'
+import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { dateToDDMMYY, dateToWD } from '../../utilities';
-import { useMutation, useQuery } from 'react-query';
-import { addExerciseToWorkout, fetchExerciseData, fetchWorkoutData, fetchWorkoutsData } from '../../api';
 import { WorkoutIcon } from '../../_layout';
-import { WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
+import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
+import { ActionSelectionModal } from '../../components/Modal';
+import { Muscle, useExerciseSuggestionsFromMuscle } from '../../queries/SuggestionQueries';
 
 const AddExercise: FunctionComponent = (props:any) => {
   const {workoutId, exerciseId} = useLocalSearchParams();
@@ -26,38 +25,19 @@ const AddExercise: FunctionComponent = (props:any) => {
       return e;
     }
   })
-
+  // The setIn if in edit, if in create mode, empty array
   const sets = (exercise ? (exercise.sets ? exercise.sets : []) : []);
-
+  // The targetMuscles from the workout
+  const targetMuscles = workout?.targetMuscles?.map((muscle:Muscle) =>  muscle ) ?? [];
+  
   // Form handling
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
   const { control, setValue, getValues } = useForm({defaultValues: { exerciseName: exercise ? exercise.name : ''}});
 
-
-
-  // Fetch Suggested Exercises Data Handling
-  // const [updateExercises, setUpdateExercises] = useState(false);
-  // const { data: exercisesData, error: exercisesError, isLoading: areExercisesLoading } = useQuery(['exercises', workoutTargetMuscles], () => fetchExerciseData(workoutTargetMuscles), {
-  //   onSuccess: () => {
-  //     setUpdateExercises(true);
-  //   }
-  // });
-  // const { exerciseNames } = useMemo(() => {
-  //   return { exerciseNames: exercisesData ? [... new Set(exercisesData.exercises.map((e: any) => e.name))] : [] }
-  // }, [exercisesData])
-
-  // // Handle Suggestion Logic
-  // const addSuggestion = (suggestion: string) => {
-  //   setValue("exerciseName", suggestion)
-  // }
-  // // const selectionModal = useModal(WORKOUTGROUPS);
-  // const suggestions = useSuggested(exerciseNames);
-  // // Updates the selection modal when muscleMap is changed (fetched)
-  // useEffect(() => {
-  //   suggestions.setNewSuggestions(exerciseNames);
-  // }, [updateExercises])
-  
+  // Exercise Suggestions Handling
+  const [isShowingModal, setIsShowingModal] = useState(false);
+  const exerciseSuggestions = useExerciseSuggestionsFromMuscle(targetMuscles[0]);
   
   // Submit Functionality
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -82,21 +62,20 @@ const AddExercise: FunctionComponent = (props:any) => {
 
     if (!exerciseId){
       workoutData.addNewExercise(name, setsData, () => {
-        router.navigate({ pathname: '/screens/modals/Log', params: { refresh: "true", workoutId } });
+        router.navigate({ pathname: '/screens/modals/Log', params: { workoutId } });
       })
     } else {
       workoutData.updateExistingExercise(exerciseId, name, setsData, () => {
-        router.navigate({ pathname: '/screens/modals/Log', params: { refresh: "true", workoutId } });
+        router.navigate({ pathname: '/screens/modals/Log', params: { workoutId } });
       })
     }
-
   }
 
-  if (workoutData.isLoading /*|| areExercisesLoading*/) {
+  if (workoutData.isLoading) {
     return <View><Text>Loading...</Text></View>;
   }
 
-  if (workoutData.error/* || exercisesError*/) {
+  if (workoutData.error) {
     console.error('Error fetching workout data:', workoutData.error);
     return <View><Text>Error loading data</Text></View>;
   }
@@ -124,7 +103,7 @@ const AddExercise: FunctionComponent = (props:any) => {
       
         <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
             <Text style={form.elementHeader}>Name: </Text>
-            <ModalButton onPress={() => {/*modal.toggleOpen()*/}} text={"muscle"/*modal.selectedGroup*/}showing={true} />
+            <ModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
         </View>
           
         <Controller
@@ -143,27 +122,27 @@ const AddExercise: FunctionComponent = (props:any) => {
               />
           )}
         />
-        {/* <FlatList
+        <FlatList
           horizontal={true}
-          data={suggestions.unselectedSuggestions}
+          data={exerciseSuggestions.exerciseData}
           renderItem={({ item }) => (
-            <TouchableOpacity style={form.suggestion} onPress={() => {addSuggestion(item)}}>
-                <Text style={[styles.p, { paddingRight: 1.5 }]}>{item}</Text>
+            <TouchableOpacity style={form.suggestion} onPress={() => {setValue("exerciseName", item.name)}}>
+                <Text style={[styles.p, { paddingRight: 1.5 }]}>{item.name}</Text>
             </TouchableOpacity>
           )}
-        /> */}
+        />
         <SetInput setsData={sets} onSubmitSetsData={onSubmitForm}/>
-
-        {/*{modal.modalOpen &&
-          <BottomModal
-            onSelectionPress={(i) => modal.changeIndex(i)}
-            onExitPress={() => modal.toggleOpen()}
-            title={"Set Primary Muscle"}
-            selections={modal.selections}
-          />
-        } */}
+        {isShowingModal && (
+          <ActionSelectionModal
+          title={'Select Target Muscle'}
+          onExitPress={() => setIsShowingModal(false)}
+          selections={targetMuscles.map((muscle:Muscle) => {
+            return {text:muscle.name, action:() => {exerciseSuggestions.changeMuscle(muscle)}}
+          })}
+        />
+        )}
       </View>
-    </ScrollView>        
+    </ScrollView>
     </>
   )
 }
@@ -277,12 +256,6 @@ const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
         <TouchableOpacity style={[form.submitContainer, { marginTop: 14 }]} onPress={handleSubmit}>
           <Text style={[styles.h3, { lineHeight: 28 }]}>Save Changes</Text>
         </TouchableOpacity>
-        
-        {/* {sets.length != 0 &&
-          <TouchableOpacity style={[form.submitContainer, { marginTop: 14 }]} onPress={handleSubmit}>
-            <Text style={[styles.h3, { lineHeight: 28 }]}>Save Changes</Text>
-          </TouchableOpacity>
-        } */}
       </View>
     </>
   )

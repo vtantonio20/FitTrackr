@@ -23,6 +23,10 @@ export const createWorkout = async (workoutData) => {
 };
 
 export const fetchExerciseData = async (musclesNamesList) => {
+    // Ensure muscleNamesList is an array
+    if (!Array.isArray(musclesNamesList)) {
+        throw new Error('musclesNamesList must be an array');
+    }
     const params = { name: musclesNamesList };
     const response = await axios.get(`${API_URL}/exercises`, { params });
     return response.data;
@@ -38,7 +42,9 @@ export const updateExerciseOnWorkout = async (exerciseId, exerciseData) => {
     return response.data;
 }
 
-export const fetchWorkoutExerciseData = async (exerciseId) => {
-    const response = await axios.get(`${API_URL}/workout/exercise/<int:exercise_id>/${exerciseId}`);
+// Suggestion Api request
+// This will fetch just the exercises associated with a passed in muscle id
+export const fetchExerciseSuggestionsFromMuscle = async (muscleId) => {
+    const response = await axios.get(`${API_URL}/exercise/${muscleId}`);
     return response.data;
 }

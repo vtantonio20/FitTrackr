@@ -1,7 +1,8 @@
-import React, { FunctionComponent, useState } from 'react'
+import React, { FunctionComponent, useEffect, useState } from 'react'
 import { View, Text, Platform, Button } from 'react-native'
 import colors from '../../colors';
 import DateTimePicker, { DateTimePickerEvent } from '@react-native-community/datetimepicker';
+import { useExerciseSuggestionsFromMuscle } from '../../queries/SuggestionQueries';
 
 const Calender:FunctionComponent = () => {
   const [date, setDate] = useState(new Date());
@@ -17,7 +18,16 @@ const Calender:FunctionComponent = () => {
     let fDate = tempDate.getDate() + '/' + (tempDate.getMonth() + 1) + '/' + tempDate.getFullYear();
     setText(fDate);
     console.log(fDate)
+
+    exerciseSuggestionData.changeMuscle(21)
+    console.log(JSON.stringify(exerciseSuggestionData.exerciseData));
   }
+
+  // const muscleSuggestionData = useMuscleSuggestionData();
+  // console.log(JSON.stringify(muscleSuggestionData.muscleMap));
+  const exerciseSuggestionData = useExerciseSuggestionsFromMuscle(1);
+  console.log(JSON.stringify(exerciseSuggestionData.exerciseData));
+
 
   return (
     <View>
