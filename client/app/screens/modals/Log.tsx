@@ -3,15 +3,14 @@ import { ScrollView, View, Text, StyleSheet, TouchableOpacity, FlatList} from 'r
 import colors from '../../colors';
 import styles from "../../style";
 import { dateToDDMMYY, dateToWD } from '../../utilities';
-import { MaterialIcons, EvilIcons , Entypo , AntDesign, MaterialCommunityIcons} from '@expo/vector-icons'; 
+import { MaterialIcons, AntDesign, MaterialCommunityIcons} from '@expo/vector-icons'; 
 import { WorkoutIcon } from '../../_layout';
 import { WorkoutExercise, WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
-import { Bubble, InfoBubble } from '../../components/bubbleButton';
+import { InfoBubble } from '../../components/Bubble';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { useState } from 'react';
-import { Exercise } from '../../queries/SuggestionQueries';
 
 const Log = () => {
   const router = useRouter();
@@ -30,31 +29,74 @@ const Log = () => {
   }
 
   // Workout options modal
-  const [isShowingWorkoutModal, setIsShowingWorkoutModal] = useState(false)
+  const [isShowingWorkoutOptionsModal, setIsShowingWorkoutOptionsModal] = useState(false);
+  const renderShowWorkoutOptionsModal = () => {
+    return (
+      <ActionSelectionModal
+        title={'Workout Options'}
+        onExitPress={() => setIsShowingWorkoutOptionsModal(false)}
+        selections={[
+          { text: 'Edit Workout Details', action: () => console.log("edit") },
+          { text: 'Delete Workout', action: () => setShowDeleteWorkoutModal(true) }
+        ]}
+      />    
+    )
+  }
 
-  // Exercise Modal
+  // Verify Delete Workout Modal
+  const [showDeleteWorkoutModal, setShowDeleteWorkoutModal] = useState(false);
+  const renderDeleteWorkoutModal = () => {
+    return (
+      <ActionSelectionModal
+        title={"Are you sure you want to delete the Workout?"}
+        onExitPress={() => setShowDeleteWorkoutModal(false)}
+        selections={[
+          {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => workoutData.deleteWorkout(() => router.back())},
+          {text:'Cancel'}
+        ]}
+      />
+    )
+  }
+
+  // Exercise options Modal
   const [selectedExerciseModal, setSelectedExerciseModal] = useState<WorkoutExercise | null>(null);
   const renderExerciseModal = (exercise:WorkoutExercise) => {
     return (
       <ActionSelectionModal
-      title={exercise.name + " Options"}
-      onExitPress={() => setSelectedExerciseModal(null)}
-      selections={[
-        {text:'View Exercise Details', action: () => handleExercisePress(exercise)},
-        {text:'Edit Exercise Details', action: () => handleExercisePress(exercise)},
-        {text:'Delete Exercise', action: () => console.log("delete")}
-      ]}
-    />
+        title={exercise.name + " Options"}
+        onExitPress={() => setSelectedExerciseModal(null)}
+        selections={[
+          {text:'Edit Exercise Details', action: () => handleExercisePress(exercise)},
+          {text:'Delete Exercise', action: () => setSelectedDeleteExerciseModal(exercise)}
+        ]}
+      />
     )
   }
 
+  // Verify Delete Exercise Modal
+  const handleDeleteExerciseAction = (exerciseId:any) => workoutData.deleteExercise(exerciseId, () => setEventMessage("Succesfully Deleted Exercise"));
+  const [selectedDeleteExerciseModal, setSelectedDeleteExerciseModal] = useState<WorkoutExercise | null>(null);
+  const renderDeleteExerciseModal = (exercise:WorkoutExercise) => {
+    return (
+      <ActionSelectionModal
+        title={"Are you sure you want to delete this Exercise?"}
+        onExitPress={() => setSelectedDeleteExerciseModal(null)}
+        selections={[
+          {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => handleDeleteExerciseAction(selectedDeleteExerciseModal?.id)},
+          {text:'Cancel', action: () => console.log("Cancel")}
+        ]}
+      />
+    )
+  }
+
+  const [eventMessage, setEventMessage] = useState<string | null>();
   if (workoutData.isLoading) {
     return <View><Text>Loading...</Text></View>;
   }
 
   if (workoutData.error) {
     console.error('Error fetching workout data:', workoutData.error);
-    return <View><Text>Error loading data</Text></View>;
+    return <View><Text >Error loading data</Text></View>;
   }
 
   return (
@@ -69,6 +111,11 @@ const Log = () => {
       <ScrollView style={[styles.modalContainer]}>
         <View style={styles.containerWrapper}>
           
+          { eventMessage != null &&
+            <View>
+              <Text style={{paddingTop:14, color:colors.lighter}}>{eventMessage}</Text>
+            </View>
+          }
           {/* Header */}
           <View style={[styles.widgetHeader, {marginBottom:0}]}>
             <Text style={styles.h3}>{workout?.date && dateToWD(workout.date)}'s Session</Text>
@@ -77,7 +124,7 @@ const Log = () => {
 
           {/* Workout Options Modal Initializer */}
           <View style={{flexDirection:'row', flexGrow:1, justifyContent:'flex-end'}}>
-            <InitActionModalButton onPress={() => setIsShowingWorkoutModal(true)} showing={isShowingWorkoutModal} text={'Options'}  />
+            <InitActionModalButton onPress={() => setIsShowingWorkoutOptionsModal(true)} showing={isShowingWorkoutOptionsModal} text={'Options'}  />
           </View>
 
           {/* Target Muscles List */}
@@ -150,18 +197,17 @@ const Log = () => {
           }
 
           {/* Workout Modal */}
-          {isShowingWorkoutModal && (
-            <ActionSelectionModal
-              title={'Workout Options'}
-              onExitPress={() => setIsShowingWorkoutModal(false)}
-              selections={[
-                {text:'Edit Workout Details', action: () => console.log("edit")},
-                {text:'Delete Workout', action: () => console.log("delete")}
-              ]}
-          />
-          )}
+          {isShowingWorkoutOptionsModal && renderShowWorkoutOptionsModal()}
+          {/* Confirm Delete Workout Modal */}
+          {showDeleteWorkoutModal && renderDeleteWorkoutModal()}
+
           {/* Exercise Modal */}
           {selectedExerciseModal != null && renderExerciseModal(selectedExerciseModal)}
+
+
+          {/* Confirm Delete Exercise Modal */}
+          {selectedDeleteExerciseModal != null && renderDeleteExerciseModal(selectedDeleteExerciseModal)}
+
         </View>
       </ScrollView>
     </>

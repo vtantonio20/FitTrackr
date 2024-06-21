@@ -4,7 +4,7 @@ import { Platform, TouchableOpacity, View, Text, StyleSheet} from "react-native"
 import styles from "../style";
 import colors from "../colors";
 import { dateToWDDDMMYY } from "../utilities";
-import { Bubble } from "./bubbleButton";
+import { Bubble } from "./Bubble";
 import { Fontisto } from '@expo/vector-icons'; 
 
 

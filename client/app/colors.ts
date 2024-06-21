@@ -13,11 +13,9 @@ type Colors = {
   lightYellow: string;
 };
 
-export const darkMode = Appearance.getColorScheme() === 'light' ? false : true;
-
 let colors: Colors;
 
-if (darkMode) {
+if (Appearance.getColorScheme() === 'dark') {
   colors = {
     primary: '#181823',
     secondary: '#413543',
@@ -32,9 +30,9 @@ if (darkMode) {
   };
 } else {
   colors = {
-    primary: '#e2e2e2',
+    primary: '#f0f0eb',
     secondary: '#e7e7dc',
-    darker: '#f0f0eb',
+    darker: '#e2e2e2',
     purple: '#8F43EE',
     red: '#ed5050ff',
     yellow: '#0f1472',

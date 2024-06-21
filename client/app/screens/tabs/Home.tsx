@@ -9,8 +9,6 @@ import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { Workout, useWorkoutsData } from '../../queries/WorkoutQueries';
-import { convertMusclesToMuscleNames } from '../../queries/DataUtilities';
-
 
 interface HomeWidgetProps {
   onRenderModal:any;
@@ -49,14 +47,13 @@ const Home: FunctionComponent = () => {
           {workoutsData.activeWorkout ?
             <ActiveWidget activeWorkout={workoutsData.activeWorkout} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
           :
-          <TouchableOpacity style={styles.widgetBody} onPress={() => router.push('/screens/modals/CreateWorkout')}>
+          <TouchableOpacity style={[styles.widgetBody,{marginTop:14}]} onPress={() => router.push('/screens/modals/CreateWorkout')}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
                 <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
                 <AntDesign name="plus" size={28} color={colors.yellow} />
               </View>
             </TouchableOpacity> 
           }
-
           <RecentDaysWidget inactiveWorkouts={workoutsData.inactiveWorkouts} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
         </View>
       </ScrollView>
@@ -83,10 +80,25 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
         onExitPress={() => handleShowModalComponent(false)}
         selections={[
           {text:'Edit Workout Details', action: () => console.log("edit")},
-          {text:'Delete Workout', action: () => console.log("delete")}
+          {text:'Deactivate Details', action: () => console.log("edit")},
+          {text:'Delete Workout', action: () => setShowDeleteModal(true)}
         ]}
       />
     ) 
+  }
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const renderDeleteModal = () => {
+    return (
+      <ActionSelectionModal
+        title={"Are you sure you want to delete this Workout?"}
+        onExitPress={() => setShowDeleteModal(false)}
+        selections={[
+          {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => {console.log("delete")}},
+          {text:'Cancel', action: () => console.log("Cancel")}
+        ]}
+      />
+    )
   }
 
   return (
@@ -113,7 +125,10 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
             </View> 
           }
         </View>
-      </TouchableOpacity >
+
+        {showDeleteModal && renderDeleteModal()}
+
+      </TouchableOpacity>
     </>
   );
 }

@@ -1,4 +1,4 @@
-import { Modal, Platform, TouchableOpacity, View, StyleSheet, Text, TouchableHighlight, Dimensions } from "react-native";
+import { Modal, Platform, TouchableOpacity, View, StyleSheet, Text, TouchableHighlight, Dimensions, StyleProp, TextStyle } from "react-native";
 import colors from "../colors";
 import styles from "../style";
 import { Feather, Entypo } from '@expo/vector-icons';
@@ -9,6 +9,7 @@ const windowHeight = Dimensions.get('window').height;
 export type Selection = {
   text: string,
   action?: () => void,
+  textStyle?: StyleProp<TextStyle>
 }
 
 interface ActionSelectionModalProps {
@@ -28,7 +29,7 @@ export const ActionSelectionModal: React.FunctionComponent<ActionSelectionModalP
           left: 0,
           width: windowWidth,
           height: windowHeight * 100,
-          backgroundColor: 'rgba(0, 0, 0, 0.5)'
+          backgroundColor: 'rgba(0, 0, 0, 0.25)'
         }}
       />
       <Modal animationType="none" transparent={true}>
@@ -49,7 +50,7 @@ export const ActionSelectionModal: React.FunctionComponent<ActionSelectionModalP
                       selection.action && selection.action();
                       onExitPress();
                     }}>
-                    <Text style={[styles.h4, styles.lighterFont]}>{selection.text}</Text>
+                    <Text style={[styles.h4, styles.lighterFont, selection.textStyle]}>{selection.text}</Text>
                   </TouchableHighlight>
                 );
               })}
@@ -94,7 +95,7 @@ const modal = StyleSheet.create({
   },
   modalBodyContainer: {
     borderTopWidth: Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1,
-    borderColor: colors.darker
+    borderColor: colors.darker,
   },
   selection: {
     paddingVertical: 14,

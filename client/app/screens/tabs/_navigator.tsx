@@ -7,7 +7,7 @@ import colors from '../../colors'
 import { StatusBar } from 'expo-status-bar'
 import Calender from './Calender'
 import Setting from './Setting'
-import { TabButton } from '../../components/tabButton';
+import { TabButton } from '../../components/TabButton';
 import Home from './Home';
 
 const Navigator: FunctionComponent = () => {

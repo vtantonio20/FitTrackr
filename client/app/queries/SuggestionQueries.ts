@@ -1,5 +1,5 @@
 import { useQuery } from "react-query";
-import { fetchExerciseData, fetchExerciseSuggestionsFromMuscle, fetchMuscleMapData } from "../api";
+import { doFetchExerciseSuggestions, doFetchMuscleMap } from "../api";
 import { useMemo, useState } from "react";
 import { err } from "react-native-svg";
 
@@ -19,7 +19,7 @@ export interface Exercise {
 }
 
 export const useMuscleSuggestionData = () => {
-  const { data, error, isLoading } = useQuery('muscles', fetchMuscleMapData);
+  const { data, error, isLoading } = useQuery('muscles', doFetchMuscleMap);
 
   const buildMuscleMapFromJson = (jsonData: any) => {
     if (!jsonData) return {}
@@ -60,7 +60,7 @@ export const useExerciseSuggestionsFromMuscle = (muscleIn:Muscle) => {
   const [muscle, setMuscle] = useState(muscleIn);
   const { data, error, isLoading, refetch } = useQuery(
     ['exercise', muscle.id], 
-    () => fetchExerciseSuggestionsFromMuscle(muscle.id),
+    () => doFetchExerciseSuggestions(muscle.id),
     {enabled: !!muscle.id}
   );
   

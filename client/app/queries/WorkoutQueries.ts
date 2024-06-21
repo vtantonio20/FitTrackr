@@ -1,8 +1,7 @@
-import { useMutation, useQuery } from "react-query"
+import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useMemo } from "react";
-import { addExerciseToWorkout, fetchWorkoutData, fetchWorkoutsData, updateExerciseOnWorkout } from "../api";
+import { doCreateExercise, doDeleteExercise, doDeleteWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise } from "../api";
 import { Muscle } from "./SuggestionQueries";
-import { convertMusclesToMuscleNames } from "./DataUtilities";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
 
@@ -41,7 +40,7 @@ interface PostWorkoutExercise {
 }
 
 export const useWorkoutsData = () => {
-  const { data, error, isLoading, refetch } = useQuery('workouts', fetchWorkoutsData)
+  const { data, error, isLoading, refetch } = useQuery('workouts', doFetchWorkouts)
 
   const activeWorkout:Workout | undefined = useMemo(() => {
     if (!data) return undefined;
@@ -79,7 +78,9 @@ export const useWorkoutsData = () => {
 }
 
 export const useWorkoutData = (workoutId:any) => {
-  const { data, error, isLoading, refetch } = useQuery('workout', () => fetchWorkoutData(workoutId))  
+  const queryClient = useQueryClient();
+
+  const { data, error, isLoading, refetch } = useQuery('workout', () => doFetchWorkout(workoutId))  
   const workout:Workout | undefined = useMemo(() => {
     if (!data) return undefined;
     return {
@@ -105,7 +106,7 @@ export const useWorkoutData = (workoutId:any) => {
     if (workoutId == null) {
       return Promise.reject("No workout ID provided");
     }
-    return addExerciseToWorkout(workoutId, data)
+    return doCreateExercise(workoutId, data)
   });
 
   const addNewExercise = (name:string, setsData:WorkoutSet[], onSuccess:() => void)  => {
@@ -132,7 +133,7 @@ export const useWorkoutData = (workoutId:any) => {
     if (workoutId == null) {
       return Promise.reject("No workout ID provided");
     }
-    return updateExerciseOnWorkout(data.id, data)
+    return doUpdateExercise(data.id, data)
   });
   
   const updateExistingExercise = (exerciseId:any, name: string, setsData:WorkoutSet[], onSuccess:() => void) => {
@@ -152,8 +153,39 @@ export const useWorkoutData = (workoutId:any) => {
         refetch();
       },
     });
-  }  
-  // const muscleMapSvg = useMuscleSvg(workout ? (workout.targetMusclesNames ? workout.targetMusclesNames : []) : []);
+  }
+
+  const deleteExerciseMutation = useMutation((exerciseId: any) => {
+    if (workoutId == null) {
+      return Promise.reject("No workout ID provided");
+    }
+    return doDeleteExercise(exerciseId)
+  });
+
+  const deleteExercise = (exerciseId:any, onSuccess:() => void) => {
+    deleteExerciseMutation.mutate(exerciseId, {
+      onSuccess() {
+        onSuccess();
+        refetch();
+      },
+    })
+  }
+  
+  const deleteWorkoutMutation = useMutation((workoutId:any) => {
+    if (workoutId == null) {
+      return Promise.reject("No workout ID provided");
+    }
+    return doDeleteWorkout(workoutId)
+  });
+
+  const deleteWorkout = (onSuccess:() => void) => {
+      deleteWorkoutMutation.mutate(workoutId, {
+        onSuccess(){
+          queryClient.invalidateQueries('workouts');
+          onSuccess();
+        }
+      })
+  }
 
   return {
     workout,
@@ -161,9 +193,7 @@ export const useWorkoutData = (workoutId:any) => {
     isLoading,
     addNewExercise,
     updateExistingExercise,
+    deleteExercise,
+    deleteWorkout
   }
-}
-
-
-export const useWorkoutExerciseData = (workoutId:any, exerciseId:any) => {
 }

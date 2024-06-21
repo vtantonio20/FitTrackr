@@ -10,10 +10,10 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { dateToDDMMYY, dateToWD } from '../../utilities';
 import { WorkoutIcon } from '../../_layout';
 import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
-import { ActionSelectionModal } from '../../components/Modal';
+import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { Muscle, useExerciseSuggestionsFromMuscle } from '../../queries/SuggestionQueries';
 
-const AddExercise: FunctionComponent = (props:any) => {
+const Exercise: FunctionComponent = (props:any) => {
   const {workoutId, exerciseId} = useLocalSearchParams();
   const router = useRouter();
 
@@ -26,7 +26,7 @@ const AddExercise: FunctionComponent = (props:any) => {
     }
   })
   // The setIn if in edit, if in create mode, empty array
-  const sets = (exercise ? (exercise.sets ? exercise.sets : []) : []);
+  const sets = exercise ? (exercise.sets ? exercise.sets : []) : [];
   // The targetMuscles from the workout
   const targetMuscles = workout?.targetMuscles?.map((muscle:Muscle) =>  muscle ) ?? [];
   
@@ -103,7 +103,7 @@ const AddExercise: FunctionComponent = (props:any) => {
       
         <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
             <Text style={form.elementHeader}>Name: </Text>
-            <ModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
+            <InitActionModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
         </View>
           
         <Controller
@@ -261,7 +261,7 @@ const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
   )
 }
 
-export default AddExercise;
+export default Exercise;
 const form = StyleSheet.create({
   imageContainer: {
     justifyContent: 'center',
@@ -311,7 +311,3 @@ const form = StyleSheet.create({
     flexDirection: 'row'
   }
 })
-
-function useModal(WORKOUTGROUPS: string[]) {
-  throw new Error('Function not implemented.');
-}

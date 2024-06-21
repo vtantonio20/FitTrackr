@@ -4,8 +4,8 @@ import { Stack, useRouter } from 'expo-router';
 import { View, Text, TouchableOpacity, TextInput, FlatList, StyleSheet, ScrollView, TextStyle, StyleProp, Pressable, Switch } from 'react-native';
 import colors from '../../colors';
 import styles from "../../style";
-import { Bubble } from '../../components/bubbleButton';
-import { DatePicker } from '../../components/datePicker';
+import { Bubble } from '../../components/Bubble';
+import { DatePicker } from '../../components/DatePicker';
 import { Controller, useFieldArray, useForm, useFormContext, useWatch } from 'react-hook-form';
 import { SimpleLineIcons  } from '@expo/vector-icons'; 
 import { useSuggested } from '../../hooks/useSuggestions';
@@ -14,7 +14,7 @@ import BottomModal, { ModalButton } from '../../components/smallModal';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import useDate from '../../hooks/useDate';
 import { useMutation, useQuery } from 'react-query';
-import { createWorkout, fetchMuscleMapData } from '../../api';
+import { doCreateWorkout, doFetchMuscleMap } from '../../api';
 import { WorkoutIcon } from '../../_layout';
 
 export const Workout: FunctionComponent = () => {
@@ -41,7 +41,7 @@ export const Workout: FunctionComponent = () => {
 
   // Handle fetching and managing state of the muscle suggestions
   const [updateMuscles, setUpdateMuscles] = useState(false);  
-  const { data, error, isLoading } = useQuery('muscles', fetchMuscleMapData, {
+  const { data, error, isLoading } = useQuery('muscles', doFetchMuscleMap, {
     onSuccess: () => {
       setUpdateMuscles(true)
     }
@@ -107,7 +107,7 @@ export const Workout: FunctionComponent = () => {
 
   const [errorMessage, setErrorMessage] = useState();
   // Submit Functionality
-  const submitMutation = useMutation(createWorkout, {
+  const submitMutation = useMutation(doCreateWorkout, {
     onSuccess: () => {
       router.push('/screens/tabs/_navigator');
     },

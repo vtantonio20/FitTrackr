@@ -12,19 +12,15 @@ CORS(app)
 
 with app.app_context():
 
-
-    
-    @app.route("/muscles")
+    ##########################
+    # Suggestions Routes
+    ##########################
+    @app.route("/suggestions/muscles")
     def get_muscles():
         muscles =Muscle.query.all()
         return { "muscles": [m.to_dict() for m in muscles] }
-    
-    # @app.route('/exercise/<int:exercise_id>')
-    # def get_exercise(exercise_id):
-    #     exercise = Exercise.query.filter_by(id=exercise_id).first_or_404()
-    #     return exercise.to_dict()
 
-    @app.route('/exercise/<int:muscle_id>')
+    @app.route('/suggestions/exercise/<int:muscle_id>')
     def get_exercises_by_muscle(muscle_id):
         exercises = Exercise.query.filter(Exercise.target_muscles.any(id=muscle_id)).all()
         return [{
@@ -32,8 +28,7 @@ with app.app_context():
             "id": e.id
         } for e in exercises]
 
-
-    @app.route('/exercises')
+    @app.route('/suggestions/exercises')
     def get_exercises():
         filtered_muscle_names = [name.strip() for name in request.args.getlist('name')]
         exercises = Exercise.query.all()
@@ -67,32 +62,9 @@ with app.app_context():
             })
         return response_data
     
-
-    # @app.route('/exercises')
-    # def get_exercises():
-    #     filtered_muscle_names = request.args.getlist('name[]')
-    #     exercises = Exercise.query.all()
-    #     if not filtered_muscle_names:
-    #         return {"exercises": [e.to_dict() for e in exercises]}
-
-    #     filtered_exercises = []
-    #     for exercise in exercises:
-    #         for filtered_muscle_name in filtered_muscle_names:
-    #             if filtered_muscle_name in exercise.get_target_muscle_names():
-    #                 filtered_exercises.append(exercise)
-    #     return {"exercises": [e.to_dict() for e in filtered_exercises]}
-    
-    @app.route('/workout/exercise/<int:exercise_id>')
-    def get_workout_exercise(exercise_id):
-        workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
-        return workout_exercise.to_dict()
-    
-
-    @app.route('/workout/<int:workout_id>')
-    def get_workout(workout_id):
-        workout = Workout.query.filter_by(id=workout_id).first_or_404()
-        return workout.to_dict()
-    
+    ##########################
+    # Workout Routes
+    ##########################
     def find_next_sunday():
         today = datetime.today()
         # Calculate how many days to add to get to the next Sunday
@@ -123,71 +95,11 @@ with app.app_context():
             "inactive_workouts": [w.to_dict_condensed() for w in inactive_workouts]
         }), 200
     
-    @app.route("/add-exercise/<int:workout_id>", methods=['PATCH'])
-    def add_exercise(workout_id):
-        data = request.get_json()
+    @app.route('/workout/<int:workout_id>')
+    def get_workout(workout_id):
         workout = Workout.query.filter_by(id=workout_id).first_or_404()
-
-        name = data.get('name', 'N/A')
-        sets_data = data.get('sets', [])
-        
-        db_exercise_sets = []
-        for set_data in sets_data:
-            rep_num = set_data.get('rep_num')
-            weight = set_data.get('weight')
-            db_set = ExerciseSet(rep_num, weight)
-            db_exercise_sets.append(db_set)
-
-        db_workout_exercise = WorkoutExercise(name, db_exercise_sets)
-        workout.add_exercise(db_workout_exercise)
-        db.session.commit()
-        
-        return jsonify(workout.to_dict()), 200
-
-    @app.route("/temp-delete")
-    def temp_delete():
-        active_workout = Workout.query.filter_by(is_active=True).first()
-        if active_workout:
-            for workout_exercise in active_workout.workout_exercises:
-                for exercise_set in workout_exercise.sets:
-                    db.session.delete(exercise_set)
-                db.session.flush()
-                db.session.delete(workout_exercise)
-            db.session.delete(active_workout)
-            db.session.commit()
-            return "success"
-        return "not success"
+        return workout.to_dict()
     
-    @app.route("/edit-exercise/<int:exercise_id>", methods=['PATCH'])
-    def edit_exercise(exercise_id):
-        data = request.get_json()
-        workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
-
-        name_in = data.get('name')
-        sets_in = data.get('sets')
-
-        if (name_in):
-            workout_exercise.name = name_in
-        
-        if (sets_in):
-            # delete the old set data
-            sets_data = workout_exercise.sets
-            for set_data in sets_data:
-                db.session.delete(set_data)
-            
-            db.session.flush()
-
-            # add the new set data
-            for set_in in sets_in:
-                rep_num = set_in.get('rep_num')
-                weight = set_in.get('weight')
-                db_set = ExerciseSet(rep_num, weight)
-                db_set.workout_exercise_id = workout_exercise.id  # Assign workout_exercise_id here
-                workout_exercise.sets.append(db_set)
-
-        db.session.commit()
-        return jsonify(workout_exercise.to_dict()), 200
-
     @app.route("/create-workout", methods=["POST"])
     def create_workout():
         data = request.get_json()
@@ -230,6 +142,92 @@ with app.app_context():
         db.session.commit()
 
         return jsonify({"success": True, "workout": workout.to_dict()}), 201
+    
+    @app.route("/edit-workout/<int:workout_id>", methods=['PATCH'])
+    def edit_workout():
+        return ""
+
+    @app.route('/delete-workout/<int:workout_id>', methods=['DELETE'])
+    def delete_workout(workout_id):
+        workout = Workout.query.filter_by(id = workout_id).first_or_404()
+        for workout_exercise in workout.workout_exercises:
+            delete_workout_exercise(workout_exercise.id)
+
+        db.session.delete(workout)
+        db.session.commit()
+        return jsonify("Succesfully Deleted Workout"), 200
+
+    ##########################
+    # Exercise Routes
+    ##########################
+    @app.route('/workout/exercise/<int:exercise_id>')
+    def get_workout_exercise(exercise_id):
+        workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
+        return workout_exercise.to_dict()
+    
+    @app.route("/create-exercise/<int:workout_id>", methods=['PATCH'])
+    def create_exercise(workout_id):
+        data = request.get_json()
+        workout = Workout.query.filter_by(id=workout_id).first_or_404()
+
+        name = data.get('name', 'N/A')
+        sets_data = data.get('sets', [])
+        
+        db_exercise_sets = []
+        for set_data in sets_data:
+            rep_num = set_data.get('rep_num')
+            weight = set_data.get('weight')
+            db_set = ExerciseSet(rep_num, weight)
+            db_exercise_sets.append(db_set)
+
+        db_workout_exercise = WorkoutExercise(name, db_exercise_sets)
+        workout.add_exercise(db_workout_exercise)
+        db.session.commit()    
+        return jsonify(workout.to_dict()), 200
+    
+    @app.route("/edit-exercise/<int:exercise_id>", methods=['PATCH'])
+    def edit_exercise(exercise_id):
+        data = request.get_json()
+        workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
+
+        name_in = data.get('name')
+        sets_in = data.get('sets')
+
+        if (name_in):
+            workout_exercise.name = name_in
+        
+        if (sets_in):
+            # delete the old set data
+            sets_data = workout_exercise.sets
+            for set_data in sets_data:
+                db.session.delete(set_data)
+            
+            db.session.flush()
+
+            # add the new set data
+            for set_in in sets_in:
+                rep_num = set_in.get('rep_num')
+                weight = set_in.get('weight')
+                db_set = ExerciseSet(rep_num, weight)
+                db_set.workout_exercise_id = workout_exercise.id  # Assign workout_exercise_id here
+                workout_exercise.sets.append(db_set)
+
+        db.session.commit()
+        return jsonify(workout_exercise.to_dict()), 200
+    
+    @app.route('/workout/delete-exercise/<int:exercise_id>', methods=['DELETE'])
+    def delete_workout_exercise(exercise_id):
+        workout_exercise = WorkoutExercise.query.filter_by(id = exercise_id).first_or_404()
+
+        sets = ExerciseSet.query.filter_by(workout_exercise_id=exercise_id).all()
+        for s in sets:
+            db.session.delete(s)
+        
+        db.session.flush()
+
+        db.session.delete(workout_exercise)
+        db.session.commit()
+        return jsonify("Succesfully Deleted Exercise"), 200
     
     def init_db():
         file_path = './instance/static_data.json'

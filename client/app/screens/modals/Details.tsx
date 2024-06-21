@@ -5,7 +5,7 @@ import { Modal, View, Text, TouchableOpacity } from 'react-native';
 import colors from '../../colors';
 import styles from '../../style';
 import { Entypo, AntDesign } from '@expo/vector-icons'; 
-import { DatePicker } from '../../components/datePicker';
+import { DatePicker } from '../../components/DatePicker';
 
 const Title = () => {
   return (
