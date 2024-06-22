@@ -97,7 +97,7 @@ const Exercise: FunctionComponent = (props:any) => {
           </View>
         }
         <View style={styles.widgetHeader}>
-          <Text style={styles.h3}>{workout?.date && dateToWD(workout.date)}'s Session</Text>
+          <Text style={styles.h3}>Exercise Details</Text>
           <Text style={[styles.h4, styles.lighterFont]}>{workout?.date && dateToDDMMYY(workout.date)}</Text>
         </View>
       

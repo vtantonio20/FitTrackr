@@ -1,4 +1,4 @@
-import { Modal, Platform, TouchableOpacity, View, StyleSheet, Text, TouchableHighlight, Dimensions, StyleProp, TextStyle } from "react-native";
+import { Modal, Platform, TouchableOpacity, View, StyleSheet, Text, TouchableHighlight, Dimensions, StyleProp, TextStyle, Pressable } from "react-native";
 import colors from "../colors";
 import styles from "../style";
 import { Feather, Entypo } from '@expo/vector-icons';
@@ -22,21 +22,27 @@ export const ActionSelectionModal: React.FunctionComponent<ActionSelectionModalP
   return (
     <>
       <View
-        onTouchEnd={onExitPress}
         style={{
           position: 'absolute',
           top: 0,
           left: 0,
           width: windowWidth,
           height: windowHeight * 100,
-          backgroundColor: 'rgba(0, 0, 0, 0.25)'
+          backgroundColor: 'rgba(0, 0, 0, 0.5)'
         }}
       />
-      <Modal animationType="none" transparent={true}>
+      <Modal animationType="slide" transparent={true} >
+        <Pressable
+            onTouchEnd={onExitPress}
+            style={{
+              flexDirection:"column",
+              flexGrow:1
+            }}
+          />
         <View style={modal.modalContainer}>
           <View style={modal.modalHeader}>
             <Text style={styles.h3}>{title}</Text>
-            <Feather name="x" size={36} color="white" onPress={onExitPress} style={{borderRadius:14}}/>
+            <Feather name="x" size={40} color="white" onPress={onExitPress} style={{borderRadius:14}}/>
           </View>
           {selections &&
             <View style={modal.modalBodyContainer}>
@@ -95,7 +101,7 @@ const modal = StyleSheet.create({
   },
   modalBodyContainer: {
     borderTopWidth: Platform.OS === 'ios' ? StyleSheet.hairlineWidth : 1,
-    borderColor: colors.darker,
+    borderColor: colors.lighter,
   },
   selection: {
     paddingVertical: 14,

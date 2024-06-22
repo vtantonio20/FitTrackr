@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useMemo } from "react";
-import { doCreateExercise, doDeleteExercise, doDeleteWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise } from "../api";
+import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise } from "../api";
 import { Muscle } from "./SuggestionQueries";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
@@ -23,6 +23,15 @@ export interface Workout {
   date: Date;
   isActive: boolean;
   id: number;
+  targetMuscles?: Muscle[]
+  exercises?: WorkoutExercise[]
+}
+
+interface PostWorkout {
+  name: string;
+  date: Date;
+  isActive: boolean;
+  id?: number;
   targetMuscles?: Muscle[]
   exercises?: WorkoutExercise[]
 }
@@ -101,6 +110,11 @@ export const useWorkoutData = (workoutId:any) => {
     };
   }, [data]);
   
+  // Create Workout
+  const createWorkoutMutation = useMutation((data:PostWorkout) => {
+    return doCreateWorkout(data);
+  })
+
   // Create Workout Exercise
   const createExerciseMutation = useMutation((data: PostWorkoutExercise) => {
     if (workoutId == null) {

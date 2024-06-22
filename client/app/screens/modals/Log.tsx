@@ -161,13 +161,20 @@ const Log = () => {
                         <Text style={styles.h3a}>{e.name}</Text>
                         <View >
                           {
-                            e.sets.map((s: WorkoutSet, index: any) => {
+                            e.sets.slice(0,5).map((s: WorkoutSet, index: any) => {
                               return (
                                 <View key={s.id} style={{ alignSelf: 'flex-end' }}>
                                   <Text style={styles.p}>{s.rep} x {s.weight} Ibs</Text>
                                 </View>
                               )
                             })
+                          }
+                          {
+                            e.sets.length > 5 && (
+                              <View key={"..."} style={{ alignSelf: 'center' }}>
+                                <Text style={styles.p}>    ...   </Text>
+                              </View>
+                            )
                           }
                         </View>  
                       </TouchableOpacity>
@@ -270,7 +277,7 @@ const form = StyleSheet.create({
     borderRadius: 7, 
     justifyContent: 'space-between', 
     alignItems: 'center',
-    height: 75
+    height: 100
   }
 })
 export default Log;
