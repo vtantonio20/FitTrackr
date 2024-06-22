@@ -64,11 +64,12 @@ const Home: FunctionComponent = () => {
 
 const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
   const router = useRouter();
-  // The active workout
-  const activeWorkout = props.activeWorkout;
+  const workoutsData = useWorkoutsData();
+  // The active workout. Could prolly change this to not be a prop.
+  const activeWorkout = props.activeWorkout; 
   // The muscle map
   const muscleMapSvg = useMuscleSvg(activeWorkout.targetMuscles || []);
-  
+
   // Edit, Clone, Delete Routes
   const [isShowingModal, setIsShowingModal] = useState(false)
   const handleShowModalComponent = (show:boolean) => {
@@ -94,7 +95,7 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
         title={"Are you sure you want to delete this Workout?"}
         onExitPress={() => setShowDeleteModal(false)}
         selections={[
-          {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => {console.log("delete")}},
+          {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => {workoutsData.deleteActiveWorkout()}},
           {text:'Cancel', action: () => console.log("Cancel")}
         ]}
       />

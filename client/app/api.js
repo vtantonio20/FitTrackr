@@ -26,6 +26,10 @@ export const doUpdateWorkout = async (workoutId, workoutData) => {
 
 }
 
+export const doToggleWorkoutActivation = async (workoutId) => {
+    // const response = await axios.patch(``)
+}
+
 export const doUpdateExercise = async (exerciseId, exerciseData) => {
     const response = await axios.patch(`${API_URL}/edit-exercise/${exerciseId}`, exerciseData);
     return response.data;

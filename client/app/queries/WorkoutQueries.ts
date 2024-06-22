@@ -49,6 +49,8 @@ interface PostWorkoutExercise {
 }
 
 export const useWorkoutsData = () => {
+  const queryClient = useQueryClient();
+
   const { data, error, isLoading, refetch } = useQuery('workouts', doFetchWorkouts)
 
   const activeWorkout:Workout | undefined = useMemo(() => {
@@ -77,12 +79,30 @@ export const useWorkoutsData = () => {
       : [];
   }, [data]);
 
+  const deleteActiveWorkoutMutation = useMutation((activeWorkout:Workout | undefined) => {
+    if (activeWorkout === undefined) {
+      return Promise.reject("No workout ID provided");
+    }
+    return doDeleteWorkout(activeWorkout.id)
+  });
+
+  const deleteActiveWorkout = () => {
+      deleteActiveWorkoutMutation.mutate((activeWorkout), {
+        onSuccess(){
+          queryClient.invalidateQueries('workout');
+          refetch();
+        }
+      })
+  }
+
+
   return {
     activeWorkout,
     inactiveWorkouts,
     error,
     isLoading,
-    refetch
+    refetch,
+    deleteActiveWorkout
   }
 }
 

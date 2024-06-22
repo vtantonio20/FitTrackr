@@ -229,6 +229,9 @@ with app.app_context():
         db.session.commit()
         return jsonify("Succesfully Deleted Exercise"), 200
     
+    ##########################
+    # Initializing the database
+    ##########################
     def init_db():
         file_path = './instance/static_data.json'
         with open(file_path, 'r') as file:
