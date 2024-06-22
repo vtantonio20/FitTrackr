@@ -143,9 +143,30 @@ with app.app_context():
 
         return jsonify({"success": True, "workout": workout.to_dict()}), 201
     
+    # @app.route("/edit-workout/toggle-activation/<int:workout_id>", methods=['PATCH'])
+    # def edit_workout():    
+    #     return ""
+    
     @app.route("/edit-workout/<int:workout_id>", methods=['PATCH'])
-    def edit_workout():
-        return ""
+    def edit_workout(workout_id):
+        data = request.get_json()
+        workout = Workout.query.filter_by(id = workout_id).first_or_404()
+
+        name_in = data.get('name')
+        date_in = data.get('date')
+        active_in = data.get('is_active')
+
+        if (name_in):
+            workout.name = name_in
+        
+        if (date_in):
+            workout.date = date_in
+        
+        if (active_in):
+            workout.is_active = active_in
+        
+        db.session.commit()
+        return jsonify(workout.to_dict()), 200
 
     @app.route('/delete-workout/<int:workout_id>', methods=['DELETE'])
     def delete_workout(workout_id):
