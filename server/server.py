@@ -15,10 +15,34 @@ with app.app_context():
     ##########################
     # Suggestions Routes
     ##########################
+    # @app.route("/suggestions2/muscles")
+    # def get_muscles():
+    #     muscles = Muscle.query.all()
+    #     return { "muscles": [m.to_dict() for m in muscles] }
+    
     @app.route("/suggestions/muscles")
     def get_muscles():
-        muscles =Muscle.query.all()
-        return { "muscles": [m.to_dict() for m in muscles] }
+        muscles = Muscle.query.all()
+
+        map = {}
+
+        muscle_groups = MuscleGroup.query.all()
+
+        for muscle_group in muscle_groups:
+            map[muscle_group] = []
+
+        for muscle in muscles:
+            map[muscle.group].append(muscle)
+
+        response_data = []
+        for muscle_group, muscles in map.items():
+            response_data.append({
+                "name": muscle_group.name,
+                "id": muscle_group.id,
+                "muscles": [m.to_dict(True) for m in muscles]
+            })
+        return response_data
+
 
     @app.route('/suggestions/exercise/<int:muscle_id>')
     def get_exercises_by_muscle(muscle_id):
@@ -97,7 +121,7 @@ with app.app_context():
     
     @app.route('/workout/<int:workout_id>')
     def get_workout(workout_id):
-        workout = Workout.query.filter_by(id=workout_id).first_or_404()
+        workout = Workout.query.filter_by(id=workout_id).first()
         return workout.to_dict()
     
     @app.route("/create-workout", methods=["POST"])
@@ -120,7 +144,7 @@ with app.app_context():
 
         # check if there is already a active workout if wanting to make an active
         if is_active and Workout.query.filter_by(is_active=True).count() != 0:
-            return jsonify({"error": "Cannot create workout, you can only have one active workout."}), 409
+            return jsonify({"invalid": "Active Found"}), 200
         
         # find the muscles and query for them
         target_muscles  = []
@@ -143,10 +167,6 @@ with app.app_context():
 
         return jsonify({"success": True, "workout": workout.to_dict()}), 201
     
-    # @app.route("/edit-workout/toggle-activation/<int:workout_id>", methods=['PATCH'])
-    # def edit_workout():    
-    #     return ""
-    
     @app.route("/edit-workout/<int:workout_id>", methods=['PATCH'])
     def edit_workout(workout_id):
         data = request.get_json()
@@ -155,16 +175,34 @@ with app.app_context():
         name_in = data.get('name')
         date_in = data.get('date')
         active_in = data.get('is_active')
-
-        if (name_in):
+        target_muscles_ids_in = data.get('target_muscle_ids', [])
+        if name_in is not None:
             workout.name = name_in
         
-        if (date_in):
-            workout.date = date_in
+        if date_in is not None:
+            try:
+                date = datetime.fromisoformat(date_in.replace('Z', ''))
+            except ValueError:
+                return jsonify({"error": "Invalid date format"}), 400
+            workout.date = date
         
-        if (active_in):
+        if 'is_active' in data:
+            if active_in and not workout.is_active and Workout.query.filter_by(is_active=True).count() != 0:
+                return jsonify({"invalid": "Active Found"}), 200
             workout.is_active = active_in
-        
+
+
+        if target_muscles_ids_in:
+            target_muscles  = []
+            for muscle_id in target_muscles_ids_in:
+                muscle = Muscle.query.filter_by(id=muscle_id).first()
+                if not muscle:
+                    return jsonify({"error": "Attempted to add a new muscle not in the database"}), 400
+                target_muscles.append(muscle)
+
+            workout.target_muscles.clear()
+            workout.target_muscles.extend(target_muscles)              
+
         db.session.commit()
         return jsonify(workout.to_dict()), 200
 

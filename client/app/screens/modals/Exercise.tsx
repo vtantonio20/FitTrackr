@@ -1,13 +1,12 @@
-import React, { FunctionComponent, Ref, useContext, useEffect, useMemo, useRef, useState } from 'react'
+import React, { FunctionComponent, useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, FlatList, ScrollView } from 'react-native'
 import colors from '../../colors'
 import styles from "../../style";
-import { MaterialIcons, Feather, Entypo , AntDesign, Ionicons} from '@expo/vector-icons'; 
+import { AntDesign } from '@expo/vector-icons'; 
 import { Controller, useForm } from 'react-hook-form';
-import { ModalButton } from '../../components/smallModal';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
-import { dateToDDMMYY, dateToWD } from '../../utilities';
+import { dateToDDMMYY } from '../../utilities';
 import { WorkoutIcon } from '../../_layout';
 import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
@@ -61,11 +60,11 @@ const Exercise: FunctionComponent = (props:any) => {
     }
 
     if (!exerciseId){
-      workoutData.addNewExercise(name, setsData, () => {
+      workoutData.createExercise(name, setsData, () => {
         router.navigate({ pathname: '/screens/modals/Log', params: { workoutId } });
       })
     } else {
-      workoutData.updateExistingExercise(exerciseId, name, setsData, () => {
+      workoutData.updateExercise(exerciseId, name, setsData, () => {
         router.navigate({ pathname: '/screens/modals/Log', params: { workoutId } });
       })
     }

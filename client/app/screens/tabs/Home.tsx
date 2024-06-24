@@ -1,10 +1,10 @@
-import React, { FunctionComponent, useContext, useState, useMemo, useEffect } from 'react'
-import { Modal, Image, View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent, Platform, TouchableHighlight, ScrollView } from 'react-native'
+import React, { FunctionComponent, useState } from 'react'
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import colors from '../../colors';
 import styles from "../../style"
-import { MaterialIcons, Feather, Ionicons , AntDesign, FontAwesome} from '@expo/vector-icons'; 
+import { Feather , AntDesign } from '@expo/vector-icons'; 
 import { useRouter } from 'expo-router';
-import { dateToDDMMYY, dateToWD, fakeData } from '../../utilities';
+import { dateToDDMMYY, dateToWD } from '../../utilities';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
@@ -47,7 +47,7 @@ const Home: FunctionComponent = () => {
           {workoutsData.activeWorkout ?
             <ActiveWidget activeWorkout={workoutsData.activeWorkout} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
           :
-          <TouchableOpacity style={[styles.widgetBody,{marginTop:14}]} onPress={() => router.push('/screens/modals/CreateWorkout')}>
+          <TouchableOpacity style={[styles.widgetBody,{marginTop:14}]} onPress={() => router.push('/screens/modals/Workout')}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
                 <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
                 <AntDesign name="plus" size={28} color={colors.yellow} />
@@ -80,7 +80,7 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
         title={'Active Workout Options'}
         onExitPress={() => handleShowModalComponent(false)}
         selections={[
-          {text:'Edit Workout Details', action: () => console.log("edit")},
+          {text:'Edit Workout Details', action: () =>  router.push({pathname:'/screens/modals/Workout', params:{workoutId:activeWorkout.id}})},
           {text:'Deactivate Details', action: () => console.log("edit")},
           {text:'Delete Workout', action: () => setShowDeleteModal(true)}
         ]}

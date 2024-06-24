@@ -1,14 +1,15 @@
-import React, { FunctionComponent, useState, useContext, useEffect } from 'react'
-import { View, StyleSheet, Platform, Text } from 'react-native'
+import React, { FunctionComponent, useState } from 'react'
+import { View, StyleSheet, Platform } from 'react-native'
 import Account from './Account'
-import { AntDesign, Feather, Ionicons  , FontAwesome5, FontAwesome} from '@expo/vector-icons'; 
-import { Stack, useRouter } from 'expo-router';
+import { FontAwesome5, FontAwesome} from '@expo/vector-icons'; 
+import { Stack } from 'expo-router';
 import colors from '../../colors'
 import { StatusBar } from 'expo-status-bar'
 import Calender from './Calender'
 import Setting from './Setting'
 import { TabButton } from '../../components/TabButton';
 import Home from './Home';
+import { WorkoutIcon } from '../../_layout';
 
 const Navigator: FunctionComponent = () => {
   const [activeTab, setActiveTab] = useState('home');
@@ -25,7 +26,13 @@ const Navigator: FunctionComponent = () => {
 
   return (
     <>
-      <Stack.Screen options={{ title: 'FitTrackr',}}/>
+      <Stack.Screen 
+        options={{ 
+          title: 'FitTrackr',
+          headerRight: () => <WorkoutIcon enabled={true}/>
+
+          }}
+        />
       <StatusBar style="light"/>
 
       {renderTab()}

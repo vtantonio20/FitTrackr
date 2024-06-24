@@ -23,6 +23,12 @@ class MuscleGroup(db.Model):
     def __init__(self, name):
         self.name=name
 
+    def __hash__(self):
+        return hash((self.name, self.id))
+
+    def __eq__(self, other):
+        return (self.name, self.id) == (other.name, other.id)
+    
     def to_dict(self):
         return {
             "id": self.id,

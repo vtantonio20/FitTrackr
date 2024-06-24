@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useMemo } from "react";
-import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise } from "../api";
+import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise, doUpdateWorkout } from "../api";
 import { Muscle } from "./SuggestionQueries";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
@@ -30,9 +30,9 @@ export interface Workout {
 interface PostWorkout {
   name: string;
   date: Date;
-  isActive: boolean;
+  is_active: boolean;
   id?: number;
-  targetMuscles?: Muscle[]
+  target_muscle_ids?: string[]
   exercises?: WorkoutExercise[]
 }
 
@@ -108,8 +108,21 @@ export const useWorkoutsData = () => {
 
 export const useWorkoutData = (workoutId:any) => {
   const queryClient = useQueryClient();
+  
+  const { data, error, isLoading, refetch } = useQuery(
+    ['workout', workoutId],
+    () => {
+      if (workoutId) {
+        return doFetchWorkout(workoutId);
+      } else {
+        return Promise.resolve(null);  
+      }
+    },
+    // Ensures the query is only ran whenever workoutId is passed in
+    { enabled: !!workoutId }
+  );
 
-  const { data, error, isLoading, refetch } = useQuery('workout', () => doFetchWorkout(workoutId))  
+  // Workout GET request data
   const workout:Workout | undefined = useMemo(() => {
     if (!data) return undefined;
     return {
@@ -132,18 +145,88 @@ export const useWorkoutData = (workoutId:any) => {
   
   // Create Workout
   const createWorkoutMutation = useMutation((data:PostWorkout) => {
+    if (workoutId !== undefined) {
+      return Promise.reject("Cannot create while using another workout");
+    }
     return doCreateWorkout(data);
   })
 
+  const createWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], onSuccess:(msg?:string) => void) => {
+    const newWorkout:PostWorkout = {
+      name:name,
+      date:date,
+      is_active:isActive,
+      target_muscle_ids:targetMuscleIds
+    }
+
+    createWorkoutMutation.mutate(newWorkout, {
+      onSuccess(data) {
+        if (data["invalid"] === "Active Found") {
+          onSuccess("Cannot create workout, you can only have one active workout.");
+          return;
+        }
+        queryClient.invalidateQueries('workouts');
+        onSuccess();
+        refetch();
+      }
+    });
+  })
+
+  // Update Workout
+  const updateWorkoutMutation = useMutation((data:PostWorkout) => {
+    if (workoutId === undefined) {
+      return Promise.reject("No workout ID provided");
+    }
+    return doUpdateWorkout(workoutId, data);
+  })
+
+  const updateWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], onSuccess:(msg?:string) => void) => {
+    const updatedWorkout:PostWorkout = {
+      name:name,
+      date:date,
+      is_active:isActive,
+      target_muscle_ids:targetMuscleIds
+    }
+    
+    updateWorkoutMutation.mutate(updatedWorkout, {
+      onSuccess(data) {
+        if (data["invalid"] === "Active Found") {
+          onSuccess("Cannot create workout, you can only have one active workout.");
+          return;
+        }
+        queryClient.invalidateQueries('workouts');
+        onSuccess();
+        refetch();
+      }
+    });
+  })
+  
+  const deleteWorkoutMutation = useMutation((workoutId:any) => {
+    if (workoutId === undefined) {
+      return Promise.reject("No workout ID provided");
+    }
+    return doDeleteWorkout(workoutId)
+  });
+
+  const deleteWorkout = (onSuccess:() => void) => {
+      deleteWorkoutMutation.mutate(workoutId, {
+        onSuccess(){
+          queryClient.invalidateQueries('workouts');
+          onSuccess();
+        }
+      })
+  }
+
+  // EXERCISE CRUD OPERATIONS
   // Create Workout Exercise
   const createExerciseMutation = useMutation((data: PostWorkoutExercise) => {
-    if (workoutId == null) {
+    if (workoutId === undefined) {
       return Promise.reject("No workout ID provided");
     }
     return doCreateExercise(workoutId, data)
   });
 
-  const addNewExercise = (name:string, setsData:WorkoutSet[], onSuccess:() => void)  => {
+  const createExercise = (name:string, setsData:WorkoutSet[], onSuccess:() => void)  => {
     const newExerciseData:PostWorkoutExercise = {
       name: name,
       id: undefined,
@@ -164,13 +247,13 @@ export const useWorkoutData = (workoutId:any) => {
   
   // Update Workout Exercise
   const updateExerciseMutation = useMutation((data: PostWorkoutExercise) => {
-    if (workoutId == null) {
+    if (workoutId === undefined) {
       return Promise.reject("No workout ID provided");
     }
     return doUpdateExercise(data.id, data)
   });
   
-  const updateExistingExercise = (exerciseId:any, name: string, setsData:WorkoutSet[], onSuccess:() => void) => {
+  const updateExercise = (exerciseId:any, name: string, setsData:WorkoutSet[], onSuccess:() => void) => {
     const newExerciseData:PostWorkoutExercise = {
       name: name,
       id: exerciseId,
@@ -190,7 +273,7 @@ export const useWorkoutData = (workoutId:any) => {
   }
 
   const deleteExerciseMutation = useMutation((exerciseId: any) => {
-    if (workoutId == null) {
+    if (workoutId === undefined) {
       return Promise.reject("No workout ID provided");
     }
     return doDeleteExercise(exerciseId)
@@ -204,30 +287,16 @@ export const useWorkoutData = (workoutId:any) => {
       },
     })
   }
-  
-  const deleteWorkoutMutation = useMutation((workoutId:any) => {
-    if (workoutId == null) {
-      return Promise.reject("No workout ID provided");
-    }
-    return doDeleteWorkout(workoutId)
-  });
-
-  const deleteWorkout = (onSuccess:() => void) => {
-      deleteWorkoutMutation.mutate(workoutId, {
-        onSuccess(){
-          queryClient.invalidateQueries('workouts');
-          onSuccess();
-        }
-      })
-  }
 
   return {
     workout,
     error,
     isLoading,
-    addNewExercise,
-    updateExistingExercise,
-    deleteExercise,
-    deleteWorkout
+    createWorkout,
+    updateWorkout,
+    deleteWorkout,
+    createExercise,
+    updateExercise,
+    deleteExercise
   }
 }

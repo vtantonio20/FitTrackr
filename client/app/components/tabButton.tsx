@@ -4,7 +4,6 @@ import { FontAwesome5, MaterialIcons } from '@expo/vector-icons';
 import { FunctionComponent } from 'react';
 import { Text } from "react-native";
 import colors from '../colors';
-import { TouchableHighlight } from 'react-native';
 
 const buttonHeight = 32
 interface Props {  

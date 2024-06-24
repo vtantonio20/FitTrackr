@@ -50,23 +50,7 @@ export const MUSCLEMAP = {
     Shins: "#fdfdfd",
     Calves: "#fefefe",
     Foot: "#ffffff"
-  }
-export const fakeData = [
-    { day: 'Monday', workoutName: 'Quads & Glutes', date: new Date(), id:'1' },
-    { day: 'Wednesday', workoutName: 'Chest & Bi', date: new Date(), id:'2' },
-    { day: 'Friday', workoutName: 'Shoulders', date: new Date(), id: '3' },
-    { day: 'Thursday', workoutName: 'ASS DAY', date: new Date(), id: '4' },
-    { day: 'Tuesday', workoutName: 'Legs', date: new Date(), id: '5' },
-    { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '6' },
-    { day: 'Monday', workoutName: 'Quads & Glutes', date: new Date(), id:'7' },
-    { day: 'Wednesday', workoutName: 'Chest & Bi', date: new Date(), id:'8' },
-    { day: 'Friday', workoutName: 'Shoulders', date: new Date(), id: '9' },
-    { day: 'Thursday', workoutName: 'ASS DAY', date: new Date(), id: '10' },
-    { day: 'Tuesday', workoutName: 'Legs', date: new Date(), id: '50' },
-    { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '60' },
-    { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '66' },
-    { day: 'Monday', workoutName: 'Back & Bi', date: new Date(), id: '65' }
-]; 
+}
 
 export const fonts = {
     "Lato-Bold": require("../assets/fonts/Lato/Lato-Bold.ttf"),

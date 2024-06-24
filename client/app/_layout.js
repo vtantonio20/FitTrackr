@@ -5,14 +5,13 @@ import { FontAwesome5, AntDesign } from '@expo/vector-icons';
 import { TouchableOpacity, Text, View } from "react-native";
 import { useFonts } from "expo-font";
 import Loading from "./screens/loading/Loading";
-import React, { useState } from 'react'
-import { WorkoutContext } from "./contexts/workoutContext";
+import React from 'react'
 import { fonts } from "./utilities";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 export const WorkoutIcon = (props) => {
     const router = useRouter();
-    const handleWidgetPress = () => props.enabled && router.push('/screens/modals/CreateWorkout');
+    const handleWidgetPress = () => props.enabled && router.push('/screens/modals/Workout');
     const iconColor = props.enabled ? colors.yellow : colors.secondary;
     
     return (
