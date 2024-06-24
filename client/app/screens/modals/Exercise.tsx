@@ -25,7 +25,7 @@ const Exercise: FunctionComponent = (props:any) => {
     }
   })
   // The setIn if in edit, if in create mode, empty array
-  const sets = exercise ? (exercise.sets ? exercise.sets : []) : [];
+  const sets = (exercise && exercise.sets) ? exercise.sets : [];
   // The targetMuscles from the workout
   const targetMuscles = workout?.targetMuscles?.map((muscle:Muscle) =>  muscle ) ?? [];
   

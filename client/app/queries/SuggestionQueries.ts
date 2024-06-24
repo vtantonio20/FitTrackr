@@ -40,6 +40,8 @@ export const useMuscleSuggestionData = () => {
   }
 }
 
+// TODO: add some error handling for whenever undefined muscle is passed
+// or dont allow it to happen
 export const useExerciseSuggestionsFromMuscle = (muscleIn:Muscle) => {
   const [muscle, setMuscle] = useState(muscleIn);
   const { data, error, isLoading, refetch } = useQuery(
