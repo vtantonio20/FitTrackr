@@ -2,7 +2,7 @@ import React, { FunctionComponent, useEffect, useState } from 'react'
 import { View, Text, TouchableOpacity, StyleSheet, TextInput, FlatList, ScrollView } from 'react-native'
 import colors from '../../colors'
 import styles from "../../style";
-import { AntDesign } from '@expo/vector-icons'; 
+import { AntDesign,Entypo } from '@expo/vector-icons'; 
 import { Controller, useForm } from 'react-hook-form';
 import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist'
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
@@ -10,9 +10,9 @@ import { dateToDDMMYY } from '../../utilities';
 import { WorkoutIcon } from '../../_layout';
 import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
-import { Muscle, useExerciseSuggestionsFromMuscle } from '../../queries/SuggestionQueries';
+import { Exercise, Muscle, useExerciseSuggestionsFromMuscle } from '../../queries/SuggestionQueries';
 
-const Exercise: FunctionComponent = (props:any) => {
+const ExerciseFC: FunctionComponent = (props:any) => {
   const {workoutId, exerciseId} = useLocalSearchParams();
   const router = useRouter();
 
@@ -32,11 +32,11 @@ const Exercise: FunctionComponent = (props:any) => {
   // Form handling
   const [focusOn, setFocusOn] = useState('');
   const changeFocus = (to: string) => setFocusOn(to);
-  const { control, setValue, getValues } = useForm({defaultValues: { exerciseName: exercise ? exercise.name : ''}});
+  const { control, setValue, getValues, watch } = useForm({defaultValues: { exerciseName: exercise ? exercise.name : ''}});
 
   // Exercise Suggestions Handling
   const [isShowingModal, setIsShowingModal] = useState(false);
-  const exerciseSuggestions = useExerciseSuggestionsFromMuscle(targetMuscles[0]);
+  const exerciseSuggestions = useExerciseSuggestionsFromMuscle(targetMuscles ? targetMuscles[0] : undefined);
   
   // Submit Functionality
   const [errorMessage, setErrorMessage] = useState<string>();
@@ -90,51 +90,77 @@ const Exercise: FunctionComponent = (props:any) => {
       />
     <ScrollView style={[styles.modalContainer]}>
       <View style={styles.containerWrapper}>
+
+        {/* Error Messages */}
         { errorMessage &&
           <View>
             <Text style={{paddingTop:14, color:colors.red}}>{errorMessage}</Text>
           </View>
         }
+
+        {/* Header */}
         <View style={styles.widgetHeader}>
           <Text style={styles.h3}>Exercise Details</Text>
           <Text style={[styles.h4, styles.lighterFont]}>{workout?.date && dateToDDMMYY(workout.date)}</Text>
         </View>
       
-        <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
-            <Text style={form.elementHeader}>Name: </Text>
-            <InitActionModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
-        </View>
-          
-        <Controller
-          name="exerciseName"
-          control={control}
-          rules={{required:true}}
-          render={({ field: { onChange, onBlur, value } }) => (
-            <TextInput
-              style={[form.formTextArea, (focusOn === 'name') && form.focusedInput]}
-              onChangeText={onChange}
-              value={value}
-              placeholder={'Name of Exercise'}
-              onBlur={() => changeFocus('')}
-              onChange={onChange}
-              onFocus={() => changeFocus('name')}
-              />
-          )}
-        />
-        <FlatList
-          horizontal={true}
-          data={exerciseSuggestions.exerciseData}
-          renderItem={({ item }) => (
-            <TouchableOpacity style={form.suggestion} onPress={() => {setValue("exerciseName", item.name)}}>
-                <Text style={[styles.p, { paddingRight: 1.5 }]}>{item.name}</Text>
-            </TouchableOpacity>
-          )}
-        />
+        {/* Suggested Exercises Section */}
+        { exerciseSuggestions.muscle &&
+          <>
+            <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
+                <Text style={form.elementHeader}>Name: </Text>
+                <InitActionModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
+            </View>
+              
+            <Controller
+              name="exerciseName"
+              control={control}
+              rules={{required:true}}
+              render={({ field: { onChange, onBlur, value } }) => (
+                <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:'center'}}>
+                  <TextInput
+                    style={[form.formTextArea, (focusOn === 'name') && form.focusedInput , {flexGrow:1}]}
+                    onChangeText={onChange}
+                    value={value}
+                    placeholder={'Name of Exercise'}
+                    onBlur={() => changeFocus('')}
+                    onChange={onChange}
+                    onFocus={() => changeFocus('name')}
+                  />
+                  <TouchableOpacity onPress={() => setValue("exerciseName", "")}>
+                    <Entypo style={{paddingLeft:7}} name="erase" size={24} color={colors.primary} />
+                  </TouchableOpacity>
+                </View>
+
+                
+              )}
+            />
+            {/* The suggestion list */}
+            <FlatList
+              horizontal={true}
+              // data={exerciseSuggestions.exerciseData}
+              data={exerciseSuggestions.exerciseData?.filter((exercise: Exercise) => {
+                  const inputtedText = watch("exerciseName").toLowerCase();
+                  return inputtedText !== "" ? exercise.name.toLowerCase().startsWith(inputtedText) : exercise.name;
+                })
+              }
+              renderItem={({ item }) => (
+                <TouchableOpacity style={form.suggestion} onPress={() => {setValue("exerciseName", item.name)}}>
+                    <Text style={[styles.p, { paddingRight: 1.5 }]}>{item.name}</Text>
+                </TouchableOpacity>
+              )}
+            />
+          </>
+        }
+
+        {/* Sets Component */}
         <SetInput setsData={sets} onSubmitSetsData={onSubmitForm}/>
+
+        {/* Target Muscle Modal */}
         {isShowingModal && (
           <ActionSelectionModal
           title={'Select Target Muscle'}
-          onExitPress={() => setIsShowingModal(false)}
+          onExitPress={() => {setIsShowingModal(false); setValue("exerciseName", "")}}
           selections={targetMuscles.map((muscle:Muscle) => {
             return {text:muscle.name, action:() => {exerciseSuggestions.changeMuscle(muscle)}}
           })}
@@ -260,7 +286,7 @@ const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
   )
 }
 
-export default Exercise;
+export default ExerciseFC;
 const form = StyleSheet.create({
   imageContainer: {
     justifyContent: 'center',

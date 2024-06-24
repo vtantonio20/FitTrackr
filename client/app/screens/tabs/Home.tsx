@@ -148,17 +148,22 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
   const getDaysList = () => {
     const dates = [];
     const getLastSunday = () => {
-      // Calculate how many days to add to reach the next Sunday
-      let today = new Date();
-      let daysToAddForLastSunday = today.getDay() - 6;
-      let lastSunday = new Date(today.getTime() + daysToAddForLastSunday * 24 * 60 * 60 * 1000);
-      return lastSunday;
+      const today = new Date();
+      const currentDay = today.getDay();
+      const offsetToLastSunday = (currentDay + 7) % 7;
+      const lastSundayDate = new Date(today);
+      lastSundayDate.setDate(today.getDate() - offsetToLastSunday);
+      return lastSundayDate;
     }
     for (let i = 0; i <= 6; i++) {
       const pastDate = new Date();
       pastDate.setDate(getLastSunday().getDate() + i);
       dates.push(pastDate.toISOString().split('T')[0]);
     }
+
+    dates.sort((d1,d2) => {
+      return(new Date(d1).getDate() - new Date(d2).getDate());
+    })
     return dates;
   }
 
@@ -188,7 +193,6 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
     const numberOfWorkouts = dayWorkout.workouts.length;
 
     if (numberOfWorkouts === 0) {
-      console.log('add workout')
       return;
     }
     if (numberOfWorkouts === 1) {
@@ -230,7 +234,15 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
     <>
       <View style={styles.widgetHeader}>
         <Text style={styles.h3}>This Week</Text>
-        {/* <InitActionModalButton onPress={() => handleShowModalComponent(true)} showing={isShowingModal} text={'Time Frame'}  /> */}
+        <View style={{flexDirection:'row'}} >
+          <TouchableOpacity>
+            <AntDesign style={{paddingHorizontal:3.5}} name="leftcircleo" size={20} color={colors.lighter} />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <AntDesign style={{paddingHorizontal:3.5}} name="rightcircleo" size={20} color={colors.lighter} />
+          </TouchableOpacity>
+        </View>
+        {/* <InitActionModalButton onPress={() =>  {}} showing={true} text={'Time Frame'}  /> */}
       </View>
       <View style={[styles.divider, {borderColor:colors.primary, borderRadius: 7}]}>
         {dayWorkoutMap && days.map((day:string, index:number) => {

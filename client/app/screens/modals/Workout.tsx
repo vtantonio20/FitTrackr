@@ -8,7 +8,7 @@ import { View, Text, StyleSheet, ScrollView, TextInput, Switch, TouchableOpacity
 import colors from "../../colors";
 import styles from "../../style";
 import { WorkoutIcon } from "../../_layout";
-import { MaterialCommunityIcons, SimpleLineIcons } from '@expo/vector-icons';
+import { MaterialCommunityIcons, SimpleLineIcons, Entypo } from '@expo/vector-icons';
 import { DatePicker } from "../../components/DatePicker";
 import { ActionSelectionModal, InitActionModalButton } from "../../components/Modal";
 import { Bubble } from "../../components/Bubble";
@@ -153,15 +153,21 @@ export const Workout: FunctionComponent = () => {
                 control={control}
                 rules={{ required: false }}
                 render={({ field: { onChange, value } }) => (
-                  <TextInput
-                    style={{ color: colors.lighter, flexGrow: 1 }}
-                    onFocus={() => changeFocus('name')}
-                    onBlur={() => changeFocus('')}
-                    onChangeText={onChange}
-                    value={value}
-                    placeholder={"Name your Workout"}
-                    placeholderTextColor={"rgba(255, 255, 255, 0.54)"}
-                  />
+                  <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:'center'}}>
+
+                    <TextInput
+                      style={{ color: colors.lighter, flexGrow: 1 }}
+                      onFocus={() => changeFocus('name')}
+                      onBlur={() => changeFocus('')}
+                      onChangeText={onChange}
+                      value={value}
+                      placeholder={"Name your Workout"}
+                      placeholderTextColor={"rgba(255, 255, 255, 0.54)"}
+                    />
+                    {/* <TouchableOpacity onPress={() => setValue("workoutName", "")}>
+                      <Entypo style={{padding:7}} name="erase" size={24} color={colors.primary} />
+                    </TouchableOpacity> */}
+                  </View>
                 )}
               />
             </View>
