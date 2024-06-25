@@ -96,6 +96,48 @@ with app.app_context():
         next_sunday = today + timedelta(days=days_to_add)
         return next_sunday
     
+    @app.route("/active-workout")
+    def get_active_workout():
+        active_workout = Workout.query.filter_by(is_active=True).first()
+        if not active_workout:
+            return ('', 204)
+        else:
+            return active_workout.to_dict(), 200
+
+    #ex route: /inactive-workouts?start_date=2024-06-20T04:14:04.422Z&end_date=2024-06-25T04:14:04.422Z
+    @app.route("/inactive-workouts")
+    def get_inactive_workouts():
+        start_date_in = request.args.get('start_date')
+        end_date_in = request.args.get('end_date')
+
+        if start_date_in:
+            try:
+                start_date = datetime.fromisoformat(start_date_in.replace('Z', ''))
+            except ValueError:
+                return jsonify({"error": "Invalid date format for start_date"}), 400
+        else:
+            start_date = find_next_sunday() - timedelta(days=7)
+        
+        if end_date_in:
+            try:
+                end_date = datetime.fromisoformat(end_date_in.replace('Z', ''))
+            except ValueError:
+                return jsonify({"error": "Invalid date format for end_date"}), 400
+        else:
+            end_date = find_next_sunday()
+
+        # Convert dates to the correct format for the query
+        start_date_str = start_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+        end_date_str = end_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+
+        inactive_workouts = Workout.query.filter(
+            Workout.is_active == False,
+            Workout.date >= start_date_str,
+            Workout.date < end_date_str
+        ).all()
+        return [w.to_dict_condensed() for w in inactive_workouts]
+
+
     @app.route("/workouts")
     def get_workouts():
         # default will be to get workouts in the past 7 days

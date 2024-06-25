@@ -12,6 +12,21 @@ export const doFetchWorkouts = async () => {
     return response.data;
 }
 
+export const doFetchActiveWorkout = async () => {
+    const response = await axios.get(`${API_URL}/active-workout`);
+    return response.data;
+}
+
+export const doFetchInactiveWorkouts = async (startDate, endDate) => {
+    const response = await axios.get(`${API_URL}/inactive-workouts`, {
+        params: {
+            start_date: startDate,
+            end_date: endDate
+        }
+    });
+    return response.data;
+}
+
 export const doCreateWorkout = async (workoutData) => {
     const response = await axios.post(`${API_URL}/create-workout`, workoutData);
     return response.data;

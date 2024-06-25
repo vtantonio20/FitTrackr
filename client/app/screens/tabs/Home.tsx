@@ -1,14 +1,14 @@
-import React, { FunctionComponent, useState } from 'react'
+import React, { FunctionComponent, useEffect, useMemo, useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import colors from '../../colors';
 import styles from "../../style"
-import { Feather , AntDesign } from '@expo/vector-icons'; 
+import { Feather , AntDesign, Ionicons } from '@expo/vector-icons'; 
 import { useRouter } from 'expo-router';
 import { dateToDDMMYY, dateToWD } from '../../utilities';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
-import { Workout, useWorkoutsData } from '../../queries/WorkoutQueries';
+import { Workout, useActiveWorkoutData, useInactiveWorkoutData } from '../../queries/WorkoutQueries';
 
 interface HomeWidgetProps {
   onRenderModal:any;
@@ -16,45 +16,20 @@ interface HomeWidgetProps {
   showing:any;
 }
 
-interface ActiveWidgetProps extends HomeWidgetProps {
-  activeWorkout:Workout,
-}
-
 interface RecentsWidgetProps extends HomeWidgetProps {
   inactiveWorkouts:Workout[]
 }
 
 const Home: FunctionComponent = () => {
-  const router = useRouter();
-
   const [modalComponent, setModalComponent] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const workoutsData = useWorkoutsData();
-
-  if (workoutsData.isLoading) {
-    return <View><Text>Loading...</Text></View>;
-  }
-
-  if (workoutsData.error) {
-    console.error('Error fetching workout data:', workoutsData.error);
-    return <View><Text>Error loading data</Text></View>;
-  }
-
   return (
     <>
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
-          {workoutsData.activeWorkout ?
-            <ActiveWidget activeWorkout={workoutsData.activeWorkout} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
-          :
-          <TouchableOpacity style={[styles.widgetBody,{marginTop:14}]} onPress={() => router.push('/screens/modals/Workout')}>
-              <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
-                <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
-                <AntDesign name="plus" size={28} color={colors.yellow} />
-              </View>
-            </TouchableOpacity> 
-          }
-          <RecentDaysWidget inactiveWorkouts={workoutsData.inactiveWorkouts} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+            <ActiveWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+
+          <RecentDaysWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
         </View>
       </ScrollView>
       {showModal && modalComponent}
@@ -62,17 +37,18 @@ const Home: FunctionComponent = () => {
   )
 }
 
-const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
+const ActiveWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
-  const workoutsData = useWorkoutsData();
-  // The active workout. Could prolly change this to not be a prop.
-  const activeWorkout = props.activeWorkout; 
+  const workoutsData = useActiveWorkoutData();
+  const activeWorkout = workoutsData.activeWorkout; 
   // The muscle map
-  const muscleMapSvg = useMuscleSvg(activeWorkout.targetMuscles || []);
+  const muscleMapSvg = useMuscleSvg((activeWorkout && activeWorkout.targetMuscles) ? activeWorkout.targetMuscles : []);
 
   // Edit, Clone, Delete Routes
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [isShowingModal, setIsShowingModal] = useState(false)
   const handleShowModalComponent = (show:boolean) => {
+    if (!activeWorkout) return
     setIsShowingModal(show);
     props.onToggleModal(show);
     props.onRenderModal(
@@ -88,17 +64,16 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
     ) 
   }
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const renderDeleteModal = () => {
+  if (!activeWorkout) {
     return (
-      <ActionSelectionModal
-        title={"Are you sure you want to delete this Workout?"}
-        onExitPress={() => setShowDeleteModal(false)}
-        selections={[
-          {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => {workoutsData.deleteActiveWorkout()}},
-          {text:'Cancel', action: () => console.log("Cancel")}
-        ]}
-      />
+      <>
+        <TouchableOpacity style={[styles.widgetBody,{marginTop:14}]} onPress={() => router.push('/screens/modals/Workout')}>
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
+            <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
+            <AntDesign name="plus" size={28} color={colors.yellow} />
+          </View>
+        </TouchableOpacity> 
+      </>
     )
   }
 
@@ -110,29 +85,32 @@ const ActiveWidget: FunctionComponent<any> = (props:ActiveWidgetProps) => {
       </View>
       <TouchableOpacity style={styles.widgetBody} onPress={() => router.push({ pathname: '/screens/modals/Log', params: {workoutId:activeWorkout.id}})}>
         <View >
-          {activeWorkout.isActive ? 
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
-              <View style={{}}>
-                <Text style={[styles.h3]}>{activeWorkout.name && activeWorkout.name}</Text>
-                <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{activeWorkout.date && dateToWD(activeWorkout.date)}</Text> 
-                <Text style={[styles.h4, styles.lighterFont, { }]}>{activeWorkout.date && dateToDDMMYY(activeWorkout.date)}</Text> 
-              </View>
-              <MuscleMap width={150} height={150}  {...muscleMapSvg} />
+          <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", padding: 14, }}>
+            <View style={{}}>
+              <Text style={[styles.h3]}>{activeWorkout.name && activeWorkout.name}</Text>
+              <Text style={[styles.h4, styles.lighterFont, { lineHeight: 28 }]}>{activeWorkout.date && dateToWD(activeWorkout.date)}</Text> 
+              <Text style={[styles.h4, styles.lighterFont, { }]}>{activeWorkout.date && dateToDDMMYY(activeWorkout.date)}</Text> 
             </View>
-          : 
-            <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
-              <Text style={[styles.h4, { lineHeight: 28 }]}>Begin new workout</Text>
-              <AntDesign name="plus" size={28} color={colors.yellow} />
-            </View> 
-          }
+            <MuscleMap width={150} height={150}  {...muscleMapSvg} />
+          </View>
         </View>
-
-        {showDeleteModal && renderDeleteModal()}
-
       </TouchableOpacity>
+
+      {showDeleteModal && (
+          <ActionSelectionModal
+          title={"Are you sure you want to delete this Workout?"}
+          onExitPress={() => setShowDeleteModal(false)}
+          selections={[
+            {text:'Confirm Delete', textStyle:{color:colors.red}, action: () => {workoutsData.deleteActiveWorkout()}},
+            {text:'Cancel', action: () => console.log("Cancel")}
+          ]}
+        />
+      )}
+
     </>
   );
 }
+
 
 interface WorkoutDay {
   id: number,
@@ -140,19 +118,21 @@ interface WorkoutDay {
   day: string
 }
 
-const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
-  const inactiveWorkouts = props.inactiveWorkouts;
+const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
-  
+  const inactiveWorkoutData = useInactiveWorkoutData();
+  const inactiveWorkouts = inactiveWorkoutData.inactiveWorkouts;
+  const [week, setWeek] = useState(new Date())
+
   // Getting the days of the week
-  const getDaysList = () => {
+  const daysList = useMemo(() => {
     const dates = [];
     const getLastSunday = () => {
-      const today = new Date();
-      const currentDay = today.getDay();
+      const firstDay = week;
+      const currentDay = firstDay.getDay();
       const offsetToLastSunday = (currentDay + 7) % 7;
-      const lastSundayDate = new Date(today);
-      lastSundayDate.setDate(today.getDate() - offsetToLastSunday);
+      const lastSundayDate = new Date(firstDay);
+      lastSundayDate.setDate(firstDay.getDate() - offsetToLastSunday);
       return lastSundayDate;
     }
     for (let i = 0; i <= 6; i++) {
@@ -164,12 +144,14 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
     dates.sort((d1,d2) => {
       return(new Date(d1).getDate() - new Date(d2).getDate());
     })
+    inactiveWorkoutData.changeTimeFrame(new Date(dates[0]), new Date(dates[6]));
     return dates;
-  }
+  }, [week])
 
-  const buildDayToWorkoutMap = (inactiveWorkouts:Workout[], days:string[]) => {
+  const dayWorkoutMap = useMemo(() => {
     const map: Record<string, WorkoutDay> = {};
-    for (const day of days) {
+    if (!inactiveWorkouts) return map;
+    for (const day of daysList) {
       if (!map[day]){
         map[day] = {
           workouts:[],
@@ -184,9 +166,8 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
       }
     }
     return map;
-  };
+  }, [inactiveWorkoutData])
 
-  const dayWorkoutMap = buildDayToWorkoutMap(inactiveWorkouts, getDaysList());
   const days = Object.keys(dayWorkoutMap);
 
   const handleWorkoutOnPress = (dayWorkout:WorkoutDay) => {
@@ -230,20 +211,23 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
       return;
     }
   }
+
   return (
     <>
+    {/* Header and Forward and Back Arrows */}
       <View style={styles.widgetHeader}>
         <Text style={styles.h3}>This Week</Text>
         <View style={{flexDirection:'row'}} >
-          <TouchableOpacity>
-            <AntDesign style={{paddingHorizontal:3.5}} name="leftcircleo" size={20} color={colors.lighter} />
+          <TouchableOpacity onPress={() => setWeek(new Date(week.getTime() - 7 * 24 * 60 * 60 *1000))}>
+            <Ionicons style={{paddingHorizontal:7}} name="chevron-back-outline" size={24} color={colors.lighter} />
           </TouchableOpacity>
-          <TouchableOpacity>
-            <AntDesign style={{paddingHorizontal:3.5}} name="rightcircleo" size={20} color={colors.lighter} />
+          <TouchableOpacity onPress={() => setWeek(new Date(week.getTime() + 7 * 24 * 60 * 60 *1000))}>
+            <Ionicons style={{paddingHorizontal:7}} name="chevron-forward-outline" size={24} color={colors.lighter} />
           </TouchableOpacity>
         </View>
-        {/* <InitActionModalButton onPress={() =>  {}} showing={true} text={'Time Frame'}  /> */}
       </View>
+
+      {/* Day Cards */}
       <View style={[styles.divider, {borderColor:colors.primary, borderRadius: 7}]}>
         {dayWorkoutMap && days.map((day:string, index:number) => {
           const determineWorkoutString = (dayWorkout:WorkoutDay) => {
@@ -269,7 +253,6 @@ const RecentDaysWidget: FunctionComponent<any> = (props:RecentsWidgetProps) => {
           );
         })}
       </View>
-
     </>
   );
 }

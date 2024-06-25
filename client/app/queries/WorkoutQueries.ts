@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "react-query"
-import { useMemo } from "react";
-import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise, doUpdateWorkout } from "../api";
+import { useMemo, useState } from "react";
+import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchActiveWorkout, doFetchInactiveWorkouts, doFetchWorkout, doFetchWorkouts, doUpdateExercise, doUpdateWorkout } from "../api";
 import { Muscle } from "./SuggestionQueries";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
@@ -48,35 +48,20 @@ interface PostWorkoutExercise {
   id:number | undefined;
 }
 
-export const useWorkoutsData = () => {
+export const useActiveWorkoutData = () => {
   const queryClient = useQueryClient();
 
-  const { data, error, isLoading, refetch } = useQuery('workouts', doFetchWorkouts)
+  const { data, error, isLoading, refetch } = useQuery('active-workout', doFetchActiveWorkout)
 
   const activeWorkout:Workout | undefined = useMemo(() => {
     if (!data) return undefined;
-    const activeWorkoutData = data.active_workout;
-    if (activeWorkoutData === null) return undefined;
     return {
-      name: activeWorkoutData.name,
-      date: new Date(activeWorkoutData.date),
-      isActive: activeWorkoutData.is_active,
-      id: activeWorkoutData.id,
-      targetMuscles: activeWorkoutData.target_muscles.map((muscle: Muscle) => muscle),
+      name: data.name,
+      date: new Date(data.date),
+      isActive: data.is_active,
+      id: data.id,
+      targetMuscles: data.target_muscles.map((muscle: Muscle) => muscle),
     };
-  }, [data]);
-
-  const inactiveWorkouts:Workout[] = useMemo(() => {
-    if (!data) return undefined;
-    const inactiveWorkoutData = data.inactive_workouts;
-    return inactiveWorkoutData
-      ? inactiveWorkoutData.map((inactiveWorkoutData:any):Workout => ({
-          name: inactiveWorkoutData.name,
-          date: new Date(inactiveWorkoutData.date),
-          isActive: inactiveWorkoutData.is_active,
-          id: inactiveWorkoutData.id
-        }))
-      : [];
   }, [data]);
 
   const deleteActiveWorkoutMutation = useMutation((activeWorkout:Workout | undefined) => {
@@ -87,22 +72,53 @@ export const useWorkoutsData = () => {
   });
 
   const deleteActiveWorkout = () => {
-      deleteActiveWorkoutMutation.mutate((activeWorkout), {
-        onSuccess(){
-          queryClient.invalidateQueries('workout');
-          refetch();
-        }
-      })
+    deleteActiveWorkoutMutation.mutate((activeWorkout), {
+      onSuccess(){
+        queryClient.invalidateQueries('workout');
+        refetch();
+      }
+    })
   }
-
-
   return {
     activeWorkout,
-    inactiveWorkouts,
     error,
     isLoading,
     refetch,
     deleteActiveWorkout
+  }
+}
+
+export const useInactiveWorkoutData = (startDateIn?:Date, endDateIn?:Date) => {
+  const [startDate, setStartDate] = useState(startDateIn)
+  const [endDate, setEndDate] = useState(endDateIn)
+
+  const { data, error, isLoading, refetch } = useQuery(
+    ['inactive-workouts', startDate, endDate],
+    () => doFetchInactiveWorkouts(startDate, endDate),
+  )
+
+  const inactiveWorkouts:Workout[] = useMemo(() => {
+    if (!data) return undefined;
+    return data.map((inactiveWorkoutData:any):Workout => ({
+      name: inactiveWorkoutData.name,
+      date: new Date(inactiveWorkoutData.date),
+      isActive: inactiveWorkoutData.is_active,
+      id: inactiveWorkoutData.id
+    }))
+  }, [data]);
+
+  const changeTimeFrame = (startDateIn:Date, endDateIn:Date) => {
+    setStartDate(startDateIn);
+    setEndDate(endDateIn);
+    refetch();
+  }
+
+  return {
+    inactiveWorkouts,
+    error,
+    isLoading,
+    refetch,
+    changeTimeFrame
   }
 }
 
@@ -165,7 +181,8 @@ export const useWorkoutData = (workoutId:any) => {
           onSuccess("Cannot create workout, you can only have one active workout.");
           return;
         }
-        queryClient.invalidateQueries('workouts');
+        queryClient.invalidateQueries('active-workout');
+        queryClient.invalidateQueries('inactive-workouts');
         onSuccess();
         refetch();
       }
@@ -194,7 +211,8 @@ export const useWorkoutData = (workoutId:any) => {
           onSuccess("Cannot create workout, you can only have one active workout.");
           return;
         }
-        queryClient.invalidateQueries('workouts');
+        queryClient.invalidateQueries('active-workout');
+        queryClient.invalidateQueries('inactive-workouts');
         onSuccess();
         refetch();
       }
@@ -211,7 +229,8 @@ export const useWorkoutData = (workoutId:any) => {
   const deleteWorkout = (onSuccess:() => void) => {
       deleteWorkoutMutation.mutate(workoutId, {
         onSuccess(){
-          queryClient.invalidateQueries('workouts');
+          queryClient.invalidateQueries('active-workout');
+          queryClient.invalidateQueries('inactive-workouts');
           onSuccess();
         }
       })
@@ -300,3 +319,62 @@ export const useWorkoutData = (workoutId:any) => {
     deleteExercise
   }
 }
+
+
+// export const useWorkoutsData = () => {
+//   const queryClient = useQueryClient();
+
+//   const { data, error, isLoading, refetch } = useQuery('workouts', doFetchWorkouts)
+
+//   const activeWorkout:Workout | undefined = useMemo(() => {
+//     if (!data) return undefined;
+//     const activeWorkoutData = data.active_workout;
+//     if (activeWorkoutData === null) return undefined;
+//     return {
+//       name: activeWorkoutData.name,
+//       date: new Date(activeWorkoutData.date),
+//       isActive: activeWorkoutData.is_active,
+//       id: activeWorkoutData.id,
+//       targetMuscles: activeWorkoutData.target_muscles.map((muscle: Muscle) => muscle),
+//     };
+//   }, [data]);
+
+//   const inactiveWorkouts:Workout[] = useMemo(() => {
+//     if (!data) return undefined;
+//     const inactiveWorkoutData = data.inactive_workouts;
+//     return inactiveWorkoutData
+//       ? inactiveWorkoutData.map((inactiveWorkoutData:any):Workout => ({
+//           name: inactiveWorkoutData.name,
+//           date: new Date(inactiveWorkoutData.date),
+//           isActive: inactiveWorkoutData.is_active,
+//           id: inactiveWorkoutData.id
+//         }))
+//       : [];
+//   }, [data]);
+
+//   const deleteActiveWorkoutMutation = useMutation((activeWorkout:Workout | undefined) => {
+//     if (activeWorkout === undefined) {
+//       return Promise.reject("No workout ID provided");
+//     }
+//     return doDeleteWorkout(activeWorkout.id)
+//   });
+
+//   const deleteActiveWorkout = () => {
+//     deleteActiveWorkoutMutation.mutate((activeWorkout), {
+//       onSuccess(){
+//         queryClient.invalidateQueries('workout');
+//         refetch();
+//       }
+//     })
+//   }
+
+
+//   return {
+//     activeWorkout,
+//     inactiveWorkouts,
+//     error,
+//     isLoading,
+//     refetch,
+//     deleteActiveWorkout
+//   }
+// }
