@@ -13,6 +13,17 @@ export const dateToWD = (f: Date) => {
     return daysOfTheWeek[f.getDay()];
 }
 
+// Gets the last sunday from date at 12 am.
+export const getLastSundayFromDate = (date: Date) => {
+    const firstDay = date;
+    const currentDay = firstDay.getDay();
+    const offsetToLastSunday = (currentDay + 7) % 7;
+    const lastSundayDate = new Date(firstDay);
+    lastSundayDate.setDate(firstDay.getDate() - offsetToLastSunday);
+    lastSundayDate.setHours(0,0,0,0);
+    return lastSundayDate;
+}
+
 export const muscleSvgProps = (targetMuscles:string[]) => {
     const dynamicProps: { [key: string]: string } = {};
     dynamicProps['Border'] = '#2B2B2B'

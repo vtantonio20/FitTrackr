@@ -1,10 +1,10 @@
-import React, { FunctionComponent, useEffect, useMemo, useState } from 'react'
+import React, { FunctionComponent, useMemo, useState } from 'react'
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native'
 import colors from '../../colors';
 import styles from "../../style"
 import { Feather , AntDesign, Ionicons } from '@expo/vector-icons'; 
 import { useRouter } from 'expo-router';
-import { dateToDDMMYY, dateToWD } from '../../utilities';
+import { dateToDDMMYY, dateToWD, getLastSundayFromDate } from '../../utilities';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
@@ -16,10 +16,6 @@ interface HomeWidgetProps {
   showing:any;
 }
 
-interface RecentsWidgetProps extends HomeWidgetProps {
-  inactiveWorkouts:Workout[]
-}
-
 const Home: FunctionComponent = () => {
   const [modalComponent, setModalComponent] = useState(null)
   const [showModal, setShowModal] = useState(false)
@@ -27,8 +23,7 @@ const Home: FunctionComponent = () => {
     <>
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
-            <ActiveWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
-
+          <ActiveWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
           <RecentDaysWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
         </View>
       </ScrollView>
@@ -122,29 +117,22 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
   const inactiveWorkoutData = useInactiveWorkoutData();
   const inactiveWorkouts = inactiveWorkoutData.inactiveWorkouts;
-  const [week, setWeek] = useState(new Date())
+  const [week, setWeek] = useState(getLastSundayFromDate(new Date()))
 
   // Getting the days of the week
   const daysList = useMemo(() => {
     const dates = [];
-    const getLastSunday = () => {
-      const firstDay = week;
-      const currentDay = firstDay.getDay();
-      const offsetToLastSunday = (currentDay + 7) % 7;
-      const lastSundayDate = new Date(firstDay);
-      lastSundayDate.setDate(firstDay.getDate() - offsetToLastSunday);
-      return lastSundayDate;
-    }
     for (let i = 0; i <= 6; i++) {
       const pastDate = new Date();
-      pastDate.setDate(getLastSunday().getDate() + i);
-      dates.push(pastDate.toISOString().split('T')[0]);
+      pastDate.setDate(getLastSundayFromDate(week).getDate() + i);
+      dates.push(pastDate)
     }
 
     dates.sort((d1,d2) => {
-      return(new Date(d1).getDate() - new Date(d2).getDate());
+      return(d1.getDay() - d2.getDay());
     })
-    inactiveWorkoutData.changeTimeFrame(new Date(dates[0]), new Date(dates[6]));
+    
+    inactiveWorkoutData.changeTimeFrame(dates[0], dates[6]);
     return dates;
   }, [week])
 
@@ -152,23 +140,29 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
     const map: Record<string, WorkoutDay> = {};
     if (!inactiveWorkouts) return map;
     for (const day of daysList) {
-      if (!map[day]){
-        map[day] = {
+      if (!map[day.toDateString()]){
+        map[day.toDateString()] = {
           workouts:[],
           id: new Date(day).getDay(),
-          day: day
+          day: day.toDateString()
         }
       }
       for (const inactiveWorkout of inactiveWorkouts) {
         if (dateToWD(new Date(day)) === dateToWD(new Date(inactiveWorkout.date))) {
-          map[day].workouts.push(inactiveWorkout)
+          map[day.toDateString()].workouts.push(inactiveWorkout)
         }
       }
     }
     return map;
   }, [inactiveWorkoutData])
 
-  const days = Object.keys(dayWorkoutMap);
+  const handleIncrementWeek = () => {
+    setWeek(new Date(week.getTime() + 7 * 24 * 60 * 60 *1000))
+  }
+  
+  const handleDecrementWeek = () => {
+    setWeek(new Date(week.getTime() - 7 * 24 * 60 * 60 *1000))
+  }
 
   const handleWorkoutOnPress = (dayWorkout:WorkoutDay) => {
     const numberOfWorkouts = dayWorkout.workouts.length;
@@ -191,7 +185,7 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
         if (dayWorkout) {
           props.onRenderModal(
             <ActionSelectionModal
-              title={dateToWD(new Date(dayWorkout.day))}
+              title={new Date(dayWorkout.day).toDateString()}
               onExitPress={() => handleShowModalComponent(false)}
               selections={dayWorkout.workouts.map((w: Workout) => {
                 return {
@@ -218,18 +212,18 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
       <View style={styles.widgetHeader}>
         <Text style={styles.h3}>This Week</Text>
         <View style={{flexDirection:'row'}} >
-          <TouchableOpacity onPress={() => setWeek(new Date(week.getTime() - 7 * 24 * 60 * 60 *1000))}>
-            <Ionicons style={{paddingHorizontal:7}} name="chevron-back-outline" size={24} color={colors.lighter} />
+          <TouchableOpacity onPress={handleDecrementWeek} style={{backgroundColor:colors.primary, padding:3.5, borderTopLeftRadius:7, borderBottomLeftRadius: 7}} >
+            <Ionicons name="chevron-back-outline" size={24} color={colors.lighter} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => setWeek(new Date(week.getTime() + 7 * 24 * 60 * 60 *1000))}>
-            <Ionicons style={{paddingHorizontal:7}} name="chevron-forward-outline" size={24} color={colors.lighter} />
+          <TouchableOpacity onPress={handleIncrementWeek} style={{backgroundColor:colors.primary, padding:3.5, borderTopRightRadius:7, borderBottomRightRadius: 7}}>
+            <Ionicons name="chevron-forward-outline" size={24} color={colors.lighter} />
           </TouchableOpacity>
         </View>
       </View>
 
       {/* Day Cards */}
       <View style={[styles.divider, {borderColor:colors.primary, borderRadius: 7}]}>
-        {dayWorkoutMap && days.map((day:string, index:number) => {
+        {dayWorkoutMap &&  Object.keys(dayWorkoutMap).map((day:string, index:number) => {
           const determineWorkoutString = (dayWorkout:WorkoutDay) => {
             if (!dayWorkout || !dayWorkout.workouts || !dayWorkout.workouts[0])
               return "";
@@ -247,7 +241,7 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
                   workoutName={determineWorkoutString(dayWorkout)}
                   date={dateToDDMMYY(new Date(day))}
                 />
-                {index + 1 !== days.length && <View style={[styles.divider, { borderColor: colors.primary,}]} />}
+                {index + 1 !== Object.keys(dayWorkoutMap).length && <View style={[styles.divider, { borderColor: colors.primary,}]} />}
               </>
             </TouchableOpacity>
           );
