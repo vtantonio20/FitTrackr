@@ -117,7 +117,7 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
   const inactiveWorkoutData = useInactiveWorkoutData();
   const inactiveWorkouts = inactiveWorkoutData.inactiveWorkouts;
-  const [week, setWeek] = useState(getLastSundayFromDate(new Date()))
+  const [week, setWeek] = useState(getLastSundayFromDate(new Date()));
 
   // Getting the days of the week
   const daysList = useMemo(() => {
@@ -183,9 +183,10 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
       const handleShowModalComponent = (show:boolean, dayWorkout?:WorkoutDay) => {
         props.onToggleModal(show);
         if (dayWorkout) {
+          const modalTitle = dateToWD(new Date(dayWorkout.day)) + ", " + dateToDDMMYY(new Date(dayWorkout.day))
           props.onRenderModal(
             <ActionSelectionModal
-              title={new Date(dayWorkout.day).toDateString()}
+              title={modalTitle}
               onExitPress={() => handleShowModalComponent(false)}
               selections={dayWorkout.workouts.map((w: Workout) => {
                 return {

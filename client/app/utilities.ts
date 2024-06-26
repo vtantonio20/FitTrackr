@@ -24,6 +24,18 @@ export const getLastSundayFromDate = (date: Date) => {
     return lastSundayDate;
 }
 
+// Gets the last sunday from date at 12 am.
+export const getNextSundayFromDate = (date: Date) => {
+    const firstDay = date;
+    const currentDay = firstDay.getDay();
+    const offsetToLastSunday = (7 - currentDay) % 7;
+    const lastSundayDate = new Date(firstDay);
+    lastSundayDate.setDate(firstDay.getDate() + offsetToLastSunday);
+    console.log(lastSundayDate)
+    lastSundayDate.setHours(0,0,0,0);
+    return lastSundayDate;
+}
+
 export const muscleSvgProps = (targetMuscles:string[]) => {
     const dynamicProps: { [key: string]: string } = {};
     dynamicProps['Border'] = '#2B2B2B'
