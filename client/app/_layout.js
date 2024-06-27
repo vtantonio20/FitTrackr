@@ -9,11 +9,16 @@ import React from 'react'
 import { fonts } from "./utilities";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
+
+// ios clientid 324981128836-vd4fiuvh0nnmr8pbratf0ajmgupmb9ua.apps.googleusercontent.com
+// android clientid 324981128836-nagdhtog3ai8h09dpc5jd09cgd9astn3.apps.googleusercontent.com
+
 export const WorkoutIcon = (props) => {
     const router = useRouter();
     const handleWidgetPress = () => props.enabled && router.push('/screens/modals/Workout');
     const iconColor = props.enabled ? colors.yellow : colors.secondary;
-    
+
+
     return (
         <TouchableOpacity onPress={handleWidgetPress}>
             <View style={{ paddingHorizontal: 10 }}>

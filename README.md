@@ -7,3 +7,6 @@ flask run --host=0.0.0.0 --debug
 cd client
 npx expo start
 
+build ios
+cd client
+eas build -p ios   ORRR  eas build -p ios --profile development

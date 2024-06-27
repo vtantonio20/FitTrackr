@@ -1,8 +1,12 @@
 {
   "expo": {
-    "scheme": "myapp",
+    "scheme": "fit_trackr",
     "name": "fit_trackr",
     "slug": "fit_trackr",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -16,9 +20,20 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.fitdev.fittrackr",
+      "infoPlist": {
+        "CFBundleURLTypes": [
+          {
+            "CFBundleURLSchemes": [
+              "com.googleusercontent.apps.324981128836-vd4fiuvh0nnmr8pbratf0ajmgupmb9ua "
+            ]
+          }
+        ]
+      }
     },
     "android": {
+      "package": "com.fitdev.fittrackr",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -29,7 +44,16 @@
       "bundler": "metro"
     },
     "plugins": [
-      "expo-font"
-    ]
+      "expo-font",
+      "expo-router"
+    ],
+    "extra": {
+      "router": {
+        "origin": false
+      },
+      "eas": {
+        "projectId": "a5e50969-f794-4b6d-8391-3ba470e2c930"
+      }
+    }
   }
 }
