@@ -4,7 +4,7 @@ import colors from '../../colors';
 import styles from "../../style"
 import { Feather , AntDesign, Ionicons } from '@expo/vector-icons'; 
 import { useRouter } from 'expo-router';
-import { dateToDDMMYY, dateToWD, getLastSundayFromDate } from '../../utilities';
+import { dateToDDMMYY, dateToWD, getDateNumberOfDaysApart, getLastSundayFromDate } from '../../utilities';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
@@ -75,7 +75,7 @@ const ActiveWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   return (
     <>
       <View style={styles.widgetHeader}>
-        <Text style={styles.h3}>Active Workout</Text>
+        <Text style={[styles.h3, {paddingVertical:7}]}>Active Workout</Text>
         <InitActionModalButton onPress={() => handleShowModalComponent(true)} showing={isShowingModal} text={'Options'}  />
       </View>
       <TouchableOpacity style={styles.widgetBody} onPress={() => router.push({ pathname: '/screens/modals/Log', params: {workoutId:activeWorkout.id}})}>
@@ -122,14 +122,14 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   // Getting the days of the week
   const daysList = useMemo(() => {
     const dates = [];
+    const pastSundayFromWeek = getLastSundayFromDate(week);
     for (let i = 0; i <= 6; i++) {
-      const pastDate = new Date();
-      pastDate.setDate(getLastSundayFromDate(week).getDate() + i);
-      dates.push(pastDate)
+      const dayOfWeek = getDateNumberOfDaysApart(pastSundayFromWeek, i);
+      dates.push(dayOfWeek);
     }
 
-    dates.sort((d1,d2) => {
-      return(d1.getDay() - d2.getDay());
+    dates.sort((d1, d2) => {
+      return(d1.getTime() - d2.getTime());
     })
     
     inactiveWorkoutData.changeTimeFrame(dates[0], dates[6]);
@@ -148,7 +148,7 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
         }
       }
       for (const inactiveWorkout of inactiveWorkouts) {
-        if (dateToWD(new Date(day)) === dateToWD(new Date(inactiveWorkout.date))) {
+        if (new Date(day).getDay() === new Date(inactiveWorkout.date).getDay()) {
           map[day.toDateString()].workouts.push(inactiveWorkout)
         }
       }
@@ -156,12 +156,38 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
     return map;
   }, [inactiveWorkoutData])
 
+  const handleRecentsHeaderTitle = useMemo(() => {
+    const thisWeek = getLastSundayFromDate(new Date());
+    switch (week.getTime()) {
+      case getDateNumberOfDaysApart(thisWeek, - 14).getTime():
+        return "2 weeks ago";
+      case getDateNumberOfDaysApart(thisWeek, - 7).getTime():
+        return "Last week";
+      case thisWeek.getTime():
+        return "This week";
+      case getDateNumberOfDaysApart(thisWeek, 7).getTime():
+        return "Next week";
+      case getDateNumberOfDaysApart(thisWeek, 14).getTime():
+        return "2 weeks from now";
+      default:
+        return dateToDDMMYY(week) + " - " + dateToDDMMYY(getDateNumberOfDaysApart(week, 7));
+    }
+  }, [week]);
+
+  const handleDisableDecrement = () => {
+    return getDateNumberOfDaysApart(new Date(), - 15).getTime() > week.getTime();
+  }
+
+  const handleDisableIncrement = () => {
+    return getDateNumberOfDaysApart(new Date(), 6).getTime() < week.getTime();
+  }
+
   const handleIncrementWeek = () => {
-    setWeek(new Date(week.getTime() + 7 * 24 * 60 * 60 *1000))
+    setWeek(getDateNumberOfDaysApart(week, 7))    
   }
   
   const handleDecrementWeek = () => {
-    setWeek(new Date(week.getTime() - 7 * 24 * 60 * 60 *1000))
+    setWeek(getDateNumberOfDaysApart(week, - 7))
   }
 
   const handleWorkoutOnPress = (dayWorkout:WorkoutDay) => {
@@ -210,14 +236,14 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   return (
     <>
     {/* Header and Forward and Back Arrows */}
-      <View style={styles.widgetHeader}>
-        <Text style={styles.h3}>This Week</Text>
+      <View style={[styles.widgetHeader, {marginVertical:7}]}>
+        <Text style={styles.h3}>{ handleRecentsHeaderTitle }</Text>
         <View style={{flexDirection:'row'}} >
-          <TouchableOpacity onPress={handleDecrementWeek} style={{backgroundColor:colors.primary, padding:3.5, borderTopLeftRadius:7, borderBottomLeftRadius: 7}} >
-            <Ionicons name="chevron-back-outline" size={24} color={colors.lighter} />
+          <TouchableOpacity disabled={ handleDisableDecrement() } onPress={handleDecrementWeek} style={{backgroundColor:colors.primary, padding:7, borderTopLeftRadius:7, borderBottomLeftRadius: 7, opacity:handleDisableDecrement() ? 0.25 : 1}}>
+            <Ionicons name="chevron-back-outline" size={32} color={colors.lighter} />
           </TouchableOpacity>
-          <TouchableOpacity onPress={handleIncrementWeek} style={{backgroundColor:colors.primary, padding:3.5, borderTopRightRadius:7, borderBottomRightRadius: 7}}>
-            <Ionicons name="chevron-forward-outline" size={24} color={colors.lighter} />
+          <TouchableOpacity disabled={ handleDisableIncrement() } onPress={handleIncrementWeek} style={{backgroundColor: colors.primary, padding:7, borderTopRightRadius:7, borderBottomRightRadius: 7, opacity:handleDisableIncrement() ? 0.25 : 1}}>
+            <Ionicons name="chevron-forward-outline" size={32} color={colors.lighter} />
           </TouchableOpacity>
         </View>
       </View>

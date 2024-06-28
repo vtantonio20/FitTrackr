@@ -190,12 +190,32 @@ export const useWorkoutData = (workoutId:any) => {
   })
 
   // Update Workout
-  const updateWorkoutMutation = useMutation((data:PostWorkout) => {
+  const updateWorkoutMutation = useMutation((data:PostWorkout | any) => {
     if (workoutId === undefined) {
       return Promise.reject("No workout ID provided");
     }
     return doUpdateWorkout(workoutId, data);
   })
+
+  const toggleActivation = (onSuccess:(msg?:string) => void) => {
+    if (!workout) return undefined;
+
+    const newWorkout = {
+      is_active:!workout.isActive,
+    }
+    updateWorkoutMutation.mutate(newWorkout, {
+      onSuccess(data) {
+        if (data["invalid"] === "Active Found") {
+          onSuccess("Cannot create workout, you can only have one active workout.");
+          return;
+        }
+        queryClient.invalidateQueries('active-workout');
+        queryClient.invalidateQueries('inactive-workouts');
+        onSuccess();
+        refetch();
+      }
+    })
+  }
 
   const updateWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], onSuccess:(msg?:string) => void) => {
     const updatedWorkout:PostWorkout = {
@@ -313,6 +333,7 @@ export const useWorkoutData = (workoutId:any) => {
     isLoading,
     createWorkout,
     updateWorkout,
+    toggleActivation,
     deleteWorkout,
     createExercise,
     updateExercise,

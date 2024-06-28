@@ -35,7 +35,7 @@ if (Appearance.getColorScheme() === 'dark') {
     darker: '#e2e2e2',
     purple: '#8F43EE',
     red: '#ed5050ff',
-    yellow: '#0f1472',
+    yellow: '#000',
     lighter: '#4b4b4b',
     white: '#000',
     back: '#000',

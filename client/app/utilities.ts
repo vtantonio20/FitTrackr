@@ -13,6 +13,10 @@ export const dateToWD = (f: Date) => {
     return daysOfTheWeek[f.getDay()];
 }
 
+export const getDateNumberOfDaysApart = (date:Date, n:number) => {
+    return new Date(date.getTime() + n * 24 * 60 * 60 * 1000);
+}
+
 // Gets the last sunday from date at 12 am.
 export const getLastSundayFromDate = (date: Date) => {
     const firstDay = date;

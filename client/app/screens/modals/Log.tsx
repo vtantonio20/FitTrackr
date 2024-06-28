@@ -45,6 +45,17 @@ const Log = () => {
   const [selectedDeleteExerciseModal, setSelectedDeleteExerciseModal] = useState<WorkoutExercise | null>(null);
   const handleDeleteExerciseAction = (exerciseId:any) => workoutData.deleteExercise(exerciseId, () => setEventMessage("Succesfully Deleted Exercise"));
 
+  // Finish active workout
+  const handleFinishWorkoutAction = () => {
+    workoutData.toggleActivation((msg) => {
+      if (msg) {
+        // setErrorMessage(msg)
+        return;
+      }
+      router.back();
+    })
+  }
+
   const [eventMessage, setEventMessage] = useState<string | null>();
   if (workoutData.isLoading) {
     return <View><Text>Loading...</Text></View>;
@@ -151,7 +162,7 @@ const Log = () => {
 
           {/* Finish Active Workout Button */}
           {workout?.isActive &&
-            <TouchableOpacity style={[styles.widgetBody, {marginTop:14}]} onPress={() => {}}>
+            <TouchableOpacity style={[styles.widgetBody, {marginTop:14}]} onPress={() => handleFinishWorkoutAction()}>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 14, }}>
               <Text style={[styles.h4, { lineHeight: 28 }]}>Finish Workout </Text>
               <MaterialIcons name="edit-note" size={28} color={colors.yellow} />

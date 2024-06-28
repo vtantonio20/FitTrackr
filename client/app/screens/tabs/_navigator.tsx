@@ -7,9 +7,9 @@ import colors from '../../colors'
 import { StatusBar } from 'expo-status-bar'
 import Calender from './Calender'
 import Setting from './Setting'
-import { TabButton } from '../../components/TabButton';
 import Home from './Home';
 import { WorkoutIcon } from '../../_layout';
+import { TabButton } from '../../components/TabButton';
 
 const Navigator: FunctionComponent = () => {
   const [activeTab, setActiveTab] = useState('home');
