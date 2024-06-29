@@ -4,7 +4,7 @@ import colors from '../../colors';
 import styles from "../../style"
 import { Feather , AntDesign, Ionicons } from '@expo/vector-icons'; 
 import { useRouter } from 'expo-router';
-import { dateToDDMMYY, dateToWD, getDateNumberOfDaysApart, getLastSundayFromDate } from '../../utilities';
+import { dateToDDMMYY, dateToWD, getDateNumberOfDaysApart, getLastSundayFromDate, getNumberOfWeeksBetweenDates } from '../../utilities';
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
@@ -158,24 +158,20 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
 
   const handleRecentsHeaderTitle = useMemo(() => {
     const thisWeek = getLastSundayFromDate(new Date());
-    switch (week.getTime()) {
-      case getDateNumberOfDaysApart(thisWeek, - 14).getTime():
-        return "2 weeks ago";
-      case getDateNumberOfDaysApart(thisWeek, - 7).getTime():
-        return "Last week";
-      case thisWeek.getTime():
-        return "This week";
-      case getDateNumberOfDaysApart(thisWeek, 7).getTime():
-        return "Next week";
-      case getDateNumberOfDaysApart(thisWeek, 14).getTime():
-        return "2 weeks from now";
-      default:
-        return dateToDDMMYY(week) + " - " + dateToDDMMYY(getDateNumberOfDaysApart(week, 7));
+    const numberOfWeeksBetween = getNumberOfWeeksBetweenDates(thisWeek, week);
+
+    if (numberOfWeeksBetween < 0)
+      return Math.abs(numberOfWeeksBetween) + " weeks ago";
+    else if (numberOfWeeksBetween > 0) {
+      return numberOfWeeksBetween + " weeks from now";
+    } else {
+      return "This week";
     }
+    
   }, [week]);
 
   const handleDisableDecrement = () => {
-    return getDateNumberOfDaysApart(new Date(), - 15).getTime() > week.getTime();
+    return getDateNumberOfDaysApart(new Date(), - 85).getTime() > week.getTime();
   }
 
   const handleDisableIncrement = () => {

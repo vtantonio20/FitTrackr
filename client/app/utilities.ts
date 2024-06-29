@@ -17,6 +17,11 @@ export const getDateNumberOfDaysApart = (date:Date, n:number) => {
     return new Date(date.getTime() + n * 24 * 60 * 60 * 1000);
 }
 
+export const getNumberOfWeeksBetweenDates = (start:Date, end:Date) => {
+    const timeBetween = end.getTime() - start.getTime();
+    return (timeBetween / (60 * 60 * 1000 * 24 * 7));
+}
+
 // Gets the last sunday from date at 12 am.
 export const getLastSundayFromDate = (date: Date) => {
     const firstDay = date;
