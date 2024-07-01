@@ -8,7 +8,7 @@ import { dateToDDMMYY, dateToWD, getDateNumberOfDaysApart, getLastSundayFromDate
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
-import { Workout, useActiveWorkoutData, useInactiveWorkoutData } from '../../queries/WorkoutQueries';
+import { Workout, useActiveWorkoutData, useWorkoutsData } from '../../queries/WorkoutQueries';
 
 interface HomeWidgetProps {
   onRenderModal:any;
@@ -24,7 +24,7 @@ const Home: FunctionComponent = () => {
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
           <ActiveWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
-          <RecentDaysWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+          <WeeklyTrackerWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
         </View>
       </ScrollView>
       {showModal && modalComponent}
@@ -113,10 +113,10 @@ interface WorkoutDay {
   day: string
 }
 
-const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
+const WeeklyTrackerWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
-  const inactiveWorkoutData = useInactiveWorkoutData();
-  const inactiveWorkouts = inactiveWorkoutData.inactiveWorkouts;
+  const inactiveWorkoutData = useWorkoutsData();
+  const inactiveWorkouts = inactiveWorkoutData.workouts;
   const [week, setWeek] = useState(getLastSundayFromDate(new Date()));
 
   // Getting the days of the week
@@ -171,11 +171,11 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   }, [week]);
 
   const handleDisableDecrement = () => {
-    return getDateNumberOfDaysApart(new Date(), - 85).getTime() > week.getTime();
+    return getDateNumberOfDaysApart(new Date(), - 84).getTime() > week.getTime();
   }
 
   const handleDisableIncrement = () => {
-    return getDateNumberOfDaysApart(new Date(), 6).getTime() < week.getTime();
+    return getDateNumberOfDaysApart(new Date(), 7).getTime() < week.getTime();
   }
 
   const handleIncrementWeek = () => {
@@ -183,7 +183,7 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   }
   
   const handleDecrementWeek = () => {
-    setWeek(getDateNumberOfDaysApart(week, - 7))
+    setWeek(getDateNumberOfDaysApart(week, -7))
   }
 
   const handleWorkoutOnPress = (dayWorkout:WorkoutDay) => {
@@ -192,6 +192,7 @@ const RecentDaysWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
     if (numberOfWorkouts === 0) {
       return;
     }
+    // This will be one workout and will route to the log of that workouts
     if (numberOfWorkouts === 1) {
       const singleWorkoutForDay = dayWorkout.workouts[0];
       router.push({ 

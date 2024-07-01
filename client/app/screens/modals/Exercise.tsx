@@ -105,53 +105,53 @@ const ExerciseFC: FunctionComponent = (props:any) => {
         </View>
       
         {/* Suggested Exercises Section */}
-        { exerciseSuggestions.muscle &&
-          <>
-            <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
-                <Text style={form.elementHeader}>Name: </Text>
-                <InitActionModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
+        <View style={[styles.widgetHeader, {marginVertical:0,paddingBottom:7}]}>
+            <Text style={form.elementHeader}>Name: </Text>
+            {exerciseSuggestions.muscle && (
+              <InitActionModalButton onPress={() => setIsShowingModal(true)} text={exerciseSuggestions.muscle.name} showing={isShowingModal} />
+              )
+            }
+        </View>
+          
+        <Controller
+          name="exerciseName"
+          control={control}
+          rules={{required:true}}
+          render={({ field: { onChange, onBlur, value } }) => (
+            <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:'center'}}>
+              <TextInput
+                style={[form.formTextArea, (focusOn === 'name') && form.focusedInput , {flexGrow:1}]}
+                onChangeText={onChange}
+                value={value}
+                placeholder={'Name of Exercise'}
+                onBlur={() => changeFocus('')}
+                onChange={onChange}
+                onFocus={() => changeFocus('name')}
+              />
+              <TouchableOpacity onPress={() => setValue("exerciseName", "")}>
+                <Entypo style={{paddingLeft:7}} name="erase" size={24} color={colors.primary} />
+              </TouchableOpacity>
             </View>
-              
-            <Controller
-              name="exerciseName"
-              control={control}
-              rules={{required:true}}
-              render={({ field: { onChange, onBlur, value } }) => (
-                <View style={{flexDirection:"row", justifyContent:"space-between", alignItems:'center'}}>
-                  <TextInput
-                    style={[form.formTextArea, (focusOn === 'name') && form.focusedInput , {flexGrow:1}]}
-                    onChangeText={onChange}
-                    value={value}
-                    placeholder={'Name of Exercise'}
-                    onBlur={() => changeFocus('')}
-                    onChange={onChange}
-                    onFocus={() => changeFocus('name')}
-                  />
-                  <TouchableOpacity onPress={() => setValue("exerciseName", "")}>
-                    <Entypo style={{paddingLeft:7}} name="erase" size={24} color={colors.primary} />
-                  </TouchableOpacity>
-                </View>
 
-                
-              )}
-            />
-            {/* The suggestion list */}
-            <FlatList
-              horizontal={true}
-              // data={exerciseSuggestions.exerciseData}
-              data={exerciseSuggestions.exerciseData?.filter((exercise: Exercise) => {
-                  const inputtedText = watch("exerciseName").toLowerCase();
-                  return inputtedText !== "" ? exercise.name.toLowerCase().startsWith(inputtedText) : exercise.name;
-                })
-              }
-              renderItem={({ item }) => (
-                <TouchableOpacity style={form.suggestion} onPress={() => {setValue("exerciseName", item.name)}}>
-                    <Text style={[styles.p, { paddingRight: 1.5 }]}>{item.name}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          </>
-        }
+            
+          )}
+        />
+        {/* The suggestion list */}
+        { exerciseSuggestions.exerciseData && (
+          <FlatList
+            horizontal={true}
+            data={exerciseSuggestions.exerciseData.filter((exercise: Exercise) => {
+                const inputtedText = watch("exerciseName").toLowerCase();
+                return inputtedText !== "" ? exercise.name.toLowerCase().startsWith(inputtedText) : exercise.name;
+              })
+            }
+            renderItem={({ item }) => (
+              <TouchableOpacity style={form.suggestion} onPress={() => {setValue("exerciseName", item.name)}}>
+                  <Text style={[styles.p, { paddingRight: 1.5 }]}>{item.name}</Text>
+              </TouchableOpacity>
+            )}
+          />
+        )}
 
         {/* Sets Component */}
         <SetInput setsData={sets} onSubmitSetsData={onSubmitForm}/>

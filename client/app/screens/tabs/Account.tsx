@@ -5,13 +5,13 @@ import { RenderItemParams, ScaleDecorator } from 'react-native-draggable-flatlis
 import { Svg, Path } from 'react-native-svg'
 import styles from "../../style"
 import { useMuscleSuggestionData } from '../../queries/SuggestionQueries';
-import { useInactiveWorkoutData } from '../../queries/WorkoutQueries';
+import { useWorkoutsData } from '../../queries/WorkoutQueries';
 
 
 
 const Account: FunctionComponent = () => {
-  const a = useInactiveWorkoutData();
-  console.log(a.inactiveWorkouts);
+  const a = useWorkoutsData();
+  console.log(a.workouts);
 
   const handleTestPress = () => {
     a.changeTimeFrame(new Date(new Date().getDay() -100), new Date())

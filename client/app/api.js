@@ -1,14 +1,9 @@
 import axios from "axios";
 
-export const API_URL = 'http://192.168.1.246:5001'
+export const API_URL = 'http://192.168.1.178:5001'
 
 export const doFetchWorkout = async (workoutId) => {
     const response = await axios.get(`${API_URL}/workout/${workoutId}`);
-    return response.data;
-}
-
-export const doFetchWorkouts = async () => {
-    const response = await axios.get(`${API_URL}/workouts`);
     return response.data;
 }
 
@@ -17,8 +12,8 @@ export const doFetchActiveWorkout = async () => {
     return response.data;
 }
 
-export const doFetchInactiveWorkouts = async (startDate, endDate) => {
-    const response = await axios.get(`${API_URL}/inactive-workouts`, {
+export const doFetchWorkouts = async (startDate, endDate) => {
+    const response = await axios.get(`${API_URL}/workouts`, {
         params: {
             start_date: startDate,
             end_date: endDate

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useMemo, useState } from "react";
-import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchActiveWorkout, doFetchInactiveWorkouts, doFetchWorkout, doFetchWorkouts, doUpdateExercise, doUpdateWorkout } from "../api";
+import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchActiveWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise, doUpdateWorkout } from "../api";
 import { Muscle } from "./SuggestionQueries";
 // import { useMuscleSvg } from "../hooks/useMuscleSvg";
 
@@ -88,22 +88,22 @@ export const useActiveWorkoutData = () => {
   }
 }
 
-export const useInactiveWorkoutData = (startDateIn?:Date, endDateIn?:Date) => {
+export const useWorkoutsData = (startDateIn?:Date, endDateIn?:Date) => {
   const [startDate, setStartDate] = useState(startDateIn)
   const [endDate, setEndDate] = useState(endDateIn)
 
   const { data, error, isLoading, refetch } = useQuery(
-    ['inactive-workouts', startDate, endDate],
-    () => doFetchInactiveWorkouts(startDate, endDate),
+    ['workouts', startDate, endDate],
+    () => doFetchWorkouts(startDate, endDate),
   )
 
-  const inactiveWorkouts:Workout[] = useMemo(() => {
+  const workouts:Workout[] = useMemo(() => {
     if (!data) return undefined;
-    return data.map((inactiveWorkoutData:any):Workout => ({
-      name: inactiveWorkoutData.name,
-      date: new Date(inactiveWorkoutData.date),
-      isActive: inactiveWorkoutData.is_active,
-      id: inactiveWorkoutData.id
+    return data.map((workoutData:any):Workout => ({
+      name: workoutData.name,
+      date: new Date(workoutData.date),
+      isActive: workoutData.is_active,
+      id: workoutData.id
     }))
   }, [data]);
 
@@ -114,7 +114,7 @@ export const useInactiveWorkoutData = (startDateIn?:Date, endDateIn?:Date) => {
   }
 
   return {
-    inactiveWorkouts,
+    workouts,
     error,
     isLoading,
     refetch,
@@ -182,7 +182,7 @@ export const useWorkoutData = (workoutId:any) => {
           return;
         }
         queryClient.invalidateQueries('active-workout');
-        queryClient.invalidateQueries('inactive-workouts');
+        queryClient.invalidateQueries('workouts');
         onSuccess();
         refetch();
       }
@@ -210,7 +210,7 @@ export const useWorkoutData = (workoutId:any) => {
           return;
         }
         queryClient.invalidateQueries('active-workout');
-        queryClient.invalidateQueries('inactive-workouts');
+        queryClient.invalidateQueries('workouts');
         onSuccess();
         refetch();
       }
@@ -232,7 +232,7 @@ export const useWorkoutData = (workoutId:any) => {
           return;
         }
         queryClient.invalidateQueries('active-workout');
-        queryClient.invalidateQueries('inactive-workouts');
+        queryClient.invalidateQueries('workouts');
         onSuccess();
         refetch();
       }
@@ -250,7 +250,7 @@ export const useWorkoutData = (workoutId:any) => {
       deleteWorkoutMutation.mutate(workoutId, {
         onSuccess(){
           queryClient.invalidateQueries('active-workout');
-          queryClient.invalidateQueries('inactive-workouts');
+          queryClient.invalidateQueries('workouts');
           onSuccess();
         }
       })

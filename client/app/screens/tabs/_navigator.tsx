@@ -44,13 +44,14 @@ const Navigator: FunctionComponent = () => {
             name='Home'
             focused={'home' === activeTab}
           />
-          {/*
+{/*           
           <TabButton
             onPress={() => setActiveTab('workout')}
             icon={<FontAwesome5 name="dumbbell" size={24} color={'workout' === activeTab ? colors.yellow : colors.white} />} 
             name='New Workout'
             focused={'workout' === activeTab}
-          />*/}
+          /> */}
+
 
 {/* 
           <TabButton

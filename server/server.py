@@ -104,8 +104,8 @@ with app.app_context():
         else:
             return active_workout.to_dict(), 200
 
-    #ex route: /inactive-workouts?start_date=2024-06-20T04:14:04.422Z&end_date=2024-06-25T04:14:04.422Z
-    @app.route("/inactive-workouts")
+    #ex route: /workouts?start_date=2024-06-20T04:14:04.422Z&end_date=2024-06-25T04:14:04.422Z
+    @app.route("/workouts")
     def get_inactive_workouts():
         start_date_in = request.args.get('start_date')
         end_date_in = request.args.get('end_date')
@@ -130,36 +130,35 @@ with app.app_context():
         start_date_str = start_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
         end_date_str = end_date.strftime('%Y-%m-%dT%H:%M:%S.%fZ')
 
-        inactive_workouts = Workout.query.filter(
-            Workout.is_active == False,
+        workouts = Workout.query.filter(
             Workout.date >= start_date_str,
             Workout.date < end_date_str
         ).all()
-        return [w.to_dict_condensed() for w in inactive_workouts]
+        return [w.to_dict_condensed() for w in workouts]
 
 
-    @app.route("/workouts")
-    def get_workouts():
-        # default will be to get workouts in the past 7 days
-        # Convert seven_days_ago to string in the same format as the stored date
-        this_past_sunday_str = (find_next_sunday() - timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        this_sunday_str = (find_next_sunday()).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
-        active_workout = Workout.query.filter_by(is_active=True).first()
-        inactive_workouts = Workout.query.filter(
-            Workout.is_active == False,
-            Workout.date >= this_past_sunday_str,
-            Workout.date < this_sunday_str
-        ).all()
+    # @app.route("/workouts")
+    # def get_workouts():
+    #     # default will be to get workouts in the past 7 days
+    #     # Convert seven_days_ago to string in the same format as the stored date
+    #     this_past_sunday_str = (find_next_sunday() - timedelta(days=7)).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    #     this_sunday_str = (find_next_sunday()).strftime('%Y-%m-%dT%H:%M:%S.%fZ')
+    #     active_workout = Workout.query.filter_by(is_active=True).first()
+    #     inactive_workouts = Workout.query.filter(
+    #         Workout.is_active == False,
+    #         Workout.date >= this_past_sunday_str,
+    #         Workout.date < this_sunday_str
+    #     ).all()
 
-        if active_workout:
-            active_workout_data = active_workout.to_dict()
-        else:
-            active_workout_data = None
+    #     if active_workout:
+    #         active_workout_data = active_workout.to_dict()
+    #     else:
+    #         active_workout_data = None
 
-        return jsonify({
-            "active_workout": active_workout_data,
-            "inactive_workouts": [w.to_dict_condensed() for w in inactive_workouts]
-        }), 200
+    #     return jsonify({
+    #         "active_workout": active_workout_data,
+    #         "inactive_workouts": [w.to_dict_condensed() for w in inactive_workouts]
+    #     }), 200
     
     @app.route('/workout/<int:workout_id>')
     def get_workout(workout_id):
