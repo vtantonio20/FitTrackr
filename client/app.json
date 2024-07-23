@@ -16,13 +16,15 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.vt.antonio20.fittrackrapp"
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.vt.antonio20.fittrackrapp"
     },
     "web": {
       "favicon": "./assets/favicon.png",
@@ -30,6 +32,12 @@
     },
     "plugins": [
       "expo-font"
-    ]
-  }
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a5e50969-f794-4b6d-8391-3ba470e2c930"
+      }
+    }
+  },
+  "scheme": "fittrackrapp"
 }

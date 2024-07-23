@@ -29,3 +29,4 @@ to run:
 cd client
 npx expo start
 
+eas build --profile development-simulator --platform ios

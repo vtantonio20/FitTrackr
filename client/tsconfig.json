@@ -3,4 +3,7 @@
   "compilerOptions": {
     "strict": true,
   },
+  "paths": {
+    "@env": ["node_modules/react-native-dotenv"]
+  }
 }
