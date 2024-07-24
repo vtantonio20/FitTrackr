@@ -6,10 +6,13 @@ import { Svg, Path } from 'react-native-svg'
 import styles from "../../style"
 import { useMuscleSuggestionData } from '../../queries/SuggestionQueries';
 import { useWorkoutsData } from '../../queries/WorkoutQueries';
+import { useUser } from '../../contexts/UserContext';
 
 
 
 const Account: FunctionComponent = () => {
+  const { user } = useUser();
+  
   const a = useWorkoutsData();
   console.log(a.workouts);
 
@@ -19,6 +22,7 @@ const Account: FunctionComponent = () => {
   return (
     <>
       <Pressable onPress={handleTestPress}><Text>Press</Text></Pressable>
+      {user && <Text>{user.email}</Text>}
     </>
 
 

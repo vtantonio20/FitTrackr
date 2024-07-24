@@ -1,6 +1,6 @@
 import axios from "axios";
 
-export const API_URL = 'http://192.168.1.178:5001'
+export const API_URL = process.env.API_URL;
 
 export const doFetchWorkout = async (workoutId) => {
     const response = await axios.get(`${API_URL}/workout/${workoutId}`);
