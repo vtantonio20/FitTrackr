@@ -6,10 +6,13 @@ import styles from "../../style";
 import colors from "../../colors";
 import * as WebBrowser from "expo-web-browser";
 import * as Google from "expo-auth-session/providers/google";
+import { User, useUser } from '../../contexts/UserContext';
+
 WebBrowser.maybeCompleteAuthSession();
 
-
 const Welcome: FunctionComponent = () => {
+
+  const { setUser } = useUser();
   
   const androidClientId = process.env.ANDROID_CLIENT_ID
   const iosClientId = process.env.IOS_CLIENT_ID
@@ -21,17 +24,45 @@ const Welcome: FunctionComponent = () => {
 
   const [request, response, promptAsync] = Google.useAuthRequest(config);
   
+  const getUserProfile = async (token:string | undefined) => {
+    if(!token) return;
+    try {
+      const response = await fetch("https://www.googleapis.com/userinfo/v2/me", {
+        headers: {Authorization: `Bearer ${token}`}
+      })
+      const userData = await response.json();
+      const user:User = {
+        id:userData.id,
+        name:userData.name,
+        email:userData.email
+      }
+      setUser(user);
+    } catch(e) {
+      console.log(e)
+    }
+  }
+
   const handleToken = () => {
     if (response?.type === 'success') {
       const {authentication} = response;
       const token = authentication?.accessToken;
-      console.log("access token" , token)
+      getUserProfile(token)
     }
   }
 
   useEffect(() => {
     handleToken();
   }, [response]);
+
+  const promptTestUser = () => {
+    const user:User = {
+      id: 'tester',
+      name: 'Mr. Test',
+      email: 'testing@email.com'
+    }
+    setUser(user)
+  }
+
 
   return (
       <View style={styles.welcomeBackground}>
@@ -56,10 +87,14 @@ const Welcome: FunctionComponent = () => {
           <Text style={[styles.h3, styles.lighterFont]}>Using FitTrackr{"\n"}
             Start tracking your fitness{"\n"}journey today!
           </Text>
-        </View> 
+        </View>
 
         <TouchableOpacity onPress={() => promptAsync()}>
             <Text style={{color:colors.white}}>Login with google</Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity onPress={() => promptTestUser()}>
+          <Text style={{color:colors.white}}>Login with a Test User</Text>
         </TouchableOpacity>
         <Link replace href="/screens/tabs/_navigator" asChild>
           <TouchableOpacity style={{
