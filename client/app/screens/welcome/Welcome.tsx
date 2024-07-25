@@ -10,17 +10,19 @@ import { User, useUser } from '../../contexts/UserContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const Welcome: FunctionComponent = () => {
+const TEST_USER = {
+  id: 'tester',
+  name: 'Mr. Test',
+  email: 'testing@email.com'
+}
 
+const Welcome: FunctionComponent = () => {
+  const router = useRouter();
   const { setUser } = useUser();
   
   const androidClientId = process.env.ANDROID_CLIENT_ID
   const iosClientId = process.env.IOS_CLIENT_ID
-
-  const config = {
-    androidClientId,
-    iosClientId
-  }
+  const config = { androidClientId, iosClientId }
 
   const [request, response, promptAsync] = Google.useAuthRequest(config);
   
@@ -36,7 +38,7 @@ const Welcome: FunctionComponent = () => {
         name:userData.name,
         email:userData.email
       }
-      setUser(user);
+      loginUser(user);
     } catch(e) {
       console.log(e)
     }
@@ -54,15 +56,10 @@ const Welcome: FunctionComponent = () => {
     handleToken();
   }, [response]);
 
-  const promptTestUser = () => {
-    const user:User = {
-      id: 'tester',
-      name: 'Mr. Test',
-      email: 'testing@email.com'
-    }
-    setUser(user)
-  }
-
+  const loginUser = (user:User) => {
+    setUser(user);
+    router.replace({pathname:'/screens/tabs/_navigator'})
+  };
 
   return (
       <View style={styles.welcomeBackground}>
@@ -89,14 +86,21 @@ const Welcome: FunctionComponent = () => {
           </Text>
         </View>
 
-        <TouchableOpacity onPress={() => promptAsync()}>
-            <Text style={{color:colors.white}}>Login with google</Text>
-        </TouchableOpacity>
+        <View>
+          <TouchableOpacity style={welcomeSheet.signInButton}  onPress={() => loginUser(TEST_USER)}>
+            <Text style={[styles.h4, {paddingRight:16}]}>Login as Tester</Text>
+            <Fontisto name="arrow-right" size={16} color="white" />
+          </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => promptTestUser()}>
-          <Text style={{color:colors.white}}>Login with a Test User</Text>
-        </TouchableOpacity>
-        <Link replace href="/screens/tabs/_navigator" asChild>
+          <TouchableOpacity style={welcomeSheet.signInButtonGoogle} onPress={() => promptAsync()}>
+            <Text style={[styles.h4, {paddingRight:16}]}>Login with Google</Text>
+            <AntDesign name="google" size={16} color="white" />
+          </TouchableOpacity>
+        </View>
+
+        
+
+        {/* <Link replace href="/screens/tabs/_navigator" asChild>
           <TouchableOpacity style={{
             backgroundColor: colors.primary,
             borderRadius: 50,
@@ -112,12 +116,35 @@ const Welcome: FunctionComponent = () => {
             <Text style={[styles.h3, ]}>Next</Text>
             <Fontisto name="arrow-right" size={24} color="white" />
           </TouchableOpacity >
-        </Link>
+        </Link> */}
     </View>
   )
 }
 
 export default Welcome;
 
-
+const welcomeSheet = StyleSheet.create({
+  signInButton: {
+    backgroundColor: colors.primary,
+    paddingVertical:8,
+    paddingHorizontal:16,
+    borderRadius: 32,
+    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: 'space-between',
+    marginVertical:8,
+    width: '80%',
+  },
+  signInButtonGoogle: {
+    backgroundColor: colors.red,
+    paddingVertical:8,
+    paddingHorizontal:16,
+    borderRadius: 32,
+    flexDirection: 'row',
+    alignItems: "center",
+    justifyContent: 'space-between',
+    marginVertical:3.5,
+    width: '80%',
+  }
+});
 
