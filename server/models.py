@@ -4,6 +4,19 @@ from sqlalchemy.orm import relationship
 
 db = SQLAlchemy()
 
+class User(db.Model):
+    __tablename__ = 'user'
+    id = Column(Integer, primary_key=True)
+    email = Column(String(100), nullable=False)
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
+
+    def __init__(self, id, email, first_name, last_name):
+        self.id = id
+        self.email = email
+        self.first_name = first_name
+        self.last_name = last_name
+
 # Association table for many-to-many relationship
 workout_muscle = Table('workout_muscle', db.Model.metadata,
     Column('workout_id', Integer, ForeignKey('workout.id'), primary_key=True),
@@ -46,8 +59,8 @@ class Muscle(db.Model):
         self.name=name
         self.group = group
 
-    def to_dict(self, isJustName=False):
-        if isJustName:
+    def to_dict(self, is_just_name=False):
+        if is_just_name:
             return {"id": self.id, "name": self.name }
         else:
             return {"id": self.id, "name": self.name, "group": self.group.to_dict() }

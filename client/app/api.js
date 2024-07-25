@@ -2,6 +2,13 @@ import axios from "axios";
 
 export const API_URL = process.env.API_URL;
 
+export const addGoogleUser = async (token) => {
+    const response = await axios.get(`${API_URL}/add-user`, {
+        token:token
+    })
+    return response.data;
+}
+
 export const doFetchWorkout = async (workoutId) => {
     const response = await axios.get(`${API_URL}/workout/${workoutId}`);
     return response.data;

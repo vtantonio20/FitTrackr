@@ -4,6 +4,8 @@ from sqlalchemy import MetaData, Table, create_engine, inspect
 from models import Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
 import json
 from datetime import datetime, timedelta
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
@@ -11,6 +13,31 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 CORS(app)
 
 with app.app_context():
+
+    ##########################
+    # User Routes
+    ##########################
+    # @app.route('/add-user')
+    # def add_user():
+    #     data = request.get_json()
+    #     token = data.get('token')
+    #     if not token:
+    #         return jsonify({'success': False, 'message': 'Token is missing'}), 400
+        
+    #     try:
+    #         # Specify the CLIENT_ID of the app that accesses the backend
+    #         id_info = id_token.verify_oauth2_token(token, requests.Request(), "YOUR_CLIENT_ID")
+    #         print(id_info)
+    #         # ID token is valid, get the user ID and email
+    #         user_id = id_info['sub']
+    #         email = id_info['email']
+
+    #         # Insert the user into the database
+
+    #         return jsonify({'success': True, 'message': 'User added successfully'})
+    #     except ValueError:
+    #         # Invalid token
+    #         return jsonify({'success': False, 'message': 'Invalid token'}), 400
 
     ##########################
     # Suggestions Routes

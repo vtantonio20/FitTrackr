@@ -2,3 +2,4 @@ __pycache__
 .expo
 venv
 instance/db.sqlite
+.env
