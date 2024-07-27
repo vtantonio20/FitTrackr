@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sqlalchemy import MetaData, Table, create_engine, inspect
-from models import User, Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
+from models import Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
 import json
 from datetime import datetime, timedelta
 from google.oauth2 import id_token
