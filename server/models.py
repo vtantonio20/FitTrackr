@@ -1,21 +1,9 @@
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, validates
 
 db = SQLAlchemy()
 
-class User(db.Model):
-    __tablename__ = 'user'
-    id = Column(Integer, primary_key=True)
-    email = Column(String(100), nullable=False)
-    first_name = Column(String(100), nullable=False)
-    last_name = Column(String(100), nullable=False)
-
-    def __init__(self, id, email, first_name, last_name):
-        self.id = id
-        self.email = email
-        self.first_name = first_name
-        self.last_name = last_name
 
 # Association table for many-to-many relationship
 workout_muscle = Table('workout_muscle', db.Model.metadata,
@@ -137,12 +125,20 @@ class Workout(db.Model):
     is_active = Column(Boolean, default=False)
     target_muscles = relationship('Muscle', secondary=workout_muscle, backref=db.backref('workouts', lazy='dynamic'))
     workout_exercises = relationship('WorkoutExercise', backref=db.backref('parent_workout', lazy=True))
+    uid = Column(String(80), nullable=False)
 
-    def __init__(self, name, date, target_muscles, is_active=False):
+    @validates('uid')
+    def validate_uid(self, key, value):
+        if self.id is not None and self.uid != value:
+            raise ValueError("uid is immutable and cannot be changed.")
+        return value
+    
+    def __init__(self, name, date, target_muscles, uid, is_active=False,):
         self.name = name
         self.date = date
         self.is_active = is_active
         self.target_muscles = target_muscles or []
+        self.uid = uid
 
     def add_exercise(self, workout_exercise):
         self.workout_exercises.append(workout_exercise)

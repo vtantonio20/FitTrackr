@@ -1,7 +1,7 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from sqlalchemy import MetaData, Table, create_engine, inspect
-from models import Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
+from models import User, Exercise, ExerciseSet, MuscleGroup, db, Muscle, Workout, WorkoutExercise
 import json
 from datetime import datetime, timedelta
 from google.oauth2 import id_token
@@ -13,32 +13,6 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///db.sqlite'
 CORS(app)
 
 with app.app_context():
-
-    ##########################
-    # User Routes
-    ##########################
-    # @app.route('/add-user')
-    # def add_user():
-    #     data = request.get_json()
-    #     token = data.get('token')
-    #     if not token:
-    #         return jsonify({'success': False, 'message': 'Token is missing'}), 400
-        
-    #     try:
-    #         # Specify the CLIENT_ID of the app that accesses the backend
-    #         id_info = id_token.verify_oauth2_token(token, requests.Request(), "YOUR_CLIENT_ID")
-    #         print(id_info)
-    #         # ID token is valid, get the user ID and email
-    #         user_id = id_info['sub']
-    #         email = id_info['email']
-
-    #         # Insert the user into the database
-
-    #         return jsonify({'success': True, 'message': 'User added successfully'})
-    #     except ValueError:
-    #         # Invalid token
-    #         return jsonify({'success': False, 'message': 'Invalid token'}), 400
-
     ##########################
     # Suggestions Routes
     ##########################
@@ -125,7 +99,9 @@ with app.app_context():
     
     @app.route("/active-workout")
     def get_active_workout():
-        active_workout = Workout.query.filter_by(is_active=True).first()
+        uid = request.args.get('uid')
+
+        active_workout = Workout.query.filter_by(is_active=True, uid=uid).first()
         if not active_workout:
             return ('', 204)
         else:
@@ -134,8 +110,12 @@ with app.app_context():
     #ex route: /workouts?start_date=2024-06-20T04:14:04.422Z&end_date=2024-06-25T04:14:04.422Z
     @app.route("/workouts")
     def get_inactive_workouts():
+        uid = request.args.get('uid')
         start_date_in = request.args.get('start_date')
         end_date_in = request.args.get('end_date')
+
+        if not uid:
+            return jsonify({"error": "Invalid uid provided"}), 400
 
         if start_date_in:
             try:
@@ -159,7 +139,8 @@ with app.app_context():
 
         workouts = Workout.query.filter(
             Workout.date >= start_date_str,
-            Workout.date < end_date_str
+            Workout.date < end_date_str,
+            Workout.uid == uid
         ).all()
         return [w.to_dict_condensed() for w in workouts]
 
@@ -195,7 +176,7 @@ with app.app_context():
     @app.route("/create-workout", methods=["POST"])
     def create_workout():
         data = request.get_json()
-
+        
         # ensure the date is not null
         date_str = data.get('date', "")
         if not date_str:
@@ -205,13 +186,18 @@ with app.app_context():
         except ValueError:
             return jsonify({"error": "Invalid date format"}), 400
 
+        #ensure the uid is not null
+        uid = data.get('uid')
+        if not uid:
+            return jsonify({"error": "Cannot create workout, you must have a valid user."}), 409
+
         # get the values from request
         name = data.get('name', "")
         target_muscles_names = data.get('target_muscles', [])
         is_active = data.get('is_active', False)
 
         # check if there is already a active workout if wanting to make an active
-        if is_active and Workout.query.filter_by(is_active=True).count() != 0:
+        if is_active and Workout.query.filter_by(is_active=True, uid=uid).count() != 0:
             return jsonify({"invalid": "Active Found"}), 200
         
         # find the muscles and query for them
@@ -223,7 +209,7 @@ with app.app_context():
             target_muscles.append(muscle)
         
         # create the workout
-        workout = Workout(name, date, target_muscles, is_active)
+        workout = Workout(name, date, target_muscles, uid, is_active)
         db.session.add(workout)
         db.session.flush()
 
@@ -244,6 +230,11 @@ with app.app_context():
         date_in = data.get('date')
         active_in = data.get('is_active')
         target_muscles_ids_in = data.get('target_muscle_ids', [])
+        uid_in = data.get('uid')
+
+        if not uid_in or workout.uid != uid_in:
+            return {"invalid": "uid provided"}
+
         if name_in is not None:
             workout.name = name_in
         
@@ -253,9 +244,9 @@ with app.app_context():
             except ValueError:
                 return jsonify({"error": "Invalid date format"}), 400
             workout.date = date
-        
+
         if 'is_active' in data:
-            if active_in and not workout.is_active and Workout.query.filter_by(is_active=True).count() != 0:
+            if active_in and not workout.is_active and Workout.query.filter_by(is_active=True, uid=uid_in).count() != 0:
                 return jsonify({"invalid": "Active Found"}), 200
             workout.is_active = active_in
 

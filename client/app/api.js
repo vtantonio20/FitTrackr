@@ -2,26 +2,22 @@ import axios from "axios";
 
 export const API_URL = process.env.API_URL;
 
-export const addGoogleUser = async (token) => {
-    const response = await axios.get(`${API_URL}/add-user`, {
-        token:token
-    })
-    return response.data;
-}
-
 export const doFetchWorkout = async (workoutId) => {
     const response = await axios.get(`${API_URL}/workout/${workoutId}`);
     return response.data;
 }
 
-export const doFetchActiveWorkout = async () => {
-    const response = await axios.get(`${API_URL}/active-workout`);
+export const doFetchActiveWorkout = async (uid) => {
+    const response = await axios.get(`${API_URL}/active-workout`, {
+        params: { uid:uid }
+    });
     return response.data;
 }
 
-export const doFetchWorkouts = async (startDate, endDate) => {
+export const doFetchWorkouts = async (uid, startDate, endDate) => {
     const response = await axios.get(`${API_URL}/workouts`, {
         params: {
+            uid: uid,
             start_date: startDate,
             end_date: endDate
         }

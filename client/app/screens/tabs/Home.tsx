@@ -9,22 +9,31 @@ import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { useMuscleSvg } from '../../hooks/useMuscleSvg';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { Workout, useActiveWorkoutData, useWorkoutsData } from '../../queries/WorkoutQueries';
+import { User, useUser } from '../../contexts/UserContext';
+import Loading from '../loading/Loading';
 
 interface HomeWidgetProps {
   onRenderModal:any;
   onToggleModal:any;
   showing:any;
+  user:User;
 }
 
 const Home: FunctionComponent = () => {
   const [modalComponent, setModalComponent] = useState(null)
   const [showModal, setShowModal] = useState(false)
+  const { user } = useUser();
+
+  if (!user) {
+    return <Loading/>
+  }
+
   return (
     <>
       <ScrollView style={styles.tabContainer}>
         <View style={styles.containerWrapper}>
-          <ActiveWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
-          <WeeklyTrackerWidget onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+          <ActiveWidget user={user} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
+          <WeeklyTrackerWidget  user={user} onRenderModal={(modal:any) => setModalComponent(modal)} onToggleModal={(show:boolean) => setShowModal(show)} showing={showModal}/>
         </View>
       </ScrollView>
       {showModal && modalComponent}
@@ -34,7 +43,8 @@ const Home: FunctionComponent = () => {
 
 const ActiveWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
-  const workoutsData = useActiveWorkoutData();
+
+  const workoutsData = useActiveWorkoutData(props.user.id);
   const activeWorkout = workoutsData.activeWorkout; 
   // The muscle map
   const muscleMapSvg = useMuscleSvg((activeWorkout && activeWorkout.targetMuscles) ? activeWorkout.targetMuscles : []);
@@ -115,7 +125,7 @@ interface WorkoutDay {
 
 const WeeklyTrackerWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
   const router = useRouter();
-  const inactiveWorkoutData = useWorkoutsData();
+  const inactiveWorkoutData = useWorkoutsData(props.user.id);
   const inactiveWorkouts = inactiveWorkoutData.workouts;
   const [week, setWeek] = useState(getLastSundayFromDate(new Date()));
 

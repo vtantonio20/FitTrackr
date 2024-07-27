@@ -11,7 +11,7 @@ import { User, useUser } from '../../contexts/UserContext';
 WebBrowser.maybeCompleteAuthSession();
 
 const TEST_USER = {
-  id: 'tester',
+  id: 'user123',
   name: 'Mr. Test',
   email: 'testing@email.com'
 }
@@ -46,7 +46,7 @@ const Welcome: FunctionComponent = () => {
 
   const handleToken = () => {
     if (response?.type === 'success') {
-      const {authentication} = response;
+      const { authentication } = response;
       const token = authentication?.accessToken;
       getUserProfile(token)
     }
@@ -97,26 +97,6 @@ const Welcome: FunctionComponent = () => {
             <AntDesign name="google" size={16} color="white" />
           </TouchableOpacity>
         </View>
-
-        
-
-        {/* <Link replace href="/screens/tabs/_navigator" asChild>
-          <TouchableOpacity style={{
-            backgroundColor: colors.primary,
-            borderRadius: 50,
-            flexDirection: 'row',
-            alignItems: "center",
-            justifyContent: 'space-between',
-            paddingVertical: 24,
-            paddingHorizontal: 32,
-            width: '90%',
-            borderColor: colors.darker,
-            borderWidth: StyleSheet.hairlineWidth,
-          }}>
-            <Text style={[styles.h3, ]}>Next</Text>
-            <Fontisto name="arrow-right" size={24} color="white" />
-          </TouchableOpacity >
-        </Link> */}
     </View>
   )
 }

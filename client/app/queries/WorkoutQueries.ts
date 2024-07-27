@@ -2,9 +2,6 @@ import { useMutation, useQuery, useQueryClient } from "react-query"
 import { useMemo, useState } from "react";
 import { doCreateExercise, doCreateWorkout, doDeleteExercise, doDeleteWorkout, doFetchActiveWorkout, doFetchWorkout, doFetchWorkouts, doUpdateExercise, doUpdateWorkout } from "../api";
 import { Muscle } from "./SuggestionQueries";
-// import { useMuscleSvg } from "../hooks/useMuscleSvg";
-
-
 
 export interface WorkoutSet {
   id:number;
@@ -23,6 +20,7 @@ export interface Workout {
   date: Date;
   isActive: boolean;
   id: number;
+  uid: string;
   targetMuscles?: Muscle[]
   exercises?: WorkoutExercise[]
 }
@@ -32,6 +30,7 @@ interface PostWorkout {
   date: Date;
   is_active: boolean;
   id?: number;
+  uid: string;
   target_muscle_ids?: string[]
   exercises?: WorkoutExercise[]
 }
@@ -48,10 +47,19 @@ interface PostWorkoutExercise {
   id:number | undefined;
 }
 
-export const useActiveWorkoutData = () => {
+export const useActiveWorkoutData = (uid:string) => {
   const queryClient = useQueryClient();
-
-  const { data, error, isLoading, refetch } = useQuery('active-workout', doFetchActiveWorkout)
+  const { data, error, isLoading, refetch } = useQuery(
+    ['active-workout', uid],
+    () => {
+      if (uid) {
+        return doFetchActiveWorkout(uid);
+      } else {
+        return Promise.resolve(null);
+      }
+    },
+    { enabled: !!uid }
+  );
 
   const activeWorkout:Workout | undefined = useMemo(() => {
     if (!data) return undefined;
@@ -61,6 +69,7 @@ export const useActiveWorkoutData = () => {
       isActive: data.is_active,
       id: data.id,
       targetMuscles: data.target_muscles.map((muscle: Muscle) => muscle),
+      uid:data.uid
     };
   }, [data]);
 
@@ -88,13 +97,20 @@ export const useActiveWorkoutData = () => {
   }
 }
 
-export const useWorkoutsData = (startDateIn?:Date, endDateIn?:Date) => {
+export const useWorkoutsData = (uid:string, startDateIn?:Date, endDateIn?:Date) => {
   const [startDate, setStartDate] = useState(startDateIn)
   const [endDate, setEndDate] = useState(endDateIn)
 
   const { data, error, isLoading, refetch } = useQuery(
-    ['workouts', startDate, endDate],
-    () => doFetchWorkouts(startDate, endDate),
+    ['workouts', uid, startDate, endDate ],
+    () => {
+      if (uid) {
+        return doFetchWorkouts(uid, startDate, endDate);
+      } else{
+        return Promise.resolve(null);
+      }
+    },
+    { enabled: !!uid }
   )
 
   const workouts:Workout[] = useMemo(() => {
@@ -103,7 +119,8 @@ export const useWorkoutsData = (startDateIn?:Date, endDateIn?:Date) => {
       name: workoutData.name,
       date: new Date(workoutData.date),
       isActive: workoutData.is_active,
-      id: workoutData.id
+      id: workoutData.id,
+      uid:workoutData.uid
     }))
   }, [data]);
 
@@ -146,6 +163,7 @@ export const useWorkoutData = (workoutId:any) => {
       date: new Date(data.date),  
       isActive: data.is_active,
       id: data.id,
+      uid: data.uid,
       targetMuscles: data.target_muscles.map((muscle: Muscle) => muscle),
       exercises: data.workout_exercises.map((exercise: any):WorkoutExercise => ({
         id: exercise.id,
@@ -167,12 +185,13 @@ export const useWorkoutData = (workoutId:any) => {
     return doCreateWorkout(data);
   })
 
-  const createWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], onSuccess:(msg?:string) => void) => {
+  const createWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], uid:string, onSuccess:(msg?:string) => void) => {
     const newWorkout:PostWorkout = {
       name:name,
       date:date,
       is_active:isActive,
-      target_muscle_ids:targetMuscleIds
+      target_muscle_ids:targetMuscleIds,
+      uid:uid
     }
 
     createWorkoutMutation.mutate(newWorkout, {
@@ -217,12 +236,13 @@ export const useWorkoutData = (workoutId:any) => {
     })
   }
 
-  const updateWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], onSuccess:(msg?:string) => void) => {
+  const updateWorkout = ((name:string, date:Date, isActive:boolean, targetMuscleIds:string[], uid:string, onSuccess:(msg?:string) => void) => {
     const updatedWorkout:PostWorkout = {
       name:name,
       date:date,
       is_active:isActive,
-      target_muscle_ids:targetMuscleIds
+      target_muscle_ids:targetMuscleIds,
+      uid:uid
     }
     
     updateWorkoutMutation.mutate(updatedWorkout, {

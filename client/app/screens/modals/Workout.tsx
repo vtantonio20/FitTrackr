@@ -14,9 +14,12 @@ import { ActionSelectionModal, InitActionModalButton } from "../../components/Mo
 import { Bubble } from "../../components/Bubble";
 import { useMuscleSvg } from "../../hooks/useMuscleSvg";
 import MuscleMap from '../../assets/svgs/muscleMap.svg'
+import { useUser } from "../../contexts/UserContext";
 
 export const Workout: FunctionComponent = () => {
   const router = useRouter();
+  const { user } = useUser();
+  
   const { workoutId } = useLocalSearchParams();
   const workoutData = useWorkoutData(workoutId);
   const workout = workoutData.workout;
@@ -91,6 +94,10 @@ export const Workout: FunctionComponent = () => {
     const workoutDate = data.workoutDate;
     const targetMusclesIds = data.targetMuscles.map((muscle: Muscle) => muscle.id);
     const isActiveWorkout = data.makeActive;
+    
+    if (!user) {
+      return;
+    }
 
     if (workoutName === ''){
       setErrorMessage("A name is required.")
@@ -98,7 +105,7 @@ export const Workout: FunctionComponent = () => {
     }
     
     if (!workoutId) {
-      workoutData.createWorkout(workoutName, workoutDate, isActiveWorkout, targetMusclesIds, (msg) => {
+      workoutData.createWorkout(workoutName, workoutDate, isActiveWorkout, targetMusclesIds, user.id, (msg) => {
         if (msg) {
           setErrorMessage(msg)
           return;
@@ -106,7 +113,7 @@ export const Workout: FunctionComponent = () => {
         router.back();
       })
     } else {
-      workoutData.updateWorkout(workoutName, workoutDate, isActiveWorkout, targetMusclesIds, (msg) => {
+      workoutData.updateWorkout(workoutName, workoutDate, isActiveWorkout, targetMusclesIds, user.id, (msg) => {
         if (msg) {
           setErrorMessage(msg)
           return;
@@ -260,7 +267,7 @@ export const Workout: FunctionComponent = () => {
     </>
   )
 }
-const form = StyleSheet.create({
+export const form = StyleSheet.create({
   submitContainer: {
     alignItems: 'center',
     backgroundColor: colors.primary,
