@@ -1,4 +1,4 @@
-import React,{ FunctionComponent, useState } from 'react';
+import React,{ FunctionComponent, useEffect, useState } from 'react';
 import { View, Text, TouchableOpacity, ScrollView, } from 'react-native';
 import styles from "../../style"
 import { useUser } from '../../contexts/UserContext';
@@ -6,15 +6,22 @@ import { form } from '../modals/Workout';
 import colors from '../../colors';
 import { ActionSelectionModal } from '../../components/Modal';
 import { useRouter } from 'expo-router';
+import Loading from '../loading/Loading';
 
 const Account: FunctionComponent = () => {
-  const { user, setUser } = useUser();
+  const { user, setUser, measureType, toggleMeasureType} = useUser();
   const router = useRouter();
+
+  const [showAboutModal, setShowAboutModal] = useState(false);
 
   const [showLogoutModal, setShowLogoutModal] = useState(false);
   const handleLogout = () => {
     setUser(null);
     router.push({pathname:'/screens/welcome/Welcome'})
+  }
+
+  if (!user) {
+    return <Loading/>
   }
 
   return (
@@ -28,10 +35,23 @@ const Account: FunctionComponent = () => {
         {/* <View style={styles.widgetHeader}>
           <Text style={form.elementHeader}>Preferences:</Text>
         </View> */}
+
         <View style={[styles.divider, {backgroundColor:colors.primary, borderTopLeftRadius: 7, borderTopRightRadius:7}]}>
-          <TouchableOpacity style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding:14 }}>
+          <TouchableOpacity onPress={() => setShowAboutModal(true)} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding:14 }}>
+            <Text style={styles.h4}>About</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.divider, {backgroundColor:colors.primary}]}>
+          <TouchableOpacity onPress={() => {}} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding:14 }}>
+            <Text style={styles.h4}>Manage weekly routines</Text>
+          </TouchableOpacity>
+        </View>
+
+        <View style={[styles.divider, {backgroundColor:colors.primary}]}>
+          <TouchableOpacity onPress={() => toggleMeasureType()} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding:14 }}>
             <Text style={styles.h4}>Unit of Measurement</Text>
-            <Text style={styles.p}> Imperial </Text>
+            <Text style={styles.p}> {measureType} </Text>
           </TouchableOpacity>
         </View>
 
@@ -48,6 +68,16 @@ const Account: FunctionComponent = () => {
           selections={[
             {text:'Confirm Logout', textStyle:{color:colors.red}, action:() => {handleLogout()}},
             {text:'Cancel', action: () => console.log("Cancel")}
+          ]}
+        />
+      )}
+      {showAboutModal && (
+        <ActionSelectionModal
+          title={"About FitTrackr"}
+          onExitPress={() => setShowAboutModal(false)}
+          selections={[
+            {text:'FitTrackr created in 2024'},
+            {text:'Close'}
           ]}
         />
       )}

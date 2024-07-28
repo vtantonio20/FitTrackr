@@ -1,7 +1,7 @@
 import React, { FunctionComponent, useEffect } from 'react'
-import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native'
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native'
 import { Fontisto, FontAwesome5,AntDesign } from '@expo/vector-icons'; 
-import { Link, Stack, useRouter } from "expo-router";
+import { Stack, useRouter } from "expo-router";
 import styles from "../../style";
 import colors from "../../colors";
 import * as WebBrowser from "expo-web-browser";
@@ -10,10 +10,10 @@ import { User, useUser } from '../../contexts/UserContext';
 
 WebBrowser.maybeCompleteAuthSession();
 
-const TEST_USER = {
+const TEST_USER:User = {
   id: 'user123',
   name: 'Mr. Test',
-  email: 'testing@email.com'
+  email: 'testing@email.com',
 }
 
 const Welcome: FunctionComponent = () => {
@@ -36,7 +36,7 @@ const Welcome: FunctionComponent = () => {
       const user:User = {
         id:userData.id,
         name:userData.name,
-        email:userData.email
+        email:userData.email,
       }
       loginUser(user);
     } catch(e) {

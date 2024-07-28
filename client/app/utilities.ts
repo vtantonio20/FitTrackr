@@ -1,4 +1,11 @@
 import colors from "./colors";
+export enum MeasurementType {
+    Imperial = "Imperial",
+    Metric = "Metric"
+}
+
+export const KG_TO_IBS_CONVERSION_Factor = 2.20462;
+export const IBS_TO_KG_CONVERSION_Factor = 0.45359237;
 
 export const daysOfTheWeek = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
 export const dateToWDDDMMYY = (f: Date) => {
@@ -20,6 +27,14 @@ export const getDateNumberOfDaysApart = (date:Date, n:number) => {
 export const getNumberOfWeeksBetweenDates = (start:Date, end:Date) => {
     const timeBetween = end.getTime() - start.getTime();
     return (timeBetween / (60 * 60 * 1000 * 24 * 7));
+}
+
+export const getMeasurement = (number:number, unit:MeasurementType) => {
+    if (unit == MeasurementType.Imperial){
+        return number;
+    } else {
+
+    }
 }
 
 // Gets the last sunday from date at 12 am.

@@ -18,10 +18,10 @@ import { useUser } from "../../contexts/UserContext";
 
 export const Workout: FunctionComponent = () => {
   const router = useRouter();
-  const { user } = useUser();
+  const { user, isImperial} = useUser();
   
   const { workoutId } = useLocalSearchParams();
-  const workoutData = useWorkoutData(workoutId);
+  const workoutData = useWorkoutData(workoutId, isImperial);
   const workout = workoutData.workout;
 
   // Initialize Form Stuff

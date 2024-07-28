@@ -92,6 +92,7 @@ with app.app_context():
     ##########################
     def find_next_sunday():
         today = datetime.today()
+        today = today.replace(hour=0, minute=0, second=0, microsecond=0)
         # Calculate how many days to add to get to the next Sunday
         days_to_add = (6 - today.weekday() + 7) % 7
         next_sunday = today + timedelta(days=days_to_add)
@@ -139,7 +140,7 @@ with app.app_context():
 
         workouts = Workout.query.filter(
             Workout.date >= start_date_str,
-            Workout.date < end_date_str,
+            Workout.date <= end_date_str,
             Workout.uid == uid
         ).all()
         return [w.to_dict_condensed() for w in workouts]
@@ -193,7 +194,7 @@ with app.app_context():
 
         # get the values from request
         name = data.get('name', "")
-        target_muscles_names = data.get('target_muscles', [])
+        target_muscle_ids = data.get('target_muscle_ids', [])
         is_active = data.get('is_active', False)
 
         # check if there is already a active workout if wanting to make an active
@@ -201,12 +202,13 @@ with app.app_context():
             return jsonify({"invalid": "Active Found"}), 200
         
         # find the muscles and query for them
-        target_muscles  = []
-        for muscle_name in target_muscles_names:
-            muscle = Muscle.query.filter_by(name=muscle_name).first()
-            if not muscle:
-                return jsonify({"error": "Attempted to add a new muscle not in the database"}), 400
-            target_muscles.append(muscle)
+        if target_muscle_ids:
+            target_muscles  = []
+            for muscle_id in target_muscle_ids:
+                muscle = Muscle.query.filter_by(id=muscle_id).first()
+                if not muscle:
+                    return jsonify({"error": "Attempted to add a new muscle not in the database"}), 400
+                target_muscles.append(muscle)
         
         # create the workout
         workout = Workout(name, date, target_muscles, uid, is_active)
@@ -307,6 +309,8 @@ with app.app_context():
     def edit_exercise(exercise_id):
         data = request.get_json()
         workout_exercise = WorkoutExercise.query.filter_by(id=exercise_id).first_or_404()
+
+        print(data)
 
         name_in = data.get('name')
         sets_in = data.get('sets')

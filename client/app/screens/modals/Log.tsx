@@ -11,11 +11,13 @@ import MuscleMap from '../../assets/svgs/muscleMap.svg'
 import { InfoBubble } from '../../components/Bubble';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { useState } from 'react';
+import { useUser } from '../../contexts/UserContext';
 
 const Log = () => {
+  const {isImperial, weightUnit} = useUser();
   const router = useRouter();
   const { workoutId } =  useLocalSearchParams();
-  const workoutData = useWorkoutData(workoutId);
+  const workoutData = useWorkoutData(workoutId, isImperial);
   const workout = workoutData.workout;
   const targetMuscles = workout ? (workout.targetMuscles || []) : [];
   const muscleMapSvg = useMuscleSvg(targetMuscles);
@@ -131,7 +133,7 @@ const Log = () => {
                             e.sets.slice(0,5).map((s: WorkoutSet, index: any) => {
                               return (
                                 <View key={s.id} style={{ alignSelf: 'flex-end' }}>
-                                  <Text style={styles.p}>{s.rep} x {s.weight} Ibs</Text>
+                                  <Text style={styles.p}>{s.rep} x {s.weight} {weightUnit} </Text>
                                 </View>
                               )
                             })

@@ -139,7 +139,7 @@ export const useWorkoutsData = (uid:string, startDateIn?:Date, endDateIn?:Date) 
   }
 }
 
-export const useWorkoutData = (workoutId:any) => {
+export const useWorkoutData = (workoutId:any, isImperial:boolean) => {
   const queryClient = useQueryClient();
   
   const { data, error, isLoading, refetch } = useQuery(
@@ -286,10 +286,11 @@ export const useWorkoutData = (workoutId:any) => {
   });
 
   const createExercise = (name:string, setsData:WorkoutSet[], onSuccess:() => void)  => {
+
     const newExerciseData:PostWorkoutExercise = {
       name: name,
       id: undefined,
-      sets: setsData.map((setData:any):PostWorkoutSet => ({
+      sets: setsData.map((setData:WorkoutSet):PostWorkoutSet => ({
         id: undefined,
         rep_num: setData.rep,
         weight: setData.weight

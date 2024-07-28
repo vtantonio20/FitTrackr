@@ -137,7 +137,6 @@ const WeeklyTrackerWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
       const dayOfWeek = getDateNumberOfDaysApart(pastSundayFromWeek, i);
       dates.push(dayOfWeek);
     }
-
     dates.sort((d1, d2) => {
       return(d1.getTime() - d2.getTime());
     })

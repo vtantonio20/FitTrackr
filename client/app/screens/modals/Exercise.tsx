@@ -11,13 +11,16 @@ import { WorkoutIcon } from '../../_layout';
 import { WorkoutSet, useWorkoutData } from '../../queries/WorkoutQueries';
 import { ActionSelectionModal, InitActionModalButton } from '../../components/Modal';
 import { Exercise, Muscle, useExerciseSuggestionsFromMuscle } from '../../queries/SuggestionQueries';
+import { useUser } from '../../contexts/UserContext';
 
 const ExerciseFC: FunctionComponent = (props:any) => {
   const {workoutId, exerciseId} = useLocalSearchParams();
-  const router = useRouter();
+  const {isImperial} = useUser();
 
+  const router = useRouter();
+    
   // Fetch Workout Data Handling
-  const workoutData = useWorkoutData(workoutId);
+  const workoutData = useWorkoutData(workoutId, isImperial);
   const workout = workoutData.workout;
   const exercise = workout?.exercises?.find((e) => {
     if (exerciseId && exerciseId === String(e.id)) {
@@ -179,8 +182,9 @@ interface SetInputProps {
 }
 
 const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
-  const [sets, setSets] = useState<WorkoutSet[]>(props.setsData);
+  const { weightUnit } = useUser();
 
+  const [sets, setSets] = useState<WorkoutSet[]>(props.setsData);
   const getSetNum = (index: number|undefined) => {
     return index ? index + 1 : 1
   }
@@ -227,7 +231,7 @@ const SetInput: FunctionComponent<any> = (props:SetInputProps) => {
           <View style={{ flexDirection: 'row', paddingHorizontal: 7, paddingBottom: 14 }}>
             <Text style={[styles.h3a, { width: '25%' }]}>Set</Text>
             <Text style={[styles.h3a, { width: '33%' }]}>Rep</Text>
-            <Text style={[styles.h3a, { width: '33%' }]}>Weight (Ibs)</Text>
+            <Text style={[styles.h3a, { width: '33%' }]}>Weight ({weightUnit})</Text>
           </View>
         }
         <DraggableFlatList
