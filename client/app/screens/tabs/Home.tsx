@@ -117,7 +117,7 @@ const ActiveWidget: FunctionComponent<any> = (props:HomeWidgetProps) => {
 }
 
 
-interface WorkoutDay {
+export interface WorkoutDay {
   id: number,
   workouts: Workout[],
   day: string

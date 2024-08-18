@@ -20,6 +20,9 @@ const Account: FunctionComponent = () => {
     router.push({pathname:'/screens/welcome/Welcome'})
   }
 
+  const handleManageWeeklyRoutinePress = () => {
+    router.push({pathname:'/screens/modals/WeeklyRoutine'})
+  }
   if (!user) {
     return <Loading/>
   }
@@ -43,8 +46,8 @@ const Account: FunctionComponent = () => {
         </View>
 
         <View style={[styles.divider, {backgroundColor:colors.primary}]}>
-          <TouchableOpacity onPress={() => {}} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding:14 }}>
-            <Text style={styles.h4}>Manage weekly routines</Text>
+          <TouchableOpacity onPress={() => handleManageWeeklyRoutinePress()} style={{ flexDirection: "row", justifyContent: "space-between", alignItems: "center", padding:14 }}>
+            <Text style={styles.h4}>Manage weekly routine</Text>
           </TouchableOpacity>
         </View>
 
